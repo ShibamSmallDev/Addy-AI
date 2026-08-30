@@ -9,6 +9,7 @@ import {
   Check,
   Volume2,
   Sparkles,
+  Heart,
   PenSquare,
   Save,
   Loader2,
@@ -467,7 +468,75 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
               {activeTab === "personality" && (
                 <div className="space-y-4">
                   <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
-                    Custom Personality Prompt
+                    Identity &amp; Emotional Persona
+                  </div>
+
+                  {/* Name Customization Inputs */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-mono tracking-wider text-slate-300 uppercase">
+                        AI Assistant Name
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.assistantName ?? "Addy"}
+                        onChange={(e) => onChange({ assistantName: e.target.value })}
+                        placeholder="Addy"
+                        className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400/50 transition"
+                      />
+                      <span className="text-[8px] text-slate-500 uppercase font-mono">
+                        e.g. Addy, Adrija, Luna, Maya
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-mono tracking-wider text-slate-300 uppercase">
+                        Your Name
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.userName ?? "Shibam"}
+                        onChange={(e) => onChange({ userName: e.target.value })}
+                        placeholder="Shibam"
+                        className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400/50 transition"
+                      />
+                      <span className="text-[8px] text-slate-500 uppercase font-mono">
+                        How your companion addresses you
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Warm Emotional Companion Mode Toggle */}
+                  <div className="p-3.5 rounded-xl border border-pink-500/20 bg-pink-500/5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center shrink-0">
+                        <Heart size={16} className="text-pink-400 fill-pink-400/30" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-mono font-bold text-pink-300">
+                          WARM EMOTIONAL COMPANION
+                        </div>
+                        <div className="text-[9px] font-mono text-slate-400 max-w-[260px] leading-tight">
+                          Anime-inspired warmth, affectionate terms of endearment ("babe"), protective care, comfort-first emotional intelligence.
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => onChange({ companionMode: !(settings.companionMode ?? true) })}
+                      className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none cursor-pointer shrink-0 ${
+                        (settings.companionMode ?? true) ? "bg-pink-500" : "bg-white/10"
+                      }`}
+                    >
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-200 ease-in-out ${
+                          (settings.companionMode ?? true) ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5 text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                    Extra Personality Instructions
                   </div>
                   <div className="p-3 rounded-xl border border-cyan-500/15 bg-cyan-500/5 flex items-start gap-2">
                     <Sparkles size={12} className="text-cyan-400 shrink-0 mt-0.5" />

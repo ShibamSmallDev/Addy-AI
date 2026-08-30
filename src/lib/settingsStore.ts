@@ -11,6 +11,12 @@
  */
 
 export interface AddySettings {
+  /** Name of the AI companion / assistant (e.g. "Addy", "Adrija", "Luna"). */
+  assistantName: string;
+  /** Your preferred name / nickname (e.g. "Shibam"). */
+  userName: string;
+  /** Enable the warm emotional girl companion persona structure. */
+  companionMode: boolean;
   /** Launch Addy (backends + browser tab) silently on Windows login. */
   autoStart: boolean;
   /** Auto-start screen sharing when a voice session connects (Electron only — no permission prompt). */
@@ -28,6 +34,9 @@ export interface AddySettings {
 }
 
 export const DEFAULT_SETTINGS: AddySettings = {
+  assistantName: "Addy",
+  userName: "Shibam",
+  companionMode: true,
   autoStart: false,
   autoStartScreenShare: true,
   wakeWordEnabled: true,

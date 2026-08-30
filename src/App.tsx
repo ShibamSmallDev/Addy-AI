@@ -1166,7 +1166,7 @@ export default function App() {
                 ? "bg-purple-500/90 hover:bg-purple-600 border border-purple-400/95 text-white shadow-[0_0_35px_rgba(168,85,247,0.4)] scale-105"
                 : "bg-amber-600 border border-amber-300 text-white animate-spin"
             }`}
-            title={state === "disconnected" ? "Awake Addy" : "Sleep core"}
+            title={state === "disconnected" ? `Awake ${settings.assistantName || "Addy"}` : "Sleep core"}
           >
             {state === "disconnected" ? (
               <Power className="opacity-80" size={24} />
