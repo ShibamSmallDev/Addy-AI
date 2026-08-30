@@ -1,3 +1,0 @@
-# Session Summary — 16/8/2026, 8:33:28 pm
-
-During the session, the user directed Addy to perform several mouse movements, including moving upward and to the left, and attempted to locate elements on the browser screen. Addy successfully executed the coordinate-based movements and attempted to scan screen elements using OCR, though navigation between browser tabs proved somewhat clumsy and drew user frustration. Ultimately, the user decided to stop the current tasks ("missioning") after Addy acknowledged a mistake with a tab click. No specific tasks were left unfinished as the user called off the interaction, but future sessions will likely need to address improvements in Addy's browser control and tab-switching precision if navigation continues.

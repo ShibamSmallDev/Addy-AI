@@ -1,3 +1,0 @@
-# Session Summary — 15/8/2026, 8:48:06 pm
-
-During this session, the user asked Addy to open a specific YouTube tab titled "Ajay Hooda - NAKO LIFF," but Addy encountered technical difficulties with the OCR tool and initially asked the user to click the tab themselves. This prompted an annoyed reaction from the user, who pointed out that they wanted the AI to handle the task, leading Addy to apologize and attempt the action again. The session concluded with the user questioning whether Addy had access to open code to resolve the issue. Consequently, the actual opening of the YouTube tab remains unfinished and should be picked up next time using the suggested code approach.

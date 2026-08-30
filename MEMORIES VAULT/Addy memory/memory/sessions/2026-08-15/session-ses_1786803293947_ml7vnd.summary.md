@@ -1,3 +1,0 @@
-# Session Summary — 15/8/2026, 7:50:33 pm
-
-During this session, the user and Addy discussed the AI's capabilities regarding Model Context Protocol (MCP) servers and the local OpenCode server running under the hood of their Addy AI companion system. They acknowledged a security warning regarding the unsecured OpenCode server, and Addy successfully connected to it to perform a web search and write a simple test script named `hello_opencode.py`. They accomplished creating and saving this file to the main project folder. Left unfinished is verifying the exact location or execution of the newly created file and deciding whether to address the server's unsecured password or write more complex code next time.
