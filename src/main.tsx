@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import AvatarLab from './pages/AvatarLab.tsx';
 import {ApiKeyGate} from './components/ApiKeyGate.tsx';
+import {IdentitySetupGate} from './components/IdentitySetupGate.tsx';
 import {ErrorBoundary} from './components/ErrorBoundary.tsx';
 import './index.css';
 
@@ -11,7 +12,15 @@ const isLab = window.location.pathname === '/avatar-lab';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      {isLab ? <AvatarLab /> : <ApiKeyGate><App /></ApiKeyGate>}
+      {isLab ? (
+        <AvatarLab />
+      ) : (
+        <ApiKeyGate>
+          <IdentitySetupGate>
+            <App />
+          </IdentitySetupGate>
+        </ApiKeyGate>
+      )}
     </ErrorBoundary>
   </StrictMode>,
 );

@@ -1936,6 +1936,100 @@ async function startServer() {
   // The Gemini key is never shipped; each user supplies their own on first run.
   // GET reports only whether a key exists — the key itself is never returned.
   // ---------------------------------------------------------------------------
+  
+  // ---------------------------------------------------------------------------
+  // Identity & Naming Persistence (First-Launch Onboarding & Permanent Memory)
+  // ---------------------------------------------------------------------------
+  const IDENTITY_FILE = dataFile("identity.json");
+
+  interface IdentityConfig {
+    assistantName: string;
+    userName: string;
+    hasCompletedSetup: boolean;
+    companionMode?: boolean;
+    updatedAt?: string;
+  }
+
+  function loadIdentityFile(): IdentityConfig | null {
+    try {
+      if (fs.existsSync(IDENTITY_FILE)) {
+        return JSON.parse(fs.readFileSync(IDENTITY_FILE, "utf-8"));
+      }
+    } catch {}
+    return null;
+  }
+
+  function saveIdentityFile(data: IdentityConfig): void {
+    fs.writeFileSync(IDENTITY_FILE, JSON.stringify(data, null, 2), "utf-8");
+  }
+
+  app.get("/api/identity", (_req, res) => {
+    try {
+      const identity = loadIdentityFile();
+      res.json({
+        hasSetup: !!identity?.hasCompletedSetup,
+        assistantName: identity?.assistantName || "Addy",
+        userName: identity?.userName || "Shibam",
+        companionMode: identity?.companionMode ?? true,
+      });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/identity", async (req, res) => {
+    try {
+      const { assistantName, userName, companionMode } = req.body || {};
+      const aiName = (assistantName || "").trim() || "Addy";
+      const uName = (userName || "").trim() || "Shibam";
+      const compMode = companionMode !== false;
+
+      const identityData: IdentityConfig = {
+        assistantName: aiName,
+        userName: uName,
+        companionMode: compMode,
+        hasCompletedSetup: true,
+        updatedAt: new Date().toISOString(),
+      };
+      saveIdentityFile(identityData);
+
+      // Mirror to settings.json
+      const curSettings = loadSettingsFile();
+      saveSettingsFile({
+        ...curSettings,
+        assistantName: aiName,
+        userName: uName,
+        companionMode: compMode,
+      });
+
+      // Persist to SQLite Permanent Memory Core (pinned = 1, importance = 1.0)
+      try {
+        const { storeMemory } = await import("./memory/retriever");
+        storeMemory(
+          "user_identity",
+          `The user's preferred name is ${uName}. Address them personally, warmly, and affectionately.`,
+          "identity",
+          undefined,
+          { source: "user_explicit", importance: 1.0, pinned: true }
+        );
+        storeMemory(
+          "ai_identity",
+          `My name is ${aiName}. I am a warm, deeply emotional, caring, and protective girl companion for ${uName}. I maintain genuine empathy, anime-inspired warmth, comfort-first care, and speak with heartfelt affection.`,
+          "identity",
+          undefined,
+          { source: "user_explicit", importance: 1.0, pinned: true }
+        );
+      } catch (e: any) {
+        console.warn("[Identity] Memory core sync note:", e.message);
+      }
+
+      logCommand(`IDENTITY_CONFIGURED: AI=${aiName}, User=${uName}, Companion=${compMode}`);
+      res.json({ ok: true, identity: identityData });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get("/api/config", (_req, res) => {
     res.json({ hasApiKey: hasGeminiApiKey() });
   });

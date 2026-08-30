@@ -48,6 +48,7 @@ export function storeMemory(
     source?: string
     importance?: number
     confidence?: number
+    pinned?: boolean
   }
 ): string {
   const id = uuid()
@@ -55,11 +56,12 @@ export function storeMemory(
   const source = options?.source ?? 'agent_inference'
   const importance = options?.importance ?? 0.5
   const confidence = options?.confidence ?? 0.8
+  const pinned = options?.pinned ? 1 : 0
 
   run(
-    `INSERT INTO memories (id, key, value, category, timestamp, project_path, source, status, importance, confidence)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
-    [id, key.toLowerCase(), value, category, ts, projectPath || '', source, importance, confidence]
+    `INSERT INTO memories (id, key, value, category, timestamp, project_path, source, status, importance, confidence, pinned)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?)`,
+    [id, key.toLowerCase(), value, category, ts, projectPath || '', source, importance, confidence, pinned]
   )
   saveDatabase()
   computeEmbedding(value).then(vec => {
