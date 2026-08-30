@@ -6,7 +6,7 @@ type Phase = "checking" | "needsSetup" | "ready";
 
 export function IdentitySetupGate({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>("checking");
-  const [assistantName, setAssistantName] = useState("Addy");
+  const [assistantName, setAssistantName] = useState("Adrija");
   const [userName, setUserName] = useState("Shibam");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,12 +112,26 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                 autoFocus
                 value={assistantName}
                 onChange={(e) => setAssistantName(e.target.value)}
-                placeholder="e.g. Addy, Adrija, Luna, Maya"
+                placeholder="e.g. Adrija, Addy, Luna, Maya"
                 className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white font-mono outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/20"
               />
-              <span className="mt-1 block text-[10px] font-mono text-slate-400">
-                What you would like to call her
-              </span>
+              <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-mono text-slate-500">Suggestions:</span>
+                {["Adrija", "Addy", "Luna", "Maya"].map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setAssistantName(name)}
+                    className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono transition cursor-pointer ${
+                      assistantName.toLowerCase() === name.toLowerCase()
+                        ? "border-pink-400 bg-pink-500/20 text-pink-300 font-bold"
+                        : "border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    {name === "Adrija" ? "✨ Adrija" : name === "Addy" ? "🌸 Addy" : name}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* User Name Input */}
@@ -132,9 +146,23 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                 placeholder="e.g. Shibam"
                 className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white font-mono outline-none transition focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-500/20"
               />
-              <span className="mt-1 block text-[10px] font-mono text-slate-400">
-                How she will address you in conversations
-              </span>
+              <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-mono text-slate-500">Suggestion:</span>
+                {["Shibam"].map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setUserName(name)}
+                    className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono transition cursor-pointer ${
+                      userName.toLowerCase() === name.toLowerCase()
+                        ? "border-cyan-400 bg-cyan-500/20 text-cyan-300 font-bold"
+                        : "border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    👤 Shibam
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Warm Emotional Girl Companion Highlight Badge */}

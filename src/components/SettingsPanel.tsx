@@ -479,14 +479,27 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                       </label>
                       <input
                         type="text"
-                        value={settings.assistantName ?? "Addy"}
+                        value={settings.assistantName ?? "Adrija"}
                         onChange={(e) => onChange({ assistantName: e.target.value })}
-                        placeholder="Addy"
+                        placeholder="Adrija"
                         className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400/50 transition"
                       />
-                      <span className="text-[8px] text-slate-500 uppercase font-mono">
-                        e.g. Addy, Adrija, Luna, Maya
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {["Adrija", "Addy", "Luna", "Maya"].map((name) => (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() => onChange({ assistantName: name })}
+                            className={`px-1.5 py-0.5 rounded border text-[8px] font-mono transition cursor-pointer ${
+                              (settings.assistantName ?? "Adrija").toLowerCase() === name.toLowerCase()
+                                ? "border-pink-400 bg-pink-500/20 text-pink-300 font-bold"
+                                : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            {name === "Adrija" ? "✨ Adrija" : name === "Addy" ? "🌸 Addy" : name}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -500,9 +513,22 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                         placeholder="Shibam"
                         className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400/50 transition"
                       />
-                      <span className="text-[8px] text-slate-500 uppercase font-mono">
-                        How your companion addresses you
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {["Shibam"].map((name) => (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() => onChange({ userName: name })}
+                            className={`px-1.5 py-0.5 rounded border text-[8px] font-mono transition cursor-pointer ${
+                              (settings.userName ?? "Shibam").toLowerCase() === name.toLowerCase()
+                                ? "border-cyan-400 bg-cyan-500/20 text-cyan-300 font-bold"
+                                : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            👤 Shibam
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
