@@ -21,6 +21,7 @@ import {
   loadSettings,
   saveSettings,
 } from "../lib/settingsStore";
+import { PERSONALITY_PRESETS } from "../lib/personalityPresets";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -532,6 +533,34 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                     </div>
                   </div>
 
+                  {/* 6 Personality Style Selector */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">
+                      Personality Archetype
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {PERSONALITY_PRESETS.map((preset) => {
+                        const active = (settings.personalityPreset ?? "warm_girl") === preset.id;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => onChange({ personalityPreset: preset.id })}
+                            className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
+                              active
+                                ? "border-pink-400 bg-pink-500/20 text-pink-200 shadow-[0_0_12px_rgba(244,114,182,0.2)]"
+                                : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"
+                            }`}
+                          >
+                            <span className="text-xs">{preset.badge.split(" ")[0]}</span>
+                            <span className="text-[10px] font-mono font-bold truncate w-full">{preset.name}</span>
+                            <span className="text-[8px] font-mono text-slate-400 leading-tight line-clamp-1">{preset.tagline}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   {/* Warm Emotional Companion Mode Toggle */}
                   <div className="p-3.5 rounded-xl border border-pink-500/20 bg-pink-500/5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -540,10 +569,10 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                       </div>
                       <div>
                         <div className="text-xs font-mono font-bold text-pink-300">
-                          WARM EMOTIONAL COMPANION
+                          AFFECTIONATE BONDING
                         </div>
                         <div className="text-[9px] font-mono text-slate-400 max-w-[260px] leading-tight">
-                          Anime-inspired warmth, affectionate terms of endearment ("babe"), protective care, comfort-first emotional intelligence.
+                          Enables protective care, terms of endearment, and comfort-first emotional intelligence.
                         </div>
                       </div>
                     </div>

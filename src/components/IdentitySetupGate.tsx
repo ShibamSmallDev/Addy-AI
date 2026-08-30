@@ -1,15 +1,15 @@
 import { useEffect, useState, type ReactNode, type FormEvent } from "react";
-import { Sparkles, Heart, Loader2, User, Bot, ArrowRight, Zap, Smile } from "lucide-react";
+import { Sparkles, Heart, Loader2, User, Bot, ArrowRight, Zap, Smile, Flame, Crown, Terminal } from "lucide-react";
 import { saveSettings } from "../lib/settingsStore";
+import { PERSONALITY_PRESETS } from "../lib/personalityPresets";
 
 type Phase = "checking" | "needsSetup" | "ready";
-type PersonalityStyle = "warm_girl" | "playful" | "cyberpunk";
 
 export function IdentitySetupGate({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>("checking");
   const [assistantName, setAssistantName] = useState("Adri");
   const [userName, setUserName] = useState("Master");
-  const [personality, setPersonality] = useState<PersonalityStyle>("warm_girl");
+  const [personality, setPersonality] = useState("warm_girl");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +24,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
           saveSettings({
             assistantName: data.assistantName || "Adri",
             userName: data.userName || "Master",
+            personalityPreset: data.personalityPreset || "warm_girl",
           });
           setPhase("ready");
         } else {
@@ -54,7 +55,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
           assistantName: aiName,
           userName: uName,
           companionMode: true,
-          personalityStyle: personality,
+          personalityPreset: personality,
         }),
       });
       const data = await res.json();
@@ -63,6 +64,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
       saveSettings({
         assistantName: aiName,
         userName: uName,
+        personalityPreset: personality,
         companionMode: true,
       });
 
@@ -76,8 +78,40 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
 
   if (phase === "ready") return <>{children}</>;
 
+  const getPresetIcon = (id: string, active: boolean) => {
+    switch (id) {
+      case "warm_girl":
+        return <Heart size={14} className={active ? "text-pink-400 fill-pink-400" : "text-slate-400"} />;
+      case "playful":
+        return <Smile size={14} className={active ? "text-amber-400" : "text-slate-400"} />;
+      case "tsundere":
+        return <Flame size={14} className={active ? "text-rose-400" : "text-slate-400"} />;
+      case "cyberpunk":
+        return <Zap size={14} className={active ? "text-cyan-400" : "text-slate-400"} />;
+      case "devoted_maid":
+        return <Crown size={14} className={active ? "text-purple-400" : "text-slate-400"} />;
+      case "pro_copilot":
+        return <Terminal size={14} className={active ? "text-emerald-400" : "text-slate-400"} />;
+      default:
+        return <Heart size={14} className="text-pink-400" />;
+    }
+  };
+
+  const getPresetBorder = (id: string, active: boolean) => {
+    if (!active) return "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10";
+    switch (id) {
+      case "warm_girl": return "border-pink-400 bg-pink-500/20 text-pink-200 shadow-[0_0_15px_rgba(244,114,182,0.15)]";
+      case "playful": return "border-amber-400 bg-amber-500/20 text-amber-200 shadow-[0_0_15px_rgba(251,191,36,0.15)]";
+      case "tsundere": return "border-rose-400 bg-rose-500/20 text-rose-200 shadow-[0_0_15px_rgba(251,113,133,0.15)]";
+      case "cyberpunk": return "border-cyan-400 bg-cyan-500/20 text-cyan-200 shadow-[0_0_15px_rgba(34,211,238,0.15)]";
+      case "devoted_maid": return "border-purple-400 bg-purple-500/20 text-purple-200 shadow-[0_0_15px_rgba(192,132,252,0.15)]";
+      case "pro_copilot": return "border-emerald-400 bg-emerald-500/20 text-emerald-200 shadow-[0_0_15px_rgba(52,211,153,0.15)]";
+      default: return "border-pink-400 bg-pink-500/20 text-pink-200";
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050509] text-white">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050509] text-white overflow-y-auto py-8">
       {/* Ambient glowing orbs matching the companion aesthetic */}
       <div className="pointer-events-none absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-pink-600/15 blur-[140px]" />
       <div className="pointer-events-none absolute -bottom-40 -right-40 h-[480px] w-[480px] rounded-full bg-cyan-600/15 blur-[150px]" />
@@ -90,17 +124,17 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
       ) : (
         <form
           onSubmit={submit}
-          className="relative z-10 w-[min(92vw,500px)] rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_90px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+          className="relative z-10 w-[min(92vw,540px)] rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_90px_rgba(0,0,0,0.7)] backdrop-blur-2xl my-auto"
         >
           <div className="mb-6 flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500/30 to-cyan-500/20 ring-1 ring-white/10 shadow-[0_0_25px_rgba(244,114,182,0.3)]">
-              <Heart className="h-8 w-8 text-pink-300 fill-pink-400/40 animate-pulse" />
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500/30 to-cyan-500/20 ring-1 ring-white/10 shadow-[0_0_25px_rgba(244,114,182,0.3)]">
+              <Heart className="h-7 w-7 text-pink-300 fill-pink-400/40 animate-pulse" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              Meet Your Companion <Sparkles size={18} className="text-pink-400" />
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              Meet Your Companion <Sparkles size={16} className="text-pink-400" />
             </h1>
-            <p className="mt-2 text-xs leading-relaxed text-slate-300 font-mono">
-              Name your AI assistant and choose how she will address you. These are stored locally and anchored into permanent memory.
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-300 font-mono">
+              Name your AI companion, choose how she addresses you, and select her personality.
             </p>
           </div>
 
@@ -168,53 +202,27 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
               </div>
             </div>
 
-            {/* Personality Style Selector */}
+            {/* 6 Personality Style Choices */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">
-                Personality &amp; Emotional Structure
+                Personality &amp; Emotional Persona
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPersonality("warm_girl")}
-                  className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
-                    personality === "warm_girl"
-                      ? "border-pink-400 bg-pink-500/20 text-pink-200"
-                      : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"
-                  }`}
-                >
-                  <Heart size={14} className={personality === "warm_girl" ? "text-pink-400 fill-pink-400" : "text-slate-400"} />
-                  <span className="text-[10px] font-mono font-bold">Warm Girl</span>
-                  <span className="text-[8px] font-mono text-slate-400 leading-tight">Loving, comforting, anime warmth</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPersonality("playful")}
-                  className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
-                    personality === "playful"
-                      ? "border-amber-400 bg-amber-500/20 text-amber-200"
-                      : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"
-                  }`}
-                >
-                  <Smile size={14} className={personality === "playful" ? "text-amber-400" : "text-slate-400"} />
-                  <span className="text-[10px] font-mono font-bold">Playful</span>
-                  <span className="text-[8px] font-mono text-slate-400 leading-tight">Cheeky, teasing, high-energy</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPersonality("cyberpunk")}
-                  className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
-                    personality === "cyberpunk"
-                      ? "border-cyan-400 bg-cyan-500/20 text-cyan-200"
-                      : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"
-                  }`}
-                >
-                  <Zap size={14} className={personality === "cyberpunk" ? "text-cyan-400" : "text-slate-400"} />
-                  <span className="text-[10px] font-mono font-bold">Cyberpunk</span>
-                  <span className="text-[8px] font-mono text-slate-400 leading-tight">Tech co-pilot, hacker vibes</span>
-                </button>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {PERSONALITY_PRESETS.map((preset) => {
+                  const active = personality === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => setPersonality(preset.id)}
+                      className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${getPresetBorder(preset.id, active)}`}
+                    >
+                      {getPresetIcon(preset.id, active)}
+                      <span className="text-[10px] font-mono font-bold truncate w-full">{preset.name}</span>
+                      <span className="text-[8px] font-mono text-slate-400 leading-tight line-clamp-2">{preset.tagline}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -228,7 +236,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
           <button
             type="submit"
             disabled={submitting || !assistantName.trim() || !userName.trim()}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-cyan-500 px-4 py-3.5 text-sm font-bold font-mono uppercase tracking-widest text-white shadow-lg shadow-pink-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-cyan-500 px-4 py-3 text-sm font-bold font-mono uppercase tracking-widest text-white shadow-lg shadow-pink-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
           >
             {submitting ? (
               <>

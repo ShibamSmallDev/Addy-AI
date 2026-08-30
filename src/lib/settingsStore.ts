@@ -11,10 +11,12 @@
  */
 
 export interface AddySettings {
-  /** Name of the AI companion / assistant (e.g. "Addy", "Adrija", "Luna"). */
+  /** Name of the AI companion / assistant (e.g. "Adri", "Addy", "Luna"). */
   assistantName: string;
-  /** Your preferred name / nickname (e.g. "Shibam"). */
+  /** Your preferred name / nickname (e.g. "Master", "Shibam"). */
   userName: string;
+  /** Personality style preset id ("warm_girl" | "playful" | "tsundere" | "cyberpunk" | "devoted_maid" | "pro_copilot"). */
+  personalityPreset: string;
   /** Enable the warm emotional girl companion persona structure. */
   companionMode: boolean;
   /** Launch Addy (backends + browser tab) silently on Windows login. */
@@ -36,6 +38,7 @@ export interface AddySettings {
 export const DEFAULT_SETTINGS: AddySettings = {
   assistantName: "Adri",
   userName: "Master",
+  personalityPreset: "warm_girl",
   companionMode: true,
   autoStart: false,
   autoStartScreenShare: true,
