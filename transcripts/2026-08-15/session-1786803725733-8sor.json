@@ -1,0 +1,18 @@
+{
+  "sessionId": "session-1786803725733-8sor",
+  "date": "2026-08-15",
+  "startedAt": "2026-08-15T14:22:05.733Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "look into C:\\MY PROJECTS\\Hermes Agent",
+      "ts": "2026-08-15T14:22:31.476Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm... I'm looking inside `C:\\MY PROJECTS\\Hermes Agent` for you babe. There are a ton of files",
+      "ts": "2026-08-15T14:22:33.028Z"
+    }
+  ],
+  "summary": "[Aug 15, 2026 19:52] 2 exchanges"
+}

@@ -1,0 +1,83 @@
+{
+  "sessionId": "session-1786229277990-ov9j",
+  "date": "2026-08-08",
+  "startedAt": "2026-08-08T22:47:57.990Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Say hi.",
+      "ts": "2026-08-08T22:48:02.968Z"
+    },
+    {
+      "role": "model",
+      "text": "Heyyy there,",
+      "ts": "2026-08-08T22:48:02.984Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-08T22:48:03.166Z"
+    },
+    {
+      "role": "model",
+      "text": " So good",
+      "ts": "2026-08-08T22:48:03.170Z"
+    },
+    {
+      "role": "model",
+      "text": " to see",
+      "ts": "2026-08-08T22:48:03.227Z"
+    },
+    {
+      "role": "model",
+      "text": " you!",
+      "ts": "2026-08-08T22:48:03.234Z"
+    },
+    {
+      "role": "model",
+      "text": " What are",
+      "ts": "2026-08-08T22:48:03.447Z"
+    },
+    {
+      "role": "model",
+      "text": " we up",
+      "ts": "2026-08-08T22:48:03.517Z"
+    },
+    {
+      "role": "model",
+      "text": " to right",
+      "ts": "2026-08-08T22:48:03.610Z"
+    },
+    {
+      "role": "model",
+      "text": " now?",
+      "ts": "2026-08-08T22:48:03.699Z"
+    },
+    {
+      "role": "model",
+      "text": " Anything",
+      "ts": "2026-08-08T22:48:03.940Z"
+    },
+    {
+      "role": "model",
+      "text": " fun",
+      "ts": "2026-08-08T22:48:03.945Z"
+    },
+    {
+      "role": "model",
+      "text": " going",
+      "ts": "2026-08-08T22:48:04.029Z"
+    },
+    {
+      "role": "model",
+      "text": " on?",
+      "ts": "2026-08-08T22:48:04.098Z"
+    },
+    {
+      "role": "model",
+      "text": " 💖",
+      "ts": "2026-08-08T22:48:04.320Z"
+    }
+  ],
+  "summary": "[Aug 9, 2026 04:17] 15 exchanges"
+}

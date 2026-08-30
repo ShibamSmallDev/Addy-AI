@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"=== exit: $? ===\")",
+      "Bash(awk '{print $5, $NF}')",
+      "Bash(awk '{print $6, $7, $8, $NF}')",
+      "Bash(awk '{print $5,$NF}')",
+      "Bash(awk '{print $1}')",
+      "Bash(tasklist //FI \"IMAGENAME eq adj-agent.exe\")",
+      "Bash(netstat -ano)",
+      "Bash(tasklist //FI \"IMAGENAME eq python.exe\")",
+      "Bash(awk '{printf \"%.0f MB  %s\\\\n\",$5/1048576,$NF}')"
+    ]
+  }
+}

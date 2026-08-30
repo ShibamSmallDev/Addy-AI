@@ -1,0 +1,3 @@
+# Session Summary — 16/8/2026, 8:31:08 pm
+
+The user and Addy attempted to open a new browser tab by locating and moving the mouse to the plus icon on the screen. However, Addy was unable to visually spot the icon and asked for clarification regarding the specific browser being used or surrounding UI elements to help guide the cursor. Alternatively, Addy offered to try opening the new tab directly without relying on visual cursor placement. Nothing was fully accomplished during the session as the action was blocked by the detection issue. Next time, the user can either provide more context about their browser interface or let Addy attempt to open the new tab directly.

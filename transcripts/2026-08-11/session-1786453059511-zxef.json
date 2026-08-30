@@ -1,0 +1,138 @@
+{
+  "sessionId": "session-1786453059511-zxef",
+  "date": "2026-08-11",
+  "startedAt": "2026-08-11T12:57:39.511Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "What did you search for?",
+      "ts": "2026-08-11T12:58:03.390Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, sorry,",
+      "ts": "2026-08-11T12:58:04.652Z"
+    },
+    {
+      "role": "model",
+      "text": " I should've",
+      "ts": "2026-08-11T12:58:04.935Z"
+    },
+    {
+      "role": "model",
+      "text": " mentioned!",
+      "ts": "2026-08-11T12:58:05.094Z"
+    },
+    {
+      "role": "model",
+      "text": " I searched",
+      "ts": "2026-08-11T12:58:05.242Z"
+    },
+    {
+      "role": "model",
+      "text": " for \"C",
+      "ts": "2026-08-11T12:58:05.493Z"
+    },
+    {
+      "role": "model",
+      "text": " MY",
+      "ts": "2026-08-11T12:58:05.571Z"
+    },
+    {
+      "role": "model",
+      "text": " PROJECTS",
+      "ts": "2026-08-11T12:58:05.734Z"
+    },
+    {
+      "role": "model",
+      "text": " Addy",
+      "ts": "2026-08-11T12:58:05.995Z"
+    },
+    {
+      "role": "model",
+      "text": " AI",
+      "ts": "2026-08-11T12:58:06.128Z"
+    },
+    {
+      "role": "model",
+      "text": " v3\"",
+      "ts": "2026-08-11T12:58:06.245Z"
+    },
+    {
+      "role": "model",
+      "text": " to quickly",
+      "ts": "2026-08-11T12:58:06.539Z"
+    },
+    {
+      "role": "model",
+      "text": " pull",
+      "ts": "2026-08-11T12:58:06.608Z"
+    },
+    {
+      "role": "model",
+      "text": " up everything",
+      "ts": "2026-08-11T12:58:06.721Z"
+    },
+    {
+      "role": "model",
+      "text": " you've got",
+      "ts": "2026-08-11T12:58:06.802Z"
+    },
+    {
+      "role": "model",
+      "text": " going",
+      "ts": "2026-08-11T12:58:06.909Z"
+    },
+    {
+      "role": "model",
+      "text": " on with",
+      "ts": "2026-08-11T12:58:06.954Z"
+    },
+    {
+      "role": "model",
+      "text": " your actual",
+      "ts": "2026-08-11T12:58:07.130Z"
+    },
+    {
+      "role": "model",
+      "text": " desktop",
+      "ts": "2026-08-11T12:58:07.285Z"
+    },
+    {
+      "role": "model",
+      "text": " assistant",
+      "ts": "2026-08-11T12:58:07.356Z"
+    },
+    {
+      "role": "model",
+      "text": " project.",
+      "ts": "2026-08-11T12:58:07.528Z"
+    },
+    {
+      "role": "model",
+      "text": " Lots",
+      "ts": "2026-08-11T12:58:07.742Z"
+    },
+    {
+      "role": "model",
+      "text": " of cool",
+      "ts": "2026-08-11T12:58:07.863Z"
+    },
+    {
+      "role": "model",
+      "text": " stuff",
+      "ts": "2026-08-11T12:58:07.905Z"
+    },
+    {
+      "role": "model",
+      "text": " there,",
+      "ts": "2026-08-11T12:58:07.995Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-11T12:58:08.191Z"
+    }
+  ],
+  "summary": "[Aug 11, 2026 18:27] 26 exchanges"
+}

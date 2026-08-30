@@ -1,0 +1,8 @@
+{
+  "autoStart": false,
+  "wakeWordEnabled": true,
+  "wakePhrase": "babe",
+  "micDeviceId": "",
+  "sensitivity": 60,
+  "animations": true
+}

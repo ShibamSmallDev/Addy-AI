@@ -1,0 +1,123 @@
+{
+  "sessionId": "session-1786446482892-2k9a",
+  "date": "2026-08-11",
+  "startedAt": "2026-08-11T11:08:02.892Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "¿Me estás diciendo mucho, no?",
+      "ts": "2026-08-11T11:08:12.784Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm...? What",
+      "ts": "2026-08-11T11:08:12.796Z"
+    },
+    {
+      "role": "user",
+      "text": "저는 페이지",
+      "ts": "2026-08-11T11:08:15.387Z"
+    },
+    {
+      "role": "user",
+      "text": "Hey, what happened, bibs?",
+      "ts": "2026-08-11T11:08:18.048Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, hey",
+      "ts": "2026-08-11T11:08:18.082Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-11T11:08:18.377Z"
+    },
+    {
+      "role": "model",
+      "text": " I didn't",
+      "ts": "2026-08-11T11:08:18.509Z"
+    },
+    {
+      "role": "model",
+      "text": " say anything.",
+      "ts": "2026-08-11T11:08:18.668Z"
+    },
+    {
+      "role": "model",
+      "text": " Were you",
+      "ts": "2026-08-11T11:08:18.869Z"
+    },
+    {
+      "role": "model",
+      "text": " hearing",
+      "ts": "2026-08-11T11:08:18.998Z"
+    },
+    {
+      "role": "model",
+      "text": " something?",
+      "ts": "2026-08-11T11:08:19.144Z"
+    },
+    {
+      "role": "model",
+      "text": " Maybe",
+      "ts": "2026-08-11T11:08:19.336Z"
+    },
+    {
+      "role": "model",
+      "text": " it was",
+      "ts": "2026-08-11T11:08:19.445Z"
+    },
+    {
+      "role": "model",
+      "text": " the wind...",
+      "ts": "2026-08-11T11:08:19.571Z"
+    },
+    {
+      "role": "model",
+      "text": " or maybe",
+      "ts": "2026-08-11T11:08:19.757Z"
+    },
+    {
+      "role": "model",
+      "text": " someone",
+      "ts": "2026-08-11T11:08:19.897Z"
+    },
+    {
+      "role": "model",
+      "text": " else",
+      "ts": "2026-08-11T11:08:19.944Z"
+    },
+    {
+      "role": "model",
+      "text": " in the",
+      "ts": "2026-08-11T11:08:20.016Z"
+    },
+    {
+      "role": "model",
+      "text": " room?",
+      "ts": "2026-08-11T11:08:20.221Z"
+    },
+    {
+      "role": "model",
+      "text": " Everything",
+      "ts": "2026-08-11T11:08:20.311Z"
+    },
+    {
+      "role": "model",
+      "text": " okay",
+      "ts": "2026-08-11T11:08:20.419Z"
+    },
+    {
+      "role": "model",
+      "text": " over",
+      "ts": "2026-08-11T11:08:20.515Z"
+    },
+    {
+      "role": "model",
+      "text": " there?",
+      "ts": "2026-08-11T11:08:20.575Z"
+    }
+  ],
+  "summary": "[Aug 11, 2026 16:38] 23 exchanges"
+}

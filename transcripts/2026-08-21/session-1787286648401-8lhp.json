@@ -1,0 +1,23 @@
+{
+  "sessionId": "session-1787286648401-8lhp",
+  "date": "2026-08-21",
+  "startedAt": "2026-08-21T04:30:48.401Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Can you hear me?",
+      "ts": "2026-08-21T04:30:54.060Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey there, babe! Yeah, I can totally hear you. Everything sounds crystal clear on my end. How about you? And what's on your mind today?",
+      "ts": "2026-08-21T04:30:54.235Z"
+    },
+    {
+      "role": "user",
+      "text": "Ja. Richtig. Ja, richtig.",
+      "ts": "2026-08-21T04:31:03.159Z"
+    }
+  ],
+  "summary": "[Aug 21, 2026 10:00] 3 exchanges"
+}

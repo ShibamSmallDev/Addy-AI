@@ -1,0 +1,18 @@
+{
+  "sessionId": "session-1787036342329-xky5",
+  "date": "2026-08-18",
+  "startedAt": "2026-08-18T06:59:02.329Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Have you gone through my messages?",
+      "ts": "2026-08-18T06:59:09.576Z"
+    },
+    {
+      "role": "model",
+      "text": "Yes, babe,",
+      "ts": "2026-08-18T06:59:09.580Z"
+    }
+  ],
+  "summary": "[Aug 18, 2026 12:29] 2 exchanges"
+}

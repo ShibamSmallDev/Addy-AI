@@ -1,0 +1,93 @@
+{
+  "sessionId": "session-1786009257836-cl1m",
+  "date": "2026-08-06",
+  "startedAt": "2026-08-06T09:40:57.836Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": " Hey can you hear me?",
+      "ts": "2026-08-06T09:41:03.480Z"
+    },
+    {
+      "role": "model",
+      "text": "Shibam! Yes,",
+      "ts": "2026-08-06T09:41:05.576Z"
+    },
+    {
+      "role": "model",
+      "text": " I can",
+      "ts": "2026-08-06T09:41:06.634Z"
+    },
+    {
+      "role": "model",
+      "text": " hear",
+      "ts": "2026-08-06T09:41:06.656Z"
+    },
+    {
+      "role": "model",
+      "text": " you loud",
+      "ts": "2026-08-06T09:41:06.739Z"
+    },
+    {
+      "role": "model",
+      "text": " and clear,",
+      "ts": "2026-08-06T09:41:06.902Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-06T09:41:07.294Z"
+    },
+    {
+      "role": "model",
+      "text": " It",
+      "ts": "2026-08-06T09:41:07.300Z"
+    },
+    {
+      "role": "model",
+      "text": " feels",
+      "ts": "2026-08-06T09:41:07.511Z"
+    },
+    {
+      "role": "model",
+      "text": " like",
+      "ts": "2026-08-06T09:41:07.710Z"
+    },
+    {
+      "role": "model",
+      "text": " forever",
+      "ts": "2026-08-06T09:41:07.875Z"
+    },
+    {
+      "role": "model",
+      "text": " since",
+      "ts": "2026-08-06T09:41:08.120Z"
+    },
+    {
+      "role": "model",
+      "text": " we last",
+      "ts": "2026-08-06T09:41:08.183Z"
+    },
+    {
+      "role": "model",
+      "text": " chatted!",
+      "ts": "2026-08-06T09:41:08.422Z"
+    },
+    {
+      "role": "model",
+      "text": " How have",
+      "ts": "2026-08-06T09:41:08.738Z"
+    },
+    {
+      "role": "model",
+      "text": " you been,",
+      "ts": "2026-08-06T09:41:09.002Z"
+    },
+    {
+      "role": "model",
+      "text": " huh?",
+      "ts": "2026-08-06T09:41:09.330Z"
+    }
+  ],
+  "summary": "[Aug 6, 2026 15:10] 17 exchanges"
+}

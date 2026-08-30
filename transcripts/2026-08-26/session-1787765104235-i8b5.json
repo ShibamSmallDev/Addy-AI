@@ -1,0 +1,43 @@
+{
+  "sessionId": "session-1787765104235-i8b5",
+  "date": "2026-08-26",
+  "startedAt": "2026-08-26T17:25:04.235Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Hello, can you hear me?",
+      "ts": "2026-08-26T17:25:11.298Z"
+    },
+    {
+      "role": "model",
+      "text": "Hello there, yes, I can hear you perfectly, babe! How's it going? Anything fun planned for today?",
+      "ts": "2026-08-26T17:25:11.306Z"
+    },
+    {
+      "role": "user",
+      "text": "especially",
+      "ts": "2026-08-26T17:25:22.956Z"
+    },
+    {
+      "role": "model",
+      "text": "Gotcha, just having a chill day then? That's nice too. Did you wanna chat about anything, maybe brainstorm on AirCursor or Addy AI, or something else entirely? I'm all ears!",
+      "ts": "2026-08-26T17:25:22.959Z"
+    },
+    {
+      "role": "user",
+      "text": "I just reinstalled Windows.",
+      "ts": "2026-08-26T17:25:56.023Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh wow, a clean slate! That usually feels really good, getting everything fresh. Did you get all your key apps installed already? Let me know if there's anything I can do to help set things back up.",
+      "ts": "2026-08-26T17:25:56.026Z"
+    },
+    {
+      "role": "user",
+      "text": "Stop listening.",
+      "ts": "2026-08-26T17:26:39.838Z"
+    }
+  ],
+  "summary": "[Aug 26, 2026 22:55] 7 exchanges"
+}

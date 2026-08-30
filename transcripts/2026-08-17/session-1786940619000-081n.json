@@ -1,0 +1,18 @@
+{
+  "sessionId": "session-1786940619000-081n",
+  "date": "2026-08-17",
+  "startedAt": "2026-08-17T04:23:39.000Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Stop listening.",
+      "ts": "2026-08-17T04:23:44.095Z"
+    },
+    {
+      "role": "model",
+      "text": "Understood, I'm halting my listening",
+      "ts": "2026-08-17T04:23:44.100Z"
+    }
+  ],
+  "summary": "[Aug 17, 2026 09:53] 2 exchanges"
+}

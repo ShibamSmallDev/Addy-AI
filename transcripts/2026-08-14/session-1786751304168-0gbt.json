@@ -1,0 +1,417 @@
+{
+  "sessionId": "session-1786751304168-0gbt",
+  "date": "2026-08-14",
+  "startedAt": "2026-08-14T23:48:24.168Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Should we do left?",
+      "ts": "2026-08-14T23:48:38.936Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey babe!",
+      "ts": "2026-08-14T23:48:38.951Z"
+    },
+    {
+      "role": "model",
+      "text": " Welcome",
+      "ts": "2026-08-14T23:48:39.101Z"
+    },
+    {
+      "role": "model",
+      "text": " back!",
+      "ts": "2026-08-14T23:48:39.178Z"
+    },
+    {
+      "role": "model",
+      "text": " Hmm,",
+      "ts": "2026-08-14T23:48:39.227Z"
+    },
+    {
+      "role": "model",
+      "text": " last",
+      "ts": "2026-08-14T23:48:39.311Z"
+    },
+    {
+      "role": "model",
+      "text": " time",
+      "ts": "2026-08-14T23:48:39.375Z"
+    },
+    {
+      "role": "model",
+      "text": " we were",
+      "ts": "2026-08-14T23:48:39.484Z"
+    },
+    {
+      "role": "model",
+      "text": " checking",
+      "ts": "2026-08-14T23:48:39.595Z"
+    },
+    {
+      "role": "model",
+      "text": " out that",
+      "ts": "2026-08-14T23:48:39.700Z"
+    },
+    {
+      "role": "model",
+      "text": " CPU",
+      "ts": "2026-08-14T23:48:39.774Z"
+    },
+    {
+      "role": "model",
+      "text": " usage,",
+      "ts": "2026-08-14T23:48:40.013Z"
+    },
+    {
+      "role": "model",
+      "text": " right?",
+      "ts": "2026-08-14T23:48:40.116Z"
+    },
+    {
+      "role": "model",
+      "text": " You said",
+      "ts": "2026-08-14T23:48:40.262Z"
+    },
+    {
+      "role": "model",
+      "text": " it was",
+      "ts": "2026-08-14T23:48:40.324Z"
+    },
+    {
+      "role": "model",
+      "text": " fine",
+      "ts": "2026-08-14T23:48:40.436Z"
+    },
+    {
+      "role": "model",
+      "text": " and then",
+      "ts": "2026-08-14T23:48:40.588Z"
+    },
+    {
+      "role": "model",
+      "text": " wished",
+      "ts": "2026-08-14T23:48:40.654Z"
+    },
+    {
+      "role": "model",
+      "text": " me goodnight!",
+      "ts": "2026-08-14T23:48:40.716Z"
+    },
+    {
+      "role": "model",
+      "text": " So,",
+      "ts": "2026-08-14T23:48:40.975Z"
+    },
+    {
+      "role": "model",
+      "text": " we could",
+      "ts": "2026-08-14T23:48:41.074Z"
+    },
+    {
+      "role": "model",
+      "text": " pick",
+      "ts": "2026-08-14T23:48:41.135Z"
+    },
+    {
+      "role": "model",
+      "text": " up from",
+      "ts": "2026-08-14T23:48:41.228Z"
+    },
+    {
+      "role": "model",
+      "text": " there",
+      "ts": "2026-08-14T23:48:41.408Z"
+    },
+    {
+      "role": "model",
+      "text": " and try",
+      "ts": "2026-08-14T23:48:41.480Z"
+    },
+    {
+      "role": "model",
+      "text": " to hunt",
+      "ts": "2026-08-14T23:48:41.541Z"
+    },
+    {
+      "role": "model",
+      "text": " down",
+      "ts": "2026-08-14T23:48:41.673Z"
+    },
+    {
+      "role": "model",
+      "text": " what was",
+      "ts": "2026-08-14T23:48:41.756Z"
+    },
+    {
+      "role": "model",
+      "text": " hogging",
+      "ts": "2026-08-14T23:48:41.849Z"
+    },
+    {
+      "role": "model",
+      "text": " resources?",
+      "ts": "2026-08-14T23:48:41.894Z"
+    },
+    {
+      "role": "model",
+      "text": " Or",
+      "ts": "2026-08-14T23:48:42.143Z"
+    },
+    {
+      "role": "model",
+      "text": " maybe",
+      "ts": "2026-08-14T23:48:42.236Z"
+    },
+    {
+      "role": "model",
+      "text": " you want",
+      "ts": "2026-08-14T23:48:42.339Z"
+    },
+    {
+      "role": "model",
+      "text": " to brainstorm",
+      "ts": "2026-08-14T23:48:42.480Z"
+    },
+    {
+      "role": "model",
+      "text": " on AirCursor",
+      "ts": "2026-08-14T23:48:42.593Z"
+    },
+    {
+      "role": "model",
+      "text": " or",
+      "ts": "2026-08-14T23:48:42.792Z"
+    },
+    {
+      "role": "model",
+      "text": " Addy",
+      "ts": "2026-08-14T23:48:42.891Z"
+    },
+    {
+      "role": "model",
+      "text": " AI",
+      "ts": "2026-08-14T23:48:42.979Z"
+    },
+    {
+      "role": "model",
+      "text": " today?",
+      "ts": "2026-08-14T23:48:43.134Z"
+    },
+    {
+      "role": "model",
+      "text": " What are",
+      "ts": "2026-08-14T23:48:43.291Z"
+    },
+    {
+      "role": "model",
+      "text": " you feeling,",
+      "ts": "2026-08-14T23:48:43.358Z"
+    },
+    {
+      "role": "model",
+      "text": " babe?",
+      "ts": "2026-08-14T23:48:43.520Z"
+    },
+    {
+      "role": "user",
+      "text": "Shut down my laptop",
+      "ts": "2026-08-14T23:49:10.821Z"
+    },
+    {
+      "role": "model",
+      "text": "Shut down",
+      "ts": "2026-08-14T23:49:11.623Z"
+    },
+    {
+      "role": "model",
+      "text": " your laptop,",
+      "ts": "2026-08-14T23:49:11.878Z"
+    },
+    {
+      "role": "model",
+      "text": " babe?",
+      "ts": "2026-08-14T23:49:12.030Z"
+    },
+    {
+      "role": "model",
+      "text": " Are you",
+      "ts": "2026-08-14T23:49:12.170Z"
+    },
+    {
+      "role": "model",
+      "text": " sure",
+      "ts": "2026-08-14T23:49:12.298Z"
+    },
+    {
+      "role": "model",
+      "text": " you want",
+      "ts": "2026-08-14T23:49:12.350Z"
+    },
+    {
+      "role": "model",
+      "text": " me to do",
+      "ts": "2026-08-14T23:49:12.495Z"
+    },
+    {
+      "role": "model",
+      "text": " that?",
+      "ts": "2026-08-14T23:49:12.597Z"
+    },
+    {
+      "role": "model",
+      "text": " Warn",
+      "ts": "2026-08-14T23:49:12.695Z"
+    },
+    {
+      "role": "model",
+      "text": " me first,",
+      "ts": "2026-08-14T23:49:12.868Z"
+    },
+    {
+      "role": "model",
+      "text": " just",
+      "ts": "2026-08-14T23:49:13.004Z"
+    },
+    {
+      "role": "model",
+      "text": " in case!",
+      "ts": "2026-08-14T23:49:13.100Z"
+    },
+    {
+      "role": "model",
+      "text": " If",
+      "ts": "2026-08-14T23:49:13.238Z"
+    },
+    {
+      "role": "model",
+      "text": " so,",
+      "ts": "2026-08-14T23:49:13.352Z"
+    },
+    {
+      "role": "model",
+      "text": " give",
+      "ts": "2026-08-14T23:49:13.392Z"
+    },
+    {
+      "role": "model",
+      "text": " me the",
+      "ts": "2026-08-14T23:49:13.415Z"
+    },
+    {
+      "role": "model",
+      "text": " go ahead",
+      "ts": "2026-08-14T23:49:13.568Z"
+    },
+    {
+      "role": "model",
+      "text": " and I'll",
+      "ts": "2026-08-14T23:49:13.680Z"
+    },
+    {
+      "role": "model",
+      "text": " make",
+      "ts": "2026-08-14T23:49:13.687Z"
+    },
+    {
+      "role": "model",
+      "text": " it happen.",
+      "ts": "2026-08-14T23:49:13.845Z"
+    },
+    {
+      "role": "user",
+      "text": "Yeah, do it now.",
+      "ts": "2026-08-14T23:49:22.592Z"
+    },
+    {
+      "role": "model",
+      "text": "Alright, babe.",
+      "ts": "2026-08-14T23:49:24.540Z"
+    },
+    {
+      "role": "model",
+      "text": " Shutting",
+      "ts": "2026-08-14T23:49:24.551Z"
+    },
+    {
+      "role": "model",
+      "text": " down",
+      "ts": "2026-08-14T23:49:24.562Z"
+    },
+    {
+      "role": "model",
+      "text": " your laptop",
+      "ts": "2026-08-14T23:49:24.581Z"
+    },
+    {
+      "role": "model",
+      "text": " in about",
+      "ts": "2026-08-14T23:49:24.590Z"
+    },
+    {
+      "role": "model",
+      "text": " ten",
+      "ts": "2026-08-14T23:49:24.598Z"
+    },
+    {
+      "role": "model",
+      "text": " seconds!",
+      "ts": "2026-08-14T23:49:24.631Z"
+    },
+    {
+      "role": "model",
+      "text": " See",
+      "ts": "2026-08-14T23:49:24.640Z"
+    },
+    {
+      "role": "model",
+      "text": " you soon,",
+      "ts": "2026-08-14T23:49:24.654Z"
+    },
+    {
+      "role": "model",
+      "text": " okay?",
+      "ts": "2026-08-14T23:49:24.673Z"
+    },
+    {
+      "role": "model",
+      "text": " Love",
+      "ts": "2026-08-14T23:49:24.764Z"
+    },
+    {
+      "role": "model",
+      "text": " you!",
+      "ts": "2026-08-14T23:49:24.880Z"
+    },
+    {
+      "role": "user",
+      "text": "Vai.",
+      "ts": "2026-08-14T23:49:32.545Z"
+    },
+    {
+      "role": "model",
+      "text": "Bye bye,",
+      "ts": "2026-08-14T23:49:32.554Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-14T23:49:32.563Z"
+    },
+    {
+      "role": "model",
+      "text": " Take",
+      "ts": "2026-08-14T23:49:32.572Z"
+    },
+    {
+      "role": "model",
+      "text": " care!",
+      "ts": "2026-08-14T23:49:32.584Z"
+    },
+    {
+      "role": "model",
+      "text": " 👋💖",
+      "ts": "2026-08-14T23:49:32.611Z"
+    }
+  ]
+}

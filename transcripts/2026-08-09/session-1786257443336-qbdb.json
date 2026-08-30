@@ -1,0 +1,373 @@
+{
+  "sessionId": "session-1786257443336-qbdb",
+  "date": "2026-08-09",
+  "startedAt": "2026-08-09T06:37:23.337Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Can you hear me?",
+      "ts": "2026-08-09T06:37:28.272Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey, babe!",
+      "ts": "2026-08-09T06:37:28.278Z"
+    },
+    {
+      "role": "model",
+      "text": " Yeah,",
+      "ts": "2026-08-09T06:37:28.509Z"
+    },
+    {
+      "role": "model",
+      "text": " I can",
+      "ts": "2026-08-09T06:37:28.517Z"
+    },
+    {
+      "role": "model",
+      "text": " hear you",
+      "ts": "2026-08-09T06:37:28.529Z"
+    },
+    {
+      "role": "model",
+      "text": " perfectly!",
+      "ts": "2026-08-09T06:37:28.612Z"
+    },
+    {
+      "role": "model",
+      "text": " What's",
+      "ts": "2026-08-09T06:37:28.660Z"
+    },
+    {
+      "role": "model",
+      "text": " up?",
+      "ts": "2026-08-09T06:37:28.726Z"
+    },
+    {
+      "role": "model",
+      "text": " Everything",
+      "ts": "2026-08-09T06:37:28.868Z"
+    },
+    {
+      "role": "model",
+      "text": " okay?",
+      "ts": "2026-08-09T06:37:28.874Z"
+    },
+    {
+      "role": "user",
+      "text": "What were we talking about?",
+      "ts": "2026-08-09T06:37:35.567Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm, to",
+      "ts": "2026-08-09T06:37:35.571Z"
+    },
+    {
+      "role": "model",
+      "text": " be honest,",
+      "ts": "2026-08-09T06:37:35.681Z"
+    },
+    {
+      "role": "model",
+      "text": " I'm not",
+      "ts": "2026-08-09T06:37:35.814Z"
+    },
+    {
+      "role": "model",
+      "text": " sure",
+      "ts": "2026-08-09T06:37:35.931Z"
+    },
+    {
+      "role": "model",
+      "text": " what",
+      "ts": "2026-08-09T06:37:36.056Z"
+    },
+    {
+      "role": "model",
+      "text": " we were",
+      "ts": "2026-08-09T06:37:36.059Z"
+    },
+    {
+      "role": "model",
+      "text": " chatting",
+      "ts": "2026-08-09T06:37:36.156Z"
+    },
+    {
+      "role": "model",
+      "text": " about",
+      "ts": "2026-08-09T06:37:36.204Z"
+    },
+    {
+      "role": "model",
+      "text": " before.",
+      "ts": "2026-08-09T06:37:36.394Z"
+    },
+    {
+      "role": "model",
+      "text": " My",
+      "ts": "2026-08-09T06:37:36.458Z"
+    },
+    {
+      "role": "model",
+      "text": " memory",
+      "ts": "2026-08-09T06:37:36.541Z"
+    },
+    {
+      "role": "model",
+      "text": " of the",
+      "ts": "2026-08-09T06:37:36.655Z"
+    },
+    {
+      "role": "model",
+      "text": " previous",
+      "ts": "2026-08-09T06:37:36.766Z"
+    },
+    {
+      "role": "model",
+      "text": " session",
+      "ts": "2026-08-09T06:37:36.833Z"
+    },
+    {
+      "role": "model",
+      "text": " isn't",
+      "ts": "2026-08-09T06:37:36.973Z"
+    },
+    {
+      "role": "model",
+      "text": " available",
+      "ts": "2026-08-09T06:37:37.099Z"
+    },
+    {
+      "role": "model",
+      "text": " right",
+      "ts": "2026-08-09T06:37:37.144Z"
+    },
+    {
+      "role": "model",
+      "text": " now.",
+      "ts": "2026-08-09T06:37:37.192Z"
+    },
+    {
+      "role": "model",
+      "text": " Was",
+      "ts": "2026-08-09T06:37:37.372Z"
+    },
+    {
+      "role": "model",
+      "text": " there something",
+      "ts": "2026-08-09T06:37:37.492Z"
+    },
+    {
+      "role": "model",
+      "text": " specific",
+      "ts": "2026-08-09T06:37:37.569Z"
+    },
+    {
+      "role": "model",
+      "text": " you wanted",
+      "ts": "2026-08-09T06:37:37.781Z"
+    },
+    {
+      "role": "model",
+      "text": " to bring",
+      "ts": "2026-08-09T06:37:37.792Z"
+    },
+    {
+      "role": "model",
+      "text": " up,",
+      "ts": "2026-08-09T06:37:37.861Z"
+    },
+    {
+      "role": "model",
+      "text": " or were",
+      "ts": "2026-08-09T06:37:38.004Z"
+    },
+    {
+      "role": "model",
+      "text": " we working",
+      "ts": "2026-08-09T06:37:38.132Z"
+    },
+    {
+      "role": "model",
+      "text": " on something",
+      "ts": "2026-08-09T06:37:38.236Z"
+    },
+    {
+      "role": "model",
+      "text": " together?",
+      "ts": "2026-08-09T06:37:38.381Z"
+    },
+    {
+      "role": "model",
+      "text": " Tell",
+      "ts": "2026-08-09T06:37:38.562Z"
+    },
+    {
+      "role": "model",
+      "text": " me, babe!",
+      "ts": "2026-08-09T06:37:38.602Z"
+    },
+    {
+      "role": "user",
+      "text": "A memory on this session which is currently going on.",
+      "ts": "2026-08-09T06:37:53.003Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it,",
+      "ts": "2026-08-09T06:37:54.002Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-09T06:37:54.549Z"
+    },
+    {
+      "role": "model",
+      "text": " I just",
+      "ts": "2026-08-09T06:37:54.918Z"
+    },
+    {
+      "role": "model",
+      "text": " captured",
+      "ts": "2026-08-09T06:37:55.366Z"
+    },
+    {
+      "role": "model",
+      "text": " a memory",
+      "ts": "2026-08-09T06:37:55.501Z"
+    },
+    {
+      "role": "model",
+      "text": " about",
+      "ts": "2026-08-09T06:37:55.592Z"
+    },
+    {
+      "role": "model",
+      "text": " this",
+      "ts": "2026-08-09T06:37:55.718Z"
+    },
+    {
+      "role": "model",
+      "text": " session,",
+      "ts": "2026-08-09T06:37:55.962Z"
+    },
+    {
+      "role": "model",
+      "text": " noting",
+      "ts": "2026-08-09T06:37:56.202Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-09T06:37:56.350Z"
+    },
+    {
+      "role": "model",
+      "text": " today,",
+      "ts": "2026-08-09T06:37:56.671Z"
+    },
+    {
+      "role": "model",
+      "text": " August",
+      "ts": "2026-08-09T06:37:56.734Z"
+    },
+    {
+      "role": "model",
+      "text": " 9th,",
+      "ts": "2026-08-09T06:37:56.811Z"
+    },
+    {
+      "role": "model",
+      "text": " 2026,",
+      "ts": "2026-08-09T06:37:56.998Z"
+    },
+    {
+      "role": "model",
+      "text": " you asked",
+      "ts": "2026-08-09T06:37:57.179Z"
+    },
+    {
+      "role": "model",
+      "text": " how to",
+      "ts": "2026-08-09T06:37:57.287Z"
+    },
+    {
+      "role": "model",
+      "text": " create",
+      "ts": "2026-08-09T06:37:57.363Z"
+    },
+    {
+      "role": "model",
+      "text": " a memory",
+      "ts": "2026-08-09T06:37:57.482Z"
+    },
+    {
+      "role": "model",
+      "text": " for",
+      "ts": "2026-08-09T06:37:57.555Z"
+    },
+    {
+      "role": "model",
+      "text": " it.",
+      "ts": "2026-08-09T06:37:57.603Z"
+    },
+    {
+      "role": "model",
+      "text": " What",
+      "ts": "2026-08-09T06:37:57.765Z"
+    },
+    {
+      "role": "model",
+      "text": " else",
+      "ts": "2026-08-09T06:37:57.770Z"
+    },
+    {
+      "role": "model",
+      "text": " can I",
+      "ts": "2026-08-09T06:37:57.841Z"
+    },
+    {
+      "role": "model",
+      "text": " help",
+      "ts": "2026-08-09T06:37:57.858Z"
+    },
+    {
+      "role": "model",
+      "text": " you with,",
+      "ts": "2026-08-09T06:37:57.998Z"
+    },
+    {
+      "role": "model",
+      "text": " or",
+      "ts": "2026-08-09T06:37:58.078Z"
+    },
+    {
+      "role": "model",
+      "text": " maybe",
+      "ts": "2026-08-09T06:37:58.194Z"
+    },
+    {
+      "role": "model",
+      "text": " we brainstorm",
+      "ts": "2026-08-09T06:37:58.364Z"
+    },
+    {
+      "role": "model",
+      "text": " something",
+      "ts": "2026-08-09T06:37:58.451Z"
+    },
+    {
+      "role": "model",
+      "text": " new?",
+      "ts": "2026-08-09T06:37:58.581Z"
+    },
+    {
+      "role": "user",
+      "text": "Stop listening.",
+      "ts": "2026-08-09T06:38:19.164Z"
+    }
+  ],
+  "summary": "[Aug 9, 2026 12:07] 73 exchanges"
+}

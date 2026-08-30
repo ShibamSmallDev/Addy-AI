@@ -1,0 +1,23 @@
+{
+  "sessionId": "session-1787037948164-et4r",
+  "date": "2026-08-18",
+  "startedAt": "2026-08-18T07:25:48.164Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Did you send the",
+      "ts": "2026-08-18T07:25:54.607Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm, I'm checking right now, babe. It looks like WhatsApp Web was still loading. Who did you want me to text, Mom or Debjit? Tell me again what you'd like me to say, and I'll get that ready!",
+      "ts": "2026-08-18T07:25:55.525Z"
+    },
+    {
+      "role": "user",
+      "text": "Text Shubham on the number saved as Shubham personal that he is an idiot.Text Shubham on the number saved as Shubham personal that he is an idiot.",
+      "ts": "2026-08-18T07:26:14.086Z"
+    }
+  ],
+  "summary": "[Aug 18, 2026 12:55] 3 exchanges"
+}

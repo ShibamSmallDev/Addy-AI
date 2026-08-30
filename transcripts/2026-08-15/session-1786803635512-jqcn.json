@@ -1,0 +1,18 @@
+{
+  "sessionId": "session-1786803635512-jqcn",
+  "date": "2026-08-15",
+  "startedAt": "2026-08-15T14:20:35.512Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "But that you can have access to open code.",
+      "ts": "2026-08-15T14:20:41.521Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm... oh, you mean like access to your local OpenCode server running on port 4096? Yeah, I totally can! We even created that `hello_opencode.py` file last time, remember? Did you want to do something more with that today, or maybe try something completely new, babe?",
+      "ts": "2026-08-15T14:20:41.535Z"
+    }
+  ],
+  "summary": "[Aug 15, 2026 19:50] 2 exchanges"
+}

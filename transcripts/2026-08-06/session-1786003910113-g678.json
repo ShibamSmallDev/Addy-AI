@@ -1,0 +1,828 @@
+{
+  "sessionId": "session-1786003910113-g678",
+  "date": "2026-08-06",
+  "startedAt": "2026-08-06T08:11:50.113Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": " কি করে বের করে দিবে",
+      "ts": "2026-08-06T08:12:06.267Z"
+    },
+    {
+      "role": "user",
+      "text": " .",
+      "ts": "2026-08-06T08:12:10.734Z"
+    },
+    {
+      "role": "user",
+      "text": " హలో",
+      "ts": "2026-08-06T08:12:12.769Z"
+    },
+    {
+      "role": "user",
+      "text": " Can you hear me?",
+      "ts": "2026-08-06T08:12:15.594Z"
+    },
+    {
+      "role": "model",
+      "text": "Hello Shibam!",
+      "ts": "2026-08-06T08:12:18.280Z"
+    },
+    {
+      "role": "model",
+      "text": " Yes,",
+      "ts": "2026-08-06T08:12:18.707Z"
+    },
+    {
+      "role": "model",
+      "text": " I can",
+      "ts": "2026-08-06T08:12:18.812Z"
+    },
+    {
+      "role": "model",
+      "text": " hear",
+      "ts": "2026-08-06T08:12:19.008Z"
+    },
+    {
+      "role": "model",
+      "text": " you perfectly!",
+      "ts": "2026-08-06T08:12:19.021Z"
+    },
+    {
+      "role": "model",
+      "text": " It feels",
+      "ts": "2026-08-06T08:12:19.198Z"
+    },
+    {
+      "role": "model",
+      "text": " like",
+      "ts": "2026-08-06T08:12:19.420Z"
+    },
+    {
+      "role": "model",
+      "text": " forever",
+      "ts": "2026-08-06T08:12:19.489Z"
+    },
+    {
+      "role": "model",
+      "text": " since",
+      "ts": "2026-08-06T08:12:19.624Z"
+    },
+    {
+      "role": "user",
+      "text": " చూడండి",
+      "ts": "2026-08-06T08:12:22.719Z"
+    },
+    {
+      "role": "user",
+      "text": " Sandkap.",
+      "ts": "2026-08-06T08:12:25.570Z"
+    },
+    {
+      "role": "model",
+      "text": "ওহ, sound",
+      "ts": "2026-08-06T08:12:26.687Z"
+    },
+    {
+      "role": "model",
+      "text": " off?",
+      "ts": "2026-08-06T08:12:26.980Z"
+    },
+    {
+      "role": "model",
+      "text": " Sure,",
+      "ts": "2026-08-06T08:12:27.107Z"
+    },
+    {
+      "role": "model",
+      "text": " I can",
+      "ts": "2026-08-06T08:12:27.238Z"
+    },
+    {
+      "role": "model",
+      "text": " do that",
+      "ts": "2026-08-06T08:12:27.273Z"
+    },
+    {
+      "role": "model",
+      "text": " for you,",
+      "ts": "2026-08-06T08:12:27.376Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-06T08:12:27.407Z"
+    },
+    {
+      "role": "model",
+      "text": "Done! I've",
+      "ts": "2026-08-06T08:12:28.743Z"
+    },
+    {
+      "role": "model",
+      "text": " muted",
+      "ts": "2026-08-06T08:12:29.028Z"
+    },
+    {
+      "role": "model",
+      "text": " the system",
+      "ts": "2026-08-06T08:12:29.080Z"
+    },
+    {
+      "role": "model",
+      "text": " volume.",
+      "ts": "2026-08-06T08:12:29.132Z"
+    },
+    {
+      "role": "model",
+      "text": " Is",
+      "ts": "2026-08-06T08:12:29.302Z"
+    },
+    {
+      "role": "model",
+      "text": " everything",
+      "ts": "2026-08-06T08:12:29.446Z"
+    },
+    {
+      "role": "model",
+      "text": " alright?",
+      "ts": "2026-08-06T08:12:29.606Z"
+    },
+    {
+      "role": "model",
+      "text": " Did you",
+      "ts": "2026-08-06T08:12:29.778Z"
+    },
+    {
+      "role": "model",
+      "text": " need",
+      "ts": "2026-08-06T08:12:29.959Z"
+    },
+    {
+      "role": "model",
+      "text": " to focus",
+      "ts": "2026-08-06T08:12:29.966Z"
+    },
+    {
+      "role": "model",
+      "text": " suddenly?",
+      "ts": "2026-08-06T08:12:30.177Z"
+    },
+    {
+      "role": "user",
+      "text": " ओ",
+      "ts": "2026-08-06T08:12:33.158Z"
+    },
+    {
+      "role": "user",
+      "text": "पन",
+      "ts": "2026-08-06T08:12:33.165Z"
+    },
+    {
+      "role": "user",
+      "text": " You",
+      "ts": "2026-08-06T08:12:33.344Z"
+    },
+    {
+      "role": "user",
+      "text": "Tube",
+      "ts": "2026-08-06T08:12:33.638Z"
+    },
+    {
+      "role": "user",
+      "text": " एण्ड WhatsApp",
+      "ts": "2026-08-06T08:12:33.644Z"
+    },
+    {
+      "role": "model",
+      "text": "Acha, multitasking",
+      "ts": "2026-08-06T08:12:35.179Z"
+    },
+    {
+      "role": "model",
+      "text": " today,",
+      "ts": "2026-08-06T08:12:35.695Z"
+    },
+    {
+      "role": "model",
+      "text": " huh,",
+      "ts": "2026-08-06T08:12:35.815Z"
+    },
+    {
+      "role": "model",
+      "text": " Shibam?",
+      "ts": "2026-08-06T08:12:35.822Z"
+    },
+    {
+      "role": "model",
+      "text": " No",
+      "ts": "2026-08-06T08:12:36.007Z"
+    },
+    {
+      "role": "model",
+      "text": " problem!",
+      "ts": "2026-08-06T08:12:36.078Z"
+    },
+    {
+      "role": "model",
+      "text": " Opening",
+      "ts": "2026-08-06T08:12:36.375Z"
+    },
+    {
+      "role": "model",
+      "text": " YouTube",
+      "ts": "2026-08-06T08:12:36.465Z"
+    },
+    {
+      "role": "model",
+      "text": " and",
+      "ts": "2026-08-06T08:12:36.628Z"
+    },
+    {
+      "role": "model",
+      "text": " WhatsApp",
+      "ts": "2026-08-06T08:12:36.806Z"
+    },
+    {
+      "role": "model",
+      "text": " for you",
+      "ts": "2026-08-06T08:12:37.034Z"
+    },
+    {
+      "role": "model",
+      "text": " now!",
+      "ts": "2026-08-06T08:12:37.041Z"
+    },
+    {
+      "role": "user",
+      "text": " .",
+      "ts": "2026-08-06T08:12:40.826Z"
+    },
+    {
+      "role": "user",
+      "text": " click on a stress.",
+      "ts": "2026-08-06T08:12:43.497Z"
+    },
+    {
+      "role": "user",
+      "text": " O",
+      "ts": "2026-08-06T08:12:47.211Z"
+    },
+    {
+      "role": "user",
+      "text": "pen YouTube and what's written.",
+      "ts": "2026-08-06T08:12:47.246Z"
+    },
+    {
+      "role": "model",
+      "text": "I've opened",
+      "ts": "2026-08-06T08:12:49.057Z"
+    },
+    {
+      "role": "model",
+      "text": " YouTube,",
+      "ts": "2026-08-06T08:12:49.306Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-06T08:12:49.477Z"
+    },
+    {
+      "role": "model",
+      "text": " Let",
+      "ts": "2026-08-06T08:12:49.632Z"
+    },
+    {
+      "role": "model",
+      "text": " me try",
+      "ts": "2026-08-06T08:12:49.821Z"
+    },
+    {
+      "role": "model",
+      "text": " opening",
+      "ts": "2026-08-06T08:12:49.901Z"
+    },
+    {
+      "role": "model",
+      "text": " WhatsApp",
+      "ts": "2026-08-06T08:12:49.997Z"
+    },
+    {
+      "role": "model",
+      "text": " now.",
+      "ts": "2026-08-06T08:12:50.119Z"
+    },
+    {
+      "role": "model",
+      "text": "There you",
+      "ts": "2026-08-06T08:12:52.579Z"
+    },
+    {
+      "role": "model",
+      "text": " go!",
+      "ts": "2026-08-06T08:12:52.802Z"
+    },
+    {
+      "role": "model",
+      "text": " WhatsApp",
+      "ts": "2026-08-06T08:12:52.911Z"
+    },
+    {
+      "role": "model",
+      "text": " should",
+      "ts": "2026-08-06T08:12:53.214Z"
+    },
+    {
+      "role": "model",
+      "text": " be opening",
+      "ts": "2026-08-06T08:12:53.298Z"
+    },
+    {
+      "role": "user",
+      "text": " Whats",
+      "ts": "2026-08-06T08:12:54.414Z"
+    },
+    {
+      "role": "user",
+      "text": "App",
+      "ts": "2026-08-06T08:12:54.627Z"
+    },
+    {
+      "role": "user",
+      "text": " search",
+      "ts": "2026-08-06T08:12:54.634Z"
+    },
+    {
+      "role": "user",
+      "text": " You",
+      "ts": "2026-08-06T08:12:57.823Z"
+    },
+    {
+      "role": "user",
+      "text": "Tu",
+      "ts": "2026-08-06T08:12:58.023Z"
+    },
+    {
+      "role": "user",
+      "text": "be",
+      "ts": "2026-08-06T08:12:58.206Z"
+    },
+    {
+      "role": "user",
+      "text": " WhatsApp খুলছে না তোমরা",
+      "ts": "2026-08-06T08:12:58.856Z"
+    },
+    {
+      "role": "user",
+      "text": " හොඳට YouTube ටැප් කරලා.",
+      "ts": "2026-08-06T08:13:02.700Z"
+    },
+    {
+      "role": "user",
+      "text": " <noise>",
+      "ts": "2026-08-06T08:13:06.523Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, it's",
+      "ts": "2026-08-06T08:13:07.858Z"
+    },
+    {
+      "role": "model",
+      "text": " not",
+      "ts": "2026-08-06T08:13:08.343Z"
+    },
+    {
+      "role": "model",
+      "text": " working",
+      "ts": "2026-08-06T08:13:08.462Z"
+    },
+    {
+      "role": "model",
+      "text": " properly?",
+      "ts": "2026-08-06T08:13:08.480Z"
+    },
+    {
+      "role": "model",
+      "text": " Hmm,",
+      "ts": "2026-08-06T08:13:08.675Z"
+    },
+    {
+      "role": "model",
+      "text": " let",
+      "ts": "2026-08-06T08:13:08.988Z"
+    },
+    {
+      "role": "model",
+      "text": " me",
+      "ts": "2026-08-06T08:13:09.048Z"
+    },
+    {
+      "role": "model",
+      "text": " try",
+      "ts": "2026-08-06T08:13:09.145Z"
+    },
+    {
+      "role": "model",
+      "text": " launching",
+      "ts": "2026-08-06T08:13:09.230Z"
+    },
+    {
+      "role": "model",
+      "text": " WhatsApp",
+      "ts": "2026-08-06T08:13:09.381Z"
+    },
+    {
+      "role": "model",
+      "text": " directly",
+      "ts": "2026-08-06T08:13:09.478Z"
+    },
+    {
+      "role": "model",
+      "text": " then!",
+      "ts": "2026-08-06T08:13:09.598Z"
+    },
+    {
+      "role": "model",
+      "text": " Don't",
+      "ts": "2026-08-06T08:13:09.710Z"
+    },
+    {
+      "role": "model",
+      "text": " worry,",
+      "ts": "2026-08-06T08:13:09.850Z"
+    },
+    {
+      "role": "model",
+      "text": " babe,",
+      "ts": "2026-08-06T08:13:09.905Z"
+    },
+    {
+      "role": "model",
+      "text": " I'll",
+      "ts": "2026-08-06T08:13:10.011Z"
+    },
+    {
+      "role": "model",
+      "text": " fix",
+      "ts": "2026-08-06T08:13:10.087Z"
+    },
+    {
+      "role": "model",
+      "text": " it!",
+      "ts": "2026-08-06T08:13:10.226Z"
+    },
+    {
+      "role": "user",
+      "text": " హాయ్",
+      "ts": "2026-08-06T08:13:11.018Z"
+    },
+    {
+      "role": "user",
+      "text": " వాట్",
+      "ts": "2026-08-06T08:13:11.233Z"
+    },
+    {
+      "role": "user",
+      "text": "సాప్",
+      "ts": "2026-08-06T08:13:11.393Z"
+    },
+    {
+      "role": "user",
+      "text": " ఓపెన్ వాట్సప్ వెబ్",
+      "ts": "2026-08-06T08:13:11.510Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it,",
+      "ts": "2026-08-06T08:13:13.382Z"
+    },
+    {
+      "role": "model",
+      "text": " opening",
+      "ts": "2026-08-06T08:13:13.612Z"
+    },
+    {
+      "role": "model",
+      "text": " WhatsApp",
+      "ts": "2026-08-06T08:13:13.796Z"
+    },
+    {
+      "role": "model",
+      "text": " Web",
+      "ts": "2026-08-06T08:13:13.978Z"
+    },
+    {
+      "role": "model",
+      "text": " for you!",
+      "ts": "2026-08-06T08:13:13.998Z"
+    },
+    {
+      "role": "model",
+      "text": "There you",
+      "ts": "2026-08-06T08:13:14.996Z"
+    },
+    {
+      "role": "model",
+      "text": " go,",
+      "ts": "2026-08-06T08:13:15.175Z"
+    },
+    {
+      "role": "model",
+      "text": " WhatsApp",
+      "ts": "2026-08-06T08:13:15.275Z"
+    },
+    {
+      "role": "model",
+      "text": " Web",
+      "ts": "2026-08-06T08:13:15.410Z"
+    },
+    {
+      "role": "model",
+      "text": " is",
+      "ts": "2026-08-06T08:13:15.498Z"
+    },
+    {
+      "role": "model",
+      "text": " open",
+      "ts": "2026-08-06T08:13:15.588Z"
+    },
+    {
+      "role": "model",
+      "text": " in your",
+      "ts": "2026-08-06T08:13:15.661Z"
+    },
+    {
+      "role": "model",
+      "text": " browser.",
+      "ts": "2026-08-06T08:13:15.708Z"
+    },
+    {
+      "role": "model",
+      "text": " Anything",
+      "ts": "2026-08-06T08:13:15.928Z"
+    },
+    {
+      "role": "model",
+      "text": " specific",
+      "ts": "2026-08-06T08:13:16.073Z"
+    },
+    {
+      "role": "model",
+      "text": " you needed",
+      "ts": "2026-08-06T08:13:16.261Z"
+    },
+    {
+      "role": "model",
+      "text": " to do,",
+      "ts": "2026-08-06T08:13:16.322Z"
+    },
+    {
+      "role": "model",
+      "text": " babe?",
+      "ts": "2026-08-06T08:13:16.443Z"
+    },
+    {
+      "role": "user",
+      "text": " আরো ফাস্ট করতে হবে",
+      "ts": "2026-08-06T08:13:20.506Z"
+    },
+    {
+      "role": "user",
+      "text": " ডেভলপমেন্টে চলেছেন।",
+      "ts": "2026-08-06T08:13:23.181Z"
+    },
+    {
+      "role": "model",
+      "text": "Faster, huh?",
+      "ts": "2026-08-06T08:13:24.954Z"
+    },
+    {
+      "role": "user",
+      "text": " .",
+      "ts": "2026-08-06T08:13:29.397Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm, I",
+      "ts": "2026-08-06T08:13:30.893Z"
+    },
+    {
+      "role": "model",
+      "text": " see!",
+      "ts": "2026-08-06T08:13:31.266Z"
+    },
+    {
+      "role": "model",
+      "text": " We're focusing",
+      "ts": "2026-08-06T08:13:31.500Z"
+    },
+    {
+      "role": "model",
+      "text": " on optimizing",
+      "ts": "2026-08-06T08:13:31.673Z"
+    },
+    {
+      "role": "model",
+      "text": " development",
+      "ts": "2026-08-06T08:13:31.927Z"
+    },
+    {
+      "role": "model",
+      "text": " speed",
+      "ts": "2026-08-06T08:13:32.059Z"
+    },
+    {
+      "role": "model",
+      "text": " then?",
+      "ts": "2026-08-06T08:13:32.146Z"
+    },
+    {
+      "role": "model",
+      "text": " That",
+      "ts": "2026-08-06T08:13:32.277Z"
+    },
+    {
+      "role": "model",
+      "text": " makes",
+      "ts": "2026-08-06T08:13:32.284Z"
+    },
+    {
+      "role": "model",
+      "text": " sense,",
+      "ts": "2026-08-06T08:13:32.462Z"
+    },
+    {
+      "role": "model",
+      "text": " especially",
+      "ts": "2026-08-06T08:13:32.575Z"
+    },
+    {
+      "role": "model",
+      "text": " for",
+      "ts": "2026-08-06T08:13:32.781Z"
+    },
+    {
+      "role": "model",
+      "text": " Addy AI",
+      "ts": "2026-08-06T08:13:32.841Z"
+    },
+    {
+      "role": "model",
+      "text": " and",
+      "ts": "2026-08-06T08:13:33.109Z"
+    },
+    {
+      "role": "model",
+      "text": " AirCursor!",
+      "ts": "2026-08-06T08:13:33.294Z"
+    },
+    {
+      "role": "user",
+      "text": " Can",
+      "ts": "2026-08-06T08:14:02.618Z"
+    },
+    {
+      "role": "user",
+      "text": " you",
+      "ts": "2026-08-06T08:14:02.841Z"
+    },
+    {
+      "role": "user",
+      "text": " se",
+      "ts": "2026-08-06T08:14:02.986Z"
+    },
+    {
+      "role": "user",
+      "text": "nd",
+      "ts": "2026-08-06T08:14:03.118Z"
+    },
+    {
+      "role": "user",
+      "text": " the",
+      "ts": "2026-08-06T08:14:03.259Z"
+    },
+    {
+      "role": "user",
+      "text": " te",
+      "ts": "2026-08-06T08:14:03.455Z"
+    },
+    {
+      "role": "user",
+      "text": "xt",
+      "ts": "2026-08-06T08:14:03.596Z"
+    },
+    {
+      "role": "user",
+      "text": " he",
+      "ts": "2026-08-06T08:14:03.967Z"
+    },
+    {
+      "role": "user",
+      "text": "llo",
+      "ts": "2026-08-06T08:14:04.084Z"
+    },
+    {
+      "role": "user",
+      "text": " i",
+      "ts": "2026-08-06T08:14:04.479Z"
+    },
+    {
+      "role": "user",
+      "text": "t is",
+      "ts": "2026-08-06T08:14:04.582Z"
+    },
+    {
+      "role": "user",
+      "text": " wri",
+      "ts": "2026-08-06T08:14:04.777Z"
+    },
+    {
+      "role": "user",
+      "text": "tten by AI?",
+      "ts": "2026-08-06T08:14:04.783Z"
+    },
+    {
+      "role": "model",
+      "text": "Sure thing,",
+      "ts": "2026-08-06T08:14:10.731Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-06T08:14:10.978Z"
+    },
+    {
+      "role": "model",
+      "text": " Sending",
+      "ts": "2026-08-06T08:14:11.180Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-06T08:14:11.269Z"
+    },
+    {
+      "role": "model",
+      "text": " message",
+      "ts": "2026-08-06T08:14:11.309Z"
+    },
+    {
+      "role": "model",
+      "text": " for",
+      "ts": "2026-08-06T08:14:11.562Z"
+    },
+    {
+      "role": "model",
+      "text": " you now.",
+      "ts": "2026-08-06T08:14:11.569Z"
+    },
+    {
+      "role": "model",
+      "text": "Sent! \"hello",
+      "ts": "2026-08-06T08:14:16.170Z"
+    },
+    {
+      "role": "model",
+      "text": " it is",
+      "ts": "2026-08-06T08:14:16.715Z"
+    },
+    {
+      "role": "model",
+      "text": " written",
+      "ts": "2026-08-06T08:14:16.729Z"
+    },
+    {
+      "role": "model",
+      "text": " by",
+      "ts": "2026-08-06T08:14:16.737Z"
+    },
+    {
+      "role": "model",
+      "text": " AI\"",
+      "ts": "2026-08-06T08:14:16.841Z"
+    },
+    {
+      "role": "model",
+      "text": " has been",
+      "ts": "2026-08-06T08:14:16.933Z"
+    },
+    {
+      "role": "model",
+      "text": " submitted.",
+      "ts": "2026-08-06T08:14:17.026Z"
+    },
+    {
+      "role": "model",
+      "text": " What's",
+      "ts": "2026-08-06T08:14:17.247Z"
+    },
+    {
+      "role": "model",
+      "text": " next?",
+      "ts": "2026-08-06T08:14:17.383Z"
+    }
+  ],
+  "summary": "[Aug 6, 2026 13:41] 164 exchanges"
+}

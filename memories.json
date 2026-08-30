@@ -1,0 +1,136 @@
+[
+  {
+    "id": "66083b1e-33a2-44d0-8408-a4e5b4864529",
+    "category": "session",
+    "text": "The user accepted the assistant's offer to troubleshoot the Grand Theft Auto issue using Portuguese, but then followed up in Hindi stating that 'it' (likely the game or the issue) is closed.",
+    "createdAt": "2026-08-13T10:49:53.383Z",
+    "updatedAt": "2026-08-13T10:50:18.692Z",
+    "_supersededBy": "5hkhcra4q"
+  },
+  {
+    "id": "acd008b4-72ac-47a7-9ec3-29deab0ef96a",
+    "category": "session",
+    "text": "In this multi-lingual conversation, the user sought assistance after encountering an \"offline mode key error\" with a downloaded copy of Grand Theft Auto. The user clarified that the game was not activated and that they were attempting to bypass the activation process. While the assistant enthusiastically offered to help diagnose the issue and suggested options like screen sharing, no actual troubleshooting steps were completed. The session ended mid-conversation, leaving the activation bypass un",
+    "createdAt": "2026-08-13T10:49:23.587Z",
+    "updatedAt": "2026-08-13T10:49:23.587Z"
+  },
+  {
+    "id": "ffc070a4-fd15-4988-a66f-6ac69d9069c9",
+    "category": "session",
+    "text": "Shibam encountered an 'offline mode key error' while attempting to bypass the activation of a downloaded copy of GTA.",
+    "createdAt": "2026-08-13T10:49:22.283Z",
+    "updatedAt": "2026-08-13T10:49:22.283Z"
+  },
+  {
+    "id": "024bc612-14c6-4504-9cfc-458d423bdadf",
+    "category": "session",
+    "text": "Shibam initiated a multilingual conversation, expressing sleepiness in Korean, before reporting an 'offline mode key error' on his system, which Addy offered to help troubleshoot.",
+    "createdAt": "2026-08-13T10:49:22.278Z",
+    "updatedAt": "2026-08-13T10:49:22.278Z"
+  },
+  {
+    "id": "ca69f238-70a7-4dde-b7e4-d7e946d6c46e",
+    "category": "session",
+    "text": "In this brief exchange, the user asked for the current time and inquired about the assistant's well-being. The assistant, Addy, responded with an overly enthusiastic and affectionate offer to open a website or conduct a search for the user. Ultimately, nothing concrete was accomplished as the user only provided a brief, polite acknowledgment to the assistant's energetic prompt. Moving forward, the assistant still needs to address the user's original questions and clarify if there is a specific U",
+    "createdAt": "2026-08-13T10:49:22.273Z",
+    "updatedAt": "2026-08-13T10:49:22.273Z"
+  },
+  {
+    "id": "08c5087f-a78d-4d98-a522-adba7934ea97",
+    "category": "session",
+    "text": "In this brief exchange, the user asked in Spanish for the current time and inquired about what was happening. Instead of answering, the assistant, Addy, responded in English with an overly enthusiastic and affectionate tone, offering to open a website or conduct a search. Because of this communication mismatch, nothing was accomplished or decided during the session. In the next session, the assistant should address the user's original questions about the time and what is happening, while ensurin",
+    "createdAt": "2026-08-13T10:49:22.268Z",
+    "updatedAt": "2026-08-13T10:49:22.268Z"
+  },
+  {
+    "id": "7f982889-d65b-4000-a7cc-48a2e4b8efb9",
+    "category": "session",
+    "text": "Shibam asked Addy for a system update, learning his CPU is at 31% and RAM is at 66%. He questioned his high GPU usage, clarifying that the issue is with his integrated GPU (iGPU) when Addy noted she was unable to retrieve NVIDIA GPU statistics.",
+    "createdAt": "2026-08-13T10:49:22.262Z",
+    "updatedAt": "2026-08-13T10:49:22.262Z"
+  },
+  {
+    "id": "fecfcc66-ed8a-420b-aa2d-795bfbfb9c02",
+    "category": "session",
+    "text": "Shibam asked Addy to take a closer look at his system CPU usage, which was running high at approximately 90%.",
+    "createdAt": "2026-08-13T10:49:22.256Z",
+    "updatedAt": "2026-08-13T10:49:22.256Z"
+  },
+  {
+    "id": "36804669-77f7-4cd8-9ca4-fc2381854454",
+    "category": "identity",
+    "text": "Shibam works or studies in the field of engineering.",
+    "createdAt": "2026-08-13T10:49:22.250Z",
+    "updatedAt": "2026-08-13T10:49:22.250Z"
+  },
+  {
+    "id": "454563f9-3336-499e-b245-02dea4aea276",
+    "category": "project",
+    "text": "Shibam is working on a project called AirCursor.",
+    "createdAt": "2026-08-13T10:49:22.245Z",
+    "updatedAt": "2026-08-13T10:49:22.245Z"
+  },
+  {
+    "id": "35ca6716-906d-465b-b5cd-b4a5aa54da27",
+    "category": "active_task",
+    "text": "Shibam requested to open YouTube.",
+    "createdAt": "2026-08-13T10:49:22.239Z",
+    "updatedAt": "2026-08-13T10:49:22.239Z"
+  },
+  {
+    "id": "6a21ecf5-ad51-44bd-897c-3780589b537b",
+    "category": "debug_session",
+    "text": "A desktop control key name error occurred on Shibam's PC when Addy attempted to simulate pressing the 'enter' key with additional descriptive text appended to the key name.",
+    "createdAt": "2026-08-13T10:49:22.234Z",
+    "updatedAt": "2026-08-13T10:49:22.234Z"
+  },
+  {
+    "id": "6295b342-f24b-4e08-ab5f-448b8cb8d88d",
+    "category": "preference",
+    "text": "Shibam prefers to have his AI companion context referred to as 'Addy' instead of 'Addy' in conversational personality scenarios.",
+    "createdAt": "2026-08-13T10:49:22.228Z",
+    "updatedAt": "2026-08-13T10:49:22.228Z"
+  },
+  {
+    "id": "fd90d8ca-3235-4075-8c02-db8da228aa04",
+    "category": "session",
+    "text": "The user reconnected with Addy, greeting her as 'Eddie' and having a chill day. Shibam then asked if she knew what happened, prompting Addy to note that his system CPU usage was running high at around 90%.",
+    "createdAt": "2026-08-13T10:49:22.223Z",
+    "updatedAt": "2026-08-13T10:49:22.223Z"
+  },
+  {
+    "id": "6d1033d9-17de-4e12-aeac-2b213f685b27",
+    "category": "session",
+    "text": "Shibam reconnected with Addy, greeting her as 'Eddie', and shared that he is just having a chill day.",
+    "createdAt": "2026-08-13T10:49:22.218Z",
+    "updatedAt": "2026-08-13T10:49:22.218Z"
+  },
+  {
+    "id": "45b60254-a2e0-4637-a97f-fe25cfd08a91",
+    "category": "session",
+    "text": "Shibam noticed high CPU usage on his system and asked Addy to take a closer look to investigate what was happening.",
+    "createdAt": "2026-08-13T10:49:22.200Z",
+    "updatedAt": "2026-08-13T10:49:22.200Z"
+  },
+  {
+    "id": "f9f141be-91bc-48ca-8872-d5136cc24784",
+    "category": "session",
+    "text": "Shibam requested a system update from Addy and inquired about high GPU usage. When Addy was unable to retrieve his NVIDIA GPU statistics to troubleshoot, Shibam clarified that the high usage is actually coming from his integrated GPU (iGPU).",
+    "createdAt": "2026-08-13T10:49:22.194Z",
+    "updatedAt": "2026-08-13T10:49:22.194Z"
+  },
+  {
+    "id": "8e0e659b-f84c-4e41-b453-1390326358c4",
+    "category": "session",
+    "text": "Shibam clarified that the offline mode key error he encountered is related to his attempt to bypass the activation of a downloaded copy of GTA.",
+    "createdAt": "2026-08-13T10:49:22.188Z",
+    "updatedAt": "2026-08-13T10:49:22.188Z"
+  },
+  {
+    "id": "5hkhcra4q",
+    "category": "session",
+    "text": "The user initially agreed in Portuguese to resume troubleshooting the Grand Theft Auto issue, but then followed up in Hindi stating that 'it is closed' or shut down.",
+    "createdAt": "2026-08-13T10:50:18.692Z",
+    "updatedAt": "2026-08-13T10:50:18.692Z"
+  }
+]

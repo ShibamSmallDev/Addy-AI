@@ -1,0 +1,13 @@
+{
+  "id": "ses_1786940915413_yyw1t0",
+  "title": "Can you open WhatsApp and text my mom again that I wont b...",
+  "startTime": 1786940915413,
+  "endTime": 1786941011813,
+  "workspace": null,
+  "activeProject": null,
+  "mode": "voice",
+  "messageCount": 38,
+  "toolCallCount": 3,
+  "summary": "The user asked the assistant to open WhatsApp and message their mom that they would not be late. When the initial attempt to open the application failed, the assistant connected to the browser via CDP to troubleshoot the issue. However, the CDP browser session only displayed a blank page. The session concluded with the assistant asking the user which website it should load first. Consequently, the task of sending the WhatsApp message remains unfinished and should be picked up next time once the correct browser page is loaded.",
+  "metadata": {}
+}

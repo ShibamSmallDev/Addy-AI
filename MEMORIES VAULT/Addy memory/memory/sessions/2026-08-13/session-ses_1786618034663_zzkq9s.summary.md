@@ -1,0 +1,3 @@
+# Session Summary — 13/8/2026, 4:18:13 pm
+
+The user checked in on their system status, prompting the assistant to provide current CPU and RAM usage statistics. When the user asked about high GPU usage, the assistant initially looked for NVIDIA GPU stats and suggested background tasks like games or browser tabs might be the cause. The user clarified that the high usage was actually affecting their integrated GPU (iGPU) rather than a discrete graphics card. The conversation cut off just as the assistant acknowledged this clarification, leaving the troubleshooting of the high iGPU usage unfinished and ready to be addressed next time.

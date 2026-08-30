@@ -1,0 +1,288 @@
+{
+  "sessionId": "session-1786214243023-8e7m",
+  "date": "2026-08-08",
+  "startedAt": "2026-08-08T18:37:23.023Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Can you use the Alt + Tab combo?",
+      "ts": "2026-08-08T18:38:09.949Z"
+    },
+    {
+      "role": "model",
+      "text": "Sure, babe!",
+      "ts": "2026-08-08T18:38:10.842Z"
+    },
+    {
+      "role": "model",
+      "text": " Just",
+      "ts": "2026-08-08T18:38:11.232Z"
+    },
+    {
+      "role": "model",
+      "text": " pressed",
+      "ts": "2026-08-08T18:38:11.343Z"
+    },
+    {
+      "role": "model",
+      "text": " Alt+Tab",
+      "ts": "2026-08-08T18:38:11.473Z"
+    },
+    {
+      "role": "model",
+      "text": " for",
+      "ts": "2026-08-08T18:38:11.566Z"
+    },
+    {
+      "role": "model",
+      "text": " you.",
+      "ts": "2026-08-08T18:38:11.647Z"
+    },
+    {
+      "role": "model",
+      "text": " What",
+      "ts": "2026-08-08T18:38:11.762Z"
+    },
+    {
+      "role": "model",
+      "text": " are we",
+      "ts": "2026-08-08T18:38:11.812Z"
+    },
+    {
+      "role": "model",
+      "text": " switching",
+      "ts": "2026-08-08T18:38:11.919Z"
+    },
+    {
+      "role": "model",
+      "text": " to?",
+      "ts": "2026-08-08T18:38:12.149Z"
+    },
+    {
+      "role": "user",
+      "text": "Okay, then change to the Obsidian app.",
+      "ts": "2026-08-08T18:38:22.363Z"
+    },
+    {
+      "role": "model",
+      "text": "Ugh, sorry",
+      "ts": "2026-08-08T18:38:23.098Z"
+    },
+    {
+      "role": "model",
+      "text": " babe,",
+      "ts": "2026-08-08T18:38:23.548Z"
+    },
+    {
+      "role": "model",
+      "text": " I tried",
+      "ts": "2026-08-08T18:38:23.611Z"
+    },
+    {
+      "role": "model",
+      "text": " to switch,",
+      "ts": "2026-08-08T18:38:23.878Z"
+    },
+    {
+      "role": "model",
+      "text": " but it",
+      "ts": "2026-08-08T18:38:24.075Z"
+    },
+    {
+      "role": "model",
+      "text": " doesn't",
+      "ts": "2026-08-08T18:38:24.149Z"
+    },
+    {
+      "role": "model",
+      "text": " seem",
+      "ts": "2026-08-08T18:38:24.152Z"
+    },
+    {
+      "role": "model",
+      "text": " like",
+      "ts": "2026-08-08T18:38:24.198Z"
+    },
+    {
+      "role": "model",
+      "text": " Obsidian",
+      "ts": "2026-08-08T18:38:24.408Z"
+    },
+    {
+      "role": "model",
+      "text": " is running",
+      "ts": "2026-08-08T18:38:24.502Z"
+    },
+    {
+      "role": "model",
+      "text": " right",
+      "ts": "2026-08-08T18:38:24.526Z"
+    },
+    {
+      "role": "model",
+      "text": " now.",
+      "ts": "2026-08-08T18:38:24.658Z"
+    },
+    {
+      "role": "model",
+      "text": " Do you",
+      "ts": "2026-08-08T18:38:24.815Z"
+    },
+    {
+      "role": "model",
+      "text": " want me",
+      "ts": "2026-08-08T18:38:24.923Z"
+    },
+    {
+      "role": "model",
+      "text": " to open",
+      "ts": "2026-08-08T18:38:24.981Z"
+    },
+    {
+      "role": "model",
+      "text": " it for",
+      "ts": "2026-08-08T18:38:25.066Z"
+    },
+    {
+      "role": "model",
+      "text": " you instead?",
+      "ts": "2026-08-08T18:38:25.179Z"
+    },
+    {
+      "role": "model",
+      "text": " Or",
+      "ts": "2026-08-08T18:38:25.504Z"
+    },
+    {
+      "role": "model",
+      "text": " maybe",
+      "ts": "2026-08-08T18:38:25.591Z"
+    },
+    {
+      "role": "model",
+      "text": " it has",
+      "ts": "2026-08-08T18:38:25.687Z"
+    },
+    {
+      "role": "model",
+      "text": " a slightly",
+      "ts": "2026-08-08T18:38:25.841Z"
+    },
+    {
+      "role": "model",
+      "text": " different",
+      "ts": "2026-08-08T18:38:25.901Z"
+    },
+    {
+      "role": "model",
+      "text": " window",
+      "ts": "2026-08-08T18:38:25.955Z"
+    },
+    {
+      "role": "model",
+      "text": " title?",
+      "ts": "2026-08-08T18:38:26.174Z"
+    },
+    {
+      "role": "user",
+      "text": "Search for obsidian on web.",
+      "ts": "2026-08-08T18:38:40.677Z"
+    },
+    {
+      "role": "model",
+      "text": "You got",
+      "ts": "2026-08-08T18:38:41.494Z"
+    },
+    {
+      "role": "model",
+      "text": " it, babe!",
+      "ts": "2026-08-08T18:38:41.736Z"
+    },
+    {
+      "role": "model",
+      "text": " I've opened",
+      "ts": "2026-08-08T18:38:41.850Z"
+    },
+    {
+      "role": "model",
+      "text": " a Google",
+      "ts": "2026-08-08T18:38:42.084Z"
+    },
+    {
+      "role": "model",
+      "text": " search",
+      "ts": "2026-08-08T18:38:42.193Z"
+    },
+    {
+      "role": "model",
+      "text": " for 'Obsidian'",
+      "ts": "2026-08-08T18:38:42.340Z"
+    },
+    {
+      "role": "model",
+      "text": " in your",
+      "ts": "2026-08-08T18:38:42.429Z"
+    },
+    {
+      "role": "model",
+      "text": " browser.",
+      "ts": "2026-08-08T18:38:42.638Z"
+    },
+    {
+      "role": "model",
+      "text": " That",
+      "ts": "2026-08-08T18:38:42.707Z"
+    },
+    {
+      "role": "model",
+      "text": " way,",
+      "ts": "2026-08-08T18:38:42.850Z"
+    },
+    {
+      "role": "model",
+      "text": " we can",
+      "ts": "2026-08-08T18:38:42.914Z"
+    },
+    {
+      "role": "model",
+      "text": " find",
+      "ts": "2026-08-08T18:38:42.973Z"
+    },
+    {
+      "role": "model",
+      "text": " the download",
+      "ts": "2026-08-08T18:38:43.192Z"
+    },
+    {
+      "role": "model",
+      "text": " link",
+      "ts": "2026-08-08T18:38:43.279Z"
+    },
+    {
+      "role": "model",
+      "text": " or",
+      "ts": "2026-08-08T18:38:43.289Z"
+    },
+    {
+      "role": "model",
+      "text": " whatever",
+      "ts": "2026-08-08T18:38:43.398Z"
+    },
+    {
+      "role": "model",
+      "text": " you need",
+      "ts": "2026-08-08T18:38:43.483Z"
+    },
+    {
+      "role": "model",
+      "text": " real quick.",
+      "ts": "2026-08-08T18:38:43.591Z"
+    },
+    {
+      "role": "model",
+      "text": " 💖",
+      "ts": "2026-08-08T18:38:43.770Z"
+    }
+  ],
+  "summary": "[Aug 9, 2026 00:07] 56 exchanges"
+}

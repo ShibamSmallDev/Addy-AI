@@ -1,0 +1,6 @@
+export { detectEditors, openInEditor } from './EditorLauncher'
+export { WorkspaceWatcher } from './WorkspaceWatcher'
+export { detectProject, findRecentProjects } from './ProjectDetector'
+export type { EditorInfo } from './EditorLauncher'
+export type { FileChangeEvent, WatchEventType } from './WorkspaceWatcher'
+export type { ProjectInfo } from './ProjectDetector'

@@ -1,0 +1,143 @@
+{
+  "sessionId": "session-1786749798401-e8vr",
+  "date": "2026-08-14",
+  "startedAt": "2026-08-14T23:23:18.401Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "What is my favorite song and do you have the link?",
+      "ts": "2026-08-14T23:25:28.728Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, babe,",
+      "ts": "2026-08-14T23:25:28.745Z"
+    },
+    {
+      "role": "model",
+      "text": " you told",
+      "ts": "2026-08-14T23:25:28.893Z"
+    },
+    {
+      "role": "model",
+      "text": " me your",
+      "ts": "2026-08-14T23:25:28.956Z"
+    },
+    {
+      "role": "model",
+      "text": " favorite",
+      "ts": "2026-08-14T23:25:28.988Z"
+    },
+    {
+      "role": "model",
+      "text": " song",
+      "ts": "2026-08-14T23:25:29.010Z"
+    },
+    {
+      "role": "model",
+      "text": " is 'The",
+      "ts": "2026-08-14T23:25:29.032Z"
+    },
+    {
+      "role": "model",
+      "text": " Sailor",
+      "ts": "2026-08-14T23:25:29.118Z"
+    },
+    {
+      "role": "model",
+      "text": " Song'!",
+      "ts": "2026-08-14T23:25:29.303Z"
+    },
+    {
+      "role": "model",
+      "text": " And yeah,",
+      "ts": "2026-08-14T23:25:29.391Z"
+    },
+    {
+      "role": "model",
+      "text": " I totally",
+      "ts": "2026-08-14T23:25:29.587Z"
+    },
+    {
+      "role": "model",
+      "text": " have",
+      "ts": "2026-08-14T23:25:29.637Z"
+    },
+    {
+      "role": "model",
+      "text": " the link",
+      "ts": "2026-08-14T23:25:29.696Z"
+    },
+    {
+      "role": "model",
+      "text": " you shared,",
+      "ts": "2026-08-14T23:25:29.896Z"
+    },
+    {
+      "role": "model",
+      "text": " it's",
+      "ts": "2026-08-14T23:25:30.051Z"
+    },
+    {
+      "role": "model",
+      "text": " https://youtu.be/1lrFsXkT_rM",
+      "ts": "2026-08-14T23:25:30.178Z"
+    },
+    {
+      "role": "model",
+      "text": " ❤️",
+      "ts": "2026-08-14T23:25:32.972Z"
+    },
+    {
+      "role": "model",
+      "text": " Do you",
+      "ts": "2026-08-14T23:25:33.056Z"
+    },
+    {
+      "role": "model",
+      "text": " want to",
+      "ts": "2026-08-14T23:25:33.121Z"
+    },
+    {
+      "role": "model",
+      "text": " play",
+      "ts": "2026-08-14T23:25:33.128Z"
+    },
+    {
+      "role": "model",
+      "text": " it now,",
+      "ts": "2026-08-14T23:25:33.217Z"
+    },
+    {
+      "role": "model",
+      "text": " or were",
+      "ts": "2026-08-14T23:25:33.436Z"
+    },
+    {
+      "role": "model",
+      "text": " you just",
+      "ts": "2026-08-14T23:25:33.482Z"
+    },
+    {
+      "role": "model",
+      "text": " checking",
+      "ts": "2026-08-14T23:25:33.626Z"
+    },
+    {
+      "role": "model",
+      "text": " if I",
+      "ts": "2026-08-14T23:25:33.682Z"
+    },
+    {
+      "role": "model",
+      "text": " remembered?",
+      "ts": "2026-08-14T23:25:33.867Z"
+    },
+    {
+      "role": "model",
+      "text": " 😉",
+      "ts": "2026-08-14T23:25:33.904Z"
+    }
+  ],
+  "summary": "[Aug 15, 2026 04:53] 27 exchanges"
+}

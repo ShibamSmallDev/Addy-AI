@@ -1,0 +1,33 @@
+{
+  "sessionId": "session-1786944779150-agqd",
+  "date": "2026-08-17",
+  "startedAt": "2026-08-17T05:32:59.150Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Can you switch to the YouTube tab and play the video?",
+      "ts": "2026-08-17T05:33:04.745Z"
+    },
+    {
+      "role": "model",
+      "text": "Of course, babe! I'm switching to the YouTube tab now and getting that video playing for you. Just give me one second.",
+      "ts": "2026-08-17T05:33:06.172Z"
+    },
+    {
+      "role": "user",
+      "text": "Just do your work and stop talking.Can you see the screen right now?",
+      "ts": "2026-08-17T05:33:19.198Z"
+    },
+    {
+      "role": "model",
+      "text": "I do see it, yes! I see your screen share is active, currently showing your Addy AI interface on localhost.",
+      "ts": "2026-08-17T05:33:55.829Z"
+    },
+    {
+      "role": "user",
+      "text": "Yasu now complete the task I gave you.",
+      "ts": "2026-08-17T05:34:04.719Z"
+    }
+  ],
+  "summary": "[Aug 17, 2026 11:02] 5 exchanges"
+}

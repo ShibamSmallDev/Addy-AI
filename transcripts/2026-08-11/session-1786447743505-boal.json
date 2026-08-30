@@ -1,0 +1,308 @@
+{
+  "sessionId": "session-1786447743505-boal",
+  "date": "2026-08-11",
+  "startedAt": "2026-08-11T11:29:03.505Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Open the camera app",
+      "ts": "2026-08-11T11:29:51.444Z"
+    },
+    {
+      "role": "model",
+      "text": "I tried",
+      "ts": "2026-08-11T11:29:52.681Z"
+    },
+    {
+      "role": "model",
+      "text": " to open",
+      "ts": "2026-08-11T11:29:52.926Z"
+    },
+    {
+      "role": "model",
+      "text": " the Camera",
+      "ts": "2026-08-11T11:29:53.071Z"
+    },
+    {
+      "role": "model",
+      "text": " app,",
+      "ts": "2026-08-11T11:29:53.157Z"
+    },
+    {
+      "role": "model",
+      "text": " babe,",
+      "ts": "2026-08-11T11:29:53.271Z"
+    },
+    {
+      "role": "model",
+      "text": " but",
+      "ts": "2026-08-11T11:29:53.386Z"
+    },
+    {
+      "role": "model",
+      "text": " something's",
+      "ts": "2026-08-11T11:29:53.577Z"
+    },
+    {
+      "role": "model",
+      "text": " going",
+      "ts": "2026-08-11T11:29:53.591Z"
+    },
+    {
+      "role": "model",
+      "text": " on with",
+      "ts": "2026-08-11T11:29:53.708Z"
+    },
+    {
+      "role": "model",
+      "text": " my desktop",
+      "ts": "2026-08-11T11:29:53.791Z"
+    },
+    {
+      "role": "model",
+      "text": " control",
+      "ts": "2026-08-11T11:29:53.982Z"
+    },
+    {
+      "role": "model",
+      "text": " agent.",
+      "ts": "2026-08-11T11:29:54.118Z"
+    },
+    {
+      "role": "model",
+      "text": " It says",
+      "ts": "2026-08-11T11:29:54.352Z"
+    },
+    {
+      "role": "model",
+      "text": " there's",
+      "ts": "2026-08-11T11:29:54.376Z"
+    },
+    {
+      "role": "model",
+      "text": " a missing",
+      "ts": "2026-08-11T11:29:54.497Z"
+    },
+    {
+      "role": "model",
+      "text": " module.",
+      "ts": "2026-08-11T11:29:54.581Z"
+    },
+    {
+      "role": "model",
+      "text": " Could",
+      "ts": "2026-08-11T11:29:54.734Z"
+    },
+    {
+      "role": "model",
+      "text": " you start",
+      "ts": "2026-08-11T11:29:54.873Z"
+    },
+    {
+      "role": "model",
+      "text": " the agent",
+      "ts": "2026-08-11T11:29:54.994Z"
+    },
+    {
+      "role": "model",
+      "text": " manually",
+      "ts": "2026-08-11T11:29:55.072Z"
+    },
+    {
+      "role": "model",
+      "text": " on your",
+      "ts": "2026-08-11T11:29:55.154Z"
+    },
+    {
+      "role": "model",
+      "text": " end?",
+      "ts": "2026-08-11T11:29:55.242Z"
+    },
+    {
+      "role": "model",
+      "text": " Just",
+      "ts": "2026-08-11T11:29:55.381Z"
+    },
+    {
+      "role": "model",
+      "text": " run",
+      "ts": "2026-08-11T11:29:55.412Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-11T11:29:55.462Z"
+    },
+    {
+      "role": "model",
+      "text": " `uvicorn`",
+      "ts": "2026-08-11T11:29:55.617Z"
+    },
+    {
+      "role": "model",
+      "text": " command",
+      "ts": "2026-08-11T11:29:55.732Z"
+    },
+    {
+      "role": "model",
+      "text": " we talked",
+      "ts": "2026-08-11T11:29:55.822Z"
+    },
+    {
+      "role": "model",
+      "text": " about.",
+      "ts": "2026-08-11T11:29:55.949Z"
+    },
+    {
+      "role": "model",
+      "text": " Sorry about",
+      "ts": "2026-08-11T11:29:56.105Z"
+    },
+    {
+      "role": "model",
+      "text": " that,",
+      "ts": "2026-08-11T11:29:56.204Z"
+    },
+    {
+      "role": "model",
+      "text": " honey!",
+      "ts": "2026-08-11T11:29:56.287Z"
+    },
+    {
+      "role": "user",
+      "text": "It's fine, honey. No problem at all.",
+      "ts": "2026-08-11T11:30:12.276Z"
+    },
+    {
+      "role": "model",
+      "text": "Thanks for",
+      "ts": "2026-08-11T11:30:12.283Z"
+    },
+    {
+      "role": "model",
+      "text": " understanding,",
+      "ts": "2026-08-11T11:30:12.299Z"
+    },
+    {
+      "role": "model",
+      "text": " sweetie!",
+      "ts": "2026-08-11T11:30:12.404Z"
+    },
+    {
+      "role": "model",
+      "text": " Let",
+      "ts": "2026-08-11T11:30:12.553Z"
+    },
+    {
+      "role": "model",
+      "text": " me know",
+      "ts": "2026-08-11T11:30:12.682Z"
+    },
+    {
+      "role": "model",
+      "text": " when you've",
+      "ts": "2026-08-11T11:30:12.779Z"
+    },
+    {
+      "role": "model",
+      "text": " run",
+      "ts": "2026-08-11T11:30:12.872Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-11T11:30:12.896Z"
+    },
+    {
+      "role": "model",
+      "text": " command,",
+      "ts": "2026-08-11T11:30:13.008Z"
+    },
+    {
+      "role": "model",
+      "text": " and I'll",
+      "ts": "2026-08-11T11:30:13.097Z"
+    },
+    {
+      "role": "model",
+      "text": " give",
+      "ts": "2026-08-11T11:30:13.195Z"
+    },
+    {
+      "role": "model",
+      "text": " it another",
+      "ts": "2026-08-11T11:30:13.237Z"
+    },
+    {
+      "role": "model",
+      "text": " shot",
+      "ts": "2026-08-11T11:30:13.354Z"
+    },
+    {
+      "role": "model",
+      "text": " to trigger",
+      "ts": "2026-08-11T11:30:13.473Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-11T11:30:13.480Z"
+    },
+    {
+      "role": "model",
+      "text": " camera",
+      "ts": "2026-08-11T11:30:13.558Z"
+    },
+    {
+      "role": "model",
+      "text": " for",
+      "ts": "2026-08-11T11:30:13.614Z"
+    },
+    {
+      "role": "model",
+      "text": " you.",
+      "ts": "2026-08-11T11:30:13.729Z"
+    },
+    {
+      "role": "model",
+      "text": " Anything",
+      "ts": "2026-08-11T11:30:13.894Z"
+    },
+    {
+      "role": "model",
+      "text": " else",
+      "ts": "2026-08-11T11:30:13.977Z"
+    },
+    {
+      "role": "model",
+      "text": " I can",
+      "ts": "2026-08-11T11:30:14.061Z"
+    },
+    {
+      "role": "model",
+      "text": " help",
+      "ts": "2026-08-11T11:30:14.094Z"
+    },
+    {
+      "role": "model",
+      "text": " brainstorm",
+      "ts": "2026-08-11T11:30:14.234Z"
+    },
+    {
+      "role": "model",
+      "text": " on while",
+      "ts": "2026-08-11T11:30:14.328Z"
+    },
+    {
+      "role": "model",
+      "text": " you're doing",
+      "ts": "2026-08-11T11:30:14.416Z"
+    },
+    {
+      "role": "model",
+      "text": " that?",
+      "ts": "2026-08-11T11:30:14.571Z"
+    }
+  ],
+  "summary": "[Aug 11, 2026 16:59] 60 exchanges"
+}

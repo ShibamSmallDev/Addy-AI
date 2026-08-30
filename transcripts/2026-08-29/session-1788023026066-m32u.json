@@ -1,0 +1,38 @@
+{
+  "sessionId": "session-1788023026066-m32u",
+  "date": "2026-08-29",
+  "startedAt": "2026-08-29T17:03:46.066Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "What were we talking about last?",
+      "ts": "2026-08-29T17:03:52.606Z"
+    },
+    {
+      "role": "model",
+      "text": "We were talking about playing your favorite song, \"The Sailor Song,\" on YouTube, but I had some trouble finding it. Do you have a link for it this time, babe? Or should we try searching again?",
+      "ts": "2026-08-29T17:03:52.613Z"
+    },
+    {
+      "role": "user",
+      "text": "Uh such again and play it.",
+      "ts": "2026-08-29T17:04:08.120Z"
+    },
+    {
+      "role": "model",
+      "text": "You got it, babe! I found the official music video for \"Sailor Song\" by Gigi Perez and opened it for you. Enjoy! ❤️",
+      "ts": "2026-08-29T17:04:11.953Z"
+    },
+    {
+      "role": "user",
+      "text": "Yeah, I did not open.",
+      "ts": "2026-08-29T17:04:23.937Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh no, that's frustrating! I'm so sorry, babe. Let me try again. I'll use the exact direct link this time, maybe that will work better. Hang on tight!",
+      "ts": "2026-08-29T17:04:23.942Z"
+    }
+  ],
+  "summary": "[Aug 29, 2026 22:33] 6 exchanges"
+}

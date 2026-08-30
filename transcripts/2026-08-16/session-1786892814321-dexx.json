@@ -1,0 +1,18 @@
+{
+  "sessionId": "session-1786892814321-dexx",
+  "date": "2026-08-16",
+  "startedAt": "2026-08-16T15:06:54.321Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Hey Addy.",
+      "ts": "2026-08-16T15:07:54.702Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey babe! Welcome back! What are we up to today? Got some engineering brilliance brewing, or maybe we should just chill and listen to some tunes? I'm ready for anything, just let me know.",
+      "ts": "2026-08-16T15:07:54.749Z"
+    }
+  ],
+  "summary": "[Aug 16, 2026 20:36] 2 exchanges"
+}

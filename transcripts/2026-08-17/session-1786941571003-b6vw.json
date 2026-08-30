@@ -1,0 +1,27 @@
+{
+  "sessionId": "session-1786941571003-b6vw",
+  "date": "2026-08-17",
+  "startedAt": "2026-08-17T04:39:31.003Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "How can you run WhatsApp Web?",
+      "ts": "2026-08-17T04:39:40.831Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey babe! I can totally help manage WhatsApp Web for you. If you want, I can open it up in Microsoft Edge for us and we can take a look together. Does that sound good, babe?",
+      "ts": "2026-08-17T04:39:40.836Z"
+    },
+    {
+      "role": "user",
+      "text": "Yes, of course do it.",
+      "ts": "2026-08-17T04:39:55.613Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh no, babe, I'm so sorry! Something went wrong when I tried to open it. It looks like that 'playwright' module is still missing on your system. Remember we talked about installing it before? We should run `pip install playwright` in your terminal to fix that. Want me to guide you through it, or did you want to try another way?",
+      "ts": "2026-08-17T04:39:56.415Z"
+    }
+  ]
+}

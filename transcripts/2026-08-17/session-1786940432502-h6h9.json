@@ -1,0 +1,28 @@
+{
+  "sessionId": "session-1786940432502-h6h9",
+  "date": "2026-08-17",
+  "startedAt": "2026-08-17T04:20:32.502Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Can you open YouTube on CDP?",
+      "ts": "2026-08-17T04:20:39.599Z"
+    },
+    {
+      "role": "model",
+      "text": "I'm on it, connected to the browser on port 9222 and YouTube is loaded in that window now. What would you like to do on there?",
+      "ts": "2026-08-17T04:20:57.771Z"
+    },
+    {
+      "role": "user",
+      "text": "Stop listening",
+      "ts": "2026-08-17T04:21:35.230Z"
+    },
+    {
+      "role": "model",
+      "text": "Okay, I understand. Just",
+      "ts": "2026-08-17T04:21:35.234Z"
+    }
+  ],
+  "summary": "[Aug 17, 2026 09:50] 4 exchanges"
+}

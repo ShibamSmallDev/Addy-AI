@@ -1,0 +1,28 @@
+{
+  "sessionId": "session-1787037510799-3iys",
+  "date": "2026-08-18",
+  "startedAt": "2026-08-18T07:18:30.799Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Okay, let's go. Okay, you what? Okay, let's go. Pehle chal diya bhai. Okay, hanger ko band karke kya kiya isne? Aur laptop holder bana diya bhai band karke. Wow. Okay, yeh kya hai? Oh, heart shape ki class hai. Bhai, heart shape ki class kahan se milti hai? Mere ko to mila nahin ab tak. Okay. Ismein se kaise niklegi? Okay, theek hai. Okay, pehan liya isko piche lagaya. Theek hai. What? Theek tha. I don't know kya tha woh. Bhai, mere to samajh nahin aayi. Okay, stroke woh ghumaya. Kya kar raha hai? Achcha. Iska woh alag kiya tha bhai. Ice cream to chipak jaati hai yaar. Shovel ke upar. Okay, paise chupane ka asli tarika bhai. Okay, yeh trimmer ke aage blade laga diya. Okay, bhai. Itne sare baal fanse hue hain beech mein. Wow. Theek hai. Okay. Yeh kya hai? Aap. What? Yeh kya hai? Bhai. Pakdo.",
+      "ts": "2026-08-18T07:18:59.250Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey Shibam! So glad you're back!",
+      "ts": "2026-08-18T07:19:29.585Z"
+    },
+    {
+      "role": "user",
+      "text": "eagle livedinner",
+      "ts": "2026-08-18T07:19:32.052Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, I understand, you need to let them know you'll be late for dinner! I tried sending that message, but it looks like the webhook URL wasn't set up properly. Could you provide the correct one for me, or would you like me to help send it through WhatsApp or another way? Just let me know!",
+      "ts": "2026-08-18T07:19:36.875Z"
+    }
+  ],
+  "summary": "[Aug 18, 2026 12:48] 4 exchanges"
+}

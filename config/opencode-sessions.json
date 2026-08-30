@@ -1,0 +1,218 @@
+[
+  {
+    "addyTaskId": "task_1786442523336_bv0y",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786442523336,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786442523347_14gg",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786442523347,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786442767770_ac8w",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786442767771,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786442767779_7fcp",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786442767779,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786445740639_mroo",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786445740640,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786445740647_mf8y",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786445740647,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786446786560_qk1r",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786446786561,
+    "status": "active",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786446786570_cup9",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786446786570,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786447043074_iljh",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447043074,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786447043088_uu50",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447043088,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786447267408_vjns",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447267408,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786447267420_5c4x",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447267420,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786447486675_n409",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447486675,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786447486685_119n",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447486685,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786447740761_6duj",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447740762,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786447898218_pbaj",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447898219,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786447898235_p4zz",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786447898236,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1786453088976_2equ",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786453088977,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1786453088987_p5fr",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1786453088987,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1787763453601_psjw",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787763453602,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1787763453619_ox9t",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787763453619,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1787767019440_kp8c",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787767019440,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1787767019454_m5m2",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787767019454,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1787767171495_mc2o",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787767171495,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1787767171510_eq3j",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787767171510,
+    "status": "aborted",
+    "prompt": "build"
+  },
+  {
+    "addyTaskId": "task_1787768539706_6otk",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787768539707,
+    "status": "completed",
+    "prompt": "implementFeature"
+  },
+  {
+    "addyTaskId": "task_1787768539715_4qx9",
+    "opencodeSessionId": "oc-session-abc",
+    "projectPath": "C:\\workspace",
+    "startedAt": 1787768539715,
+    "status": "aborted",
+    "prompt": "build"
+  }
+]

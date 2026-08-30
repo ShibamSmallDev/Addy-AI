@@ -1,0 +1,13 @@
+{
+  "id": "ses_1787880952960_76a6ng",
+  "title": "Hello hello",
+  "startTime": 1787880952960,
+  "endTime": 1787881173120,
+  "workspace": null,
+  "activeProject": null,
+  "mode": "voice",
+  "messageCount": 55,
+  "toolCallCount": 1,
+  "summary": "The user reconnected with Addy, who suggested several activities for their session, including brainstorming on AirCursor, refining Addy AI, or listening to music. Deciding on music, the user requested their favorite track, \"The Sailor Song.\" However, Addy's attempt to search YouTube for the song failed to return any results due to a technical snag. The task of playing the music remains unfinished, with Addy asking the user to either provide a direct link or authorize another search attempt.",
+  "metadata": {}
+}

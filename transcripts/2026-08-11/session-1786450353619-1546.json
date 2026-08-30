@@ -1,0 +1,18 @@
+{
+  "sessionId": "session-1786450353619-1546",
+  "date": "2026-08-11",
+  "startedAt": "2026-08-11T12:12:33.619Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Hi.",
+      "ts": "2026-08-11T12:12:41.228Z"
+    },
+    {
+      "role": "user",
+      "text": "Hello, can you hear me?",
+      "ts": "2026-08-11T12:12:45.436Z"
+    }
+  ],
+  "summary": "[Aug 11, 2026 17:42] 2 exchanges"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "ses_1786940432495_bkp212",
+  "title": "Can you open YouTube on CDP",
+  "startTime": 1786940432495,
+  "endTime": 1786940495250,
+  "workspace": null,
+  "activeProject": null,
+  "mode": "voice",
+  "messageCount": 23,
+  "toolCallCount": 4,
+  "summary": "The user requested to open YouTube through a Chrome DevTools Protocol (CDP) connection. After an initial internal error when attempting to open a new browser tab, Addy successfully connected to the browser on port 9222 and navigated to YouTube. The main objective of launching YouTube in the connected browser was successfully accomplished. The session concluded with Addy asking the user what actions they would like to perform next on the platform, leaving the interaction open for future tasks.",
+  "metadata": {}
+}

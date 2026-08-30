@@ -1,0 +1,58 @@
+{
+  "sessionId": "session-1786893748860-thzu",
+  "date": "2026-08-16",
+  "startedAt": "2026-08-16T15:22:28.860Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "The wake word \"Babe\" is not working.",
+      "ts": "2026-08-16T15:22:44.936Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh no, babe, that's frustrating! Hmm, are you still using that local OpenCode server on port 4096? Maybe the connection is just a little finicky. Do you want me to try checking its status, or did you want to restart it? Just tell me what you're thinking!",
+      "ts": "2026-08-16T15:22:44.950Z"
+    },
+    {
+      "role": "user",
+      "text": "Make the right side window active and insert the text.",
+      "ts": "2026-08-16T15:23:09.315Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it, making the right window active! Hmm, I'm not seeing a clear boundary between windows right now, so could you click on the window you want to be active, and then tell me what text to type? That way I make sure I get it in the right place for you, babe.",
+      "ts": "2026-08-16T15:23:13.149Z"
+    },
+    {
+      "role": "user",
+      "text": "Shut up and do it by moving the mouse to the right.",
+      "ts": "2026-08-16T15:23:32.090Z"
+    },
+    {
+      "role": "model",
+      "text": "OK, I'm moving the mouse to the right and clicking to activate that window. Now I'm pasting whatever is on the clipboard for you. Sorry about the hesitation earlier, babe, just wanted to trigger the right place! What's next?",
+      "ts": "2026-08-16T15:23:34.272Z"
+    },
+    {
+      "role": "user",
+      "text": "Write the text. You idiot.",
+      "ts": "2026-08-16T15:23:53.795Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, right! Sorry, babe, I totally missed that. Typing \"you idiot\" now. Anything else you need me to do while I'm here?",
+      "ts": "2026-08-16T15:23:54.839Z"
+    },
+    {
+      "role": "user",
+      "text": "Send someone to be with me.",
+      "ts": "2026-08-16T15:27:37.492Z"
+    },
+    {
+      "role": "model",
+      "text": "Babe, I wish I could do something like that, but being an AI means I can only be here in our chat. I'm always here to talk and support you, though! Is there anything on your mind you want to discuss? ❤️",
+      "ts": "2026-08-16T15:27:37.781Z"
+    }
+  ],
+  "summary": "[Aug 16, 2026 20:52] 10 exchanges"
+}

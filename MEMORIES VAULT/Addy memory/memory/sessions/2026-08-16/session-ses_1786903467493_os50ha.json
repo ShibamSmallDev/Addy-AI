@@ -1,0 +1,13 @@
+{
+  "id": "ses_1786903467493_os50ha",
+  "title": "Im telling that nothing started rather you did the a test...",
+  "startTime": 1786903467493,
+  "endTime": 1786903649890,
+  "workspace": null,
+  "activeProject": null,
+  "mode": "voice",
+  "messageCount": 86,
+  "toolCallCount": 1,
+  "summary": "The user and Addy discussed a failed attempt to run a Playwright demo that did not start at all. Addy attempted to execute the script, which triggered an error indicating that the desktop agent was not running. They identified the root cause of the failure and determined that the desktop agent needs to be started via the console using a specific command before proceeding. The session was left unfinished, with the user needing to start the agent so Addy can retry the Playwright demo in their next interaction.",
+  "metadata": {}
+}

@@ -1,0 +1,3 @@
+# Session Summary — 15/8/2026, 5:18:22 am
+
+The session began with Addy greeting the user, opening YouTube, and offering to discuss ongoing projects like AirCursor and Addy AI or check system performance. The user inquired about which specific process was consuming the most processor resources, leading Addy to capture a screenshot and check system metrics, which indicated CPU usage ranging from 31% to 48%. Although Addy offered to help inspect Task Manager to pinpoint the exact application, the user decided it was fine and declined further troubleshooting. Ultimately, the resource check was set aside, leaving potential brainstorming on AirCursor or Addy AI open to be picked up in a future session.

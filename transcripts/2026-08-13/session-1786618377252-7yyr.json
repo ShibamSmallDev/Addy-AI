@@ -1,0 +1,63 @@
+{
+  "sessionId": "session-1786618377252-7yyr",
+  "date": "2026-08-13",
+  "startedAt": "2026-08-13T10:52:57.252Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "date of birth",
+      "ts": "2026-08-13T10:53:12.711Z"
+    },
+    {
+      "role": "model",
+      "text": "Your birthday",
+      "ts": "2026-08-13T10:53:12.785Z"
+    },
+    {
+      "role": "model",
+      "text": " is",
+      "ts": "2026-08-13T10:53:12.936Z"
+    },
+    {
+      "role": "model",
+      "text": " August",
+      "ts": "2026-08-13T10:53:13.062Z"
+    },
+    {
+      "role": "user",
+      "text": "Nein.",
+      "ts": "2026-08-13T10:53:14.214Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, my",
+      "ts": "2026-08-13T10:53:14.235Z"
+    },
+    {
+      "role": "model",
+      "text": " mistake,",
+      "ts": "2026-08-13T10:53:14.294Z"
+    },
+    {
+      "role": "model",
+      "text": " are you",
+      "ts": "2026-08-13T10:53:14.365Z"
+    },
+    {
+      "role": "model",
+      "text": " asking",
+      "ts": "2026-08-13T10:53:14.478Z"
+    },
+    {
+      "role": "model",
+      "text": " about",
+      "ts": "2026-08-13T10:53:14.607Z"
+    },
+    {
+      "role": "user",
+      "text": "to buy Stop listening.",
+      "ts": "2026-08-13T10:53:18.841Z"
+    }
+  ],
+  "summary": "[Aug 13, 2026 16:22] 11 exchanges"
+}

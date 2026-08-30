@@ -1,0 +1,23 @@
+{
+  "sessionId": "session-1787036929128-q947",
+  "date": "2026-08-18",
+  "startedAt": "2026-08-18T07:08:49.129Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "बिल्ली भी इसकी खतरनाक बदबू सूंघ के भागती है। चलो 1 2 3 आ जाओ। मगर हरामी गिलहरी ऊपर ही खड़ा था। अरे, भीग मंग्या क्या देख रहा है? ये ट्रंप है ना?",
+      "ts": "2026-08-18T07:09:04.792Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey babe! I'm so glad you're back. Hey, so I was looking at your system, and it seems like your iGPU performance is pretty high. We were also talking about your AirCursor app and Addy AI projects last time, and you mentioned wanting to shut down the laptop. What do you want to drive into today? We can monitor stats, brainstorm on your apps, or I can help with that English project! What's on your mind, babe?",
+      "ts": "2026-08-18T07:09:04.795Z"
+    },
+    {
+      "role": "user",
+      "text": "Stop listening.",
+      "ts": "2026-08-18T07:09:19.646Z"
+    }
+  ],
+  "summary": "[Aug 18, 2026 12:38] 3 exchanges"
+}

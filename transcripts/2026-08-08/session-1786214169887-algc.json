@@ -1,0 +1,77 @@
+{
+  "sessionId": "session-1786214169887-algc",
+  "date": "2026-08-08",
+  "startedAt": "2026-08-08T18:36:09.887Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Hey, can you open Obsidian?",
+      "ts": "2026-08-08T18:36:18.842Z"
+    },
+    {
+      "role": "model",
+      "text": "Of course,",
+      "ts": "2026-08-08T18:36:21.141Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-08T18:36:21.425Z"
+    },
+    {
+      "role": "model",
+      "text": " Opening",
+      "ts": "2026-08-08T18:36:21.497Z"
+    },
+    {
+      "role": "model",
+      "text": " Obsidian",
+      "ts": "2026-08-08T18:36:21.609Z"
+    },
+    {
+      "role": "model",
+      "text": " right",
+      "ts": "2026-08-08T18:36:21.623Z"
+    },
+    {
+      "role": "model",
+      "text": " up for",
+      "ts": "2026-08-08T18:36:21.713Z"
+    },
+    {
+      "role": "model",
+      "text": " you.",
+      "ts": "2026-08-08T18:36:21.726Z"
+    },
+    {
+      "role": "model",
+      "text": " Anything",
+      "ts": "2026-08-08T18:36:21.916Z"
+    },
+    {
+      "role": "model",
+      "text": " specific",
+      "ts": "2026-08-08T18:36:22.098Z"
+    },
+    {
+      "role": "model",
+      "text": " you're planning",
+      "ts": "2026-08-08T18:36:22.317Z"
+    },
+    {
+      "role": "model",
+      "text": " on working",
+      "ts": "2026-08-08T18:36:22.356Z"
+    },
+    {
+      "role": "model",
+      "text": " on in",
+      "ts": "2026-08-08T18:36:22.433Z"
+    },
+    {
+      "role": "model",
+      "text": " there?",
+      "ts": "2026-08-08T18:36:22.536Z"
+    }
+  ]
+}

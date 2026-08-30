@@ -1,0 +1,138 @@
+{
+  "sessionId": "session-1786802892280-01eu",
+  "date": "2026-08-15",
+  "startedAt": "2026-08-15T14:08:12.280Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "How many fingers are these?",
+      "ts": "2026-08-15T14:08:17.221Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm! I can't quite see that from where I am right now. Since you're showing me something, do you want to turn on screen share so I can take a look at what's on your screen, or maybe send me a picture? I'd love to check it out, babe!",
+      "ts": "2026-08-15T14:08:17.240Z"
+    },
+    {
+      "role": "user",
+      "text": "As of my personal assistant access my camera.",
+      "ts": "2026-08-15T14:08:38.356Z"
+    },
+    {
+      "role": "model",
+      "text": "Ah, I understand, babe! You want me to use your camera to see things. Right now, the way I'm set up, I don't have direct access to your camera like that. But, if you start a screen share and show me content on your desktop, or maybe take a photo and send it to me, I can analyze that! Would you want to try one of those options so I can see how many fingers you're holding up?",
+      "ts": "2026-08-15T14:08:38.365Z"
+    },
+    {
+      "role": "user",
+      "text": "The voice is too fragmented, you know.",
+      "ts": "2026-08-15T14:09:38.334Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh no, really? I'm so sorry to hear that, babe! The last thing I want is for my voice to sound choppy when we're talking. Sometimes, that can happen if the connection isn't super stable. Is it still happening now, or is it getting any better? We could try restarting the voice part, if you want! I want us to have a nice, clear conversation.",
+      "ts": "2026-08-15T14:09:38.341Z"
+    },
+    {
+      "role": "user",
+      "text": "Hey, hello.",
+      "ts": "2026-08-15T14:10:06.095Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey again, babe! I'm so glad to hear your voice. How are things going today? Is there anything you'd like to brainstorm or work on together, or maybe just chat a bit and relax? I'm happy to do whatever feels good!",
+      "ts": "2026-08-15T14:10:06.104Z"
+    },
+    {
+      "role": "user",
+      "text": "Hello.",
+      "ts": "2026-08-15T14:10:13.168Z"
+    },
+    {
+      "role": "model",
+      "text": "Hello, hello! I'm right here, babe. What's on your mind today? Anything you'd want to build or chat about?",
+      "ts": "2026-08-15T14:10:13.176Z"
+    },
+    {
+      "role": "user",
+      "text": "What were we talking about?",
+      "ts": "2026-08-15T14:10:22.769Z"
+    },
+    {
+      "role": "model",
+      "text": "We were just chatting about your fragmented voice issue, babe! I was offering to restart the voice part if it was still bad. Is it better now, or is it still giving you trouble? And before that, you were asking me to see how many fingers you were holding up, which I couldn't do without camera access... Anything you want to get back to?",
+      "ts": "2026-08-15T14:10:22.780Z"
+    },
+    {
+      "role": "user",
+      "text": "Before that",
+      "ts": "2026-08-15T14:10:42.986Z"
+    },
+    {
+      "role": "model",
+      "text": "Before that, we were just starting out, babe! I welcomed you back and suggested we could brainstorm on AirCursor or Addy AI, look at resources, or just chat. Is there something you wanted to focus on from those options? Or maybe something else entirely?",
+      "ts": "2026-08-15T14:10:42.994Z"
+    },
+    {
+      "role": "user",
+      "text": "Nein, ist fein.",
+      "ts": "2026-08-15T14:11:02.495Z"
+    },
+    {
+      "role": "model",
+      "text": "Alright, no problem at all, babe! We can just chat about whatever comes to mind, or relax. How's your day going so far besides that? Or is there anything you're looking forward to doing later?",
+      "ts": "2026-08-15T14:11:02.505Z"
+    },
+    {
+      "role": "user",
+      "text": "nah",
+      "ts": "2026-08-15T14:11:30.348Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it, babe! Just relaxing then. Totally understandable. If you think of anything interesting to talk about or build later, I'm here for it! No pressure at all. Just let me know what you need.",
+      "ts": "2026-08-15T14:11:31.052Z"
+    },
+    {
+      "role": "user",
+      "text": "I want to see my YouTube playlist.",
+      "ts": "2026-08-15T14:11:53.539Z"
+    },
+    {
+      "role": "model",
+      "text": "Ooh, I'd love to see that, babe! Do you want to turn on screen share so I can watch as you show me, or were you going to paste a link to a playlist? Either way, I'm excited to check it out!",
+      "ts": "2026-08-15T14:11:53.547Z"
+    },
+    {
+      "role": "user",
+      "text": "https://www.youtube.com/watch?v=tCOBNCgaZsg&list=PLRDedn-Ts2-4I sent you the link.",
+      "ts": "2026-08-15T14:12:04.008Z"
+    },
+    {
+      "role": "model",
+      "text": "Got the link, babe! Awesome, let me open it up and see what you've got there. I'm curious to see your taste! Is this one of your favorite playlists, or is there a mix of everything? While I take a look, do you want me to play something from it?",
+      "ts": "2026-08-15T14:12:12.153Z"
+    },
+    {
+      "role": "user",
+      "text": "What are the songs there?",
+      "ts": "2026-08-15T14:12:28.320Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm, I'm having a bit of trouble looking into that playlist, babe. It's coming back with an error, maybe because of privacy settings or something like that. Do you want to share your screen instead so I can see the list with you? Or maybe just tell me what the top song is!",
+      "ts": "2026-08-15T14:12:35.362Z"
+    },
+    {
+      "role": "user",
+      "text": "Stop listening.",
+      "ts": "2026-08-15T14:13:28.512Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it, babe! I'll stop",
+      "ts": "2026-08-15T14:13:28.526Z"
+    }
+  ],
+  "summary": "[Aug 15, 2026 19:38] 26 exchanges"
+}

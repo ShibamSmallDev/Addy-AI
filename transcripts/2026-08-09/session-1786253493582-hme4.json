@@ -1,0 +1,23 @@
+{
+  "sessionId": "session-1786253493582-hme4",
+  "date": "2026-08-09",
+  "startedAt": "2026-08-09T05:31:33.582Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Stop listening.",
+      "ts": "2026-08-09T05:31:37.337Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it,",
+      "ts": "2026-08-09T05:31:37.345Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-09T05:31:37.491Z"
+    }
+  ],
+  "summary": "[Aug 9, 2026 11:01] 3 exchanges"
+}

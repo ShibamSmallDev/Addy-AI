@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Addy 3D Placeholder Girl</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1028; font-family: system-ui, sans-serif; color: #fff; }
+  #ui { position: absolute; top: 12px; left: 12px; z-index: 10; background: rgba(0,0,0,.55); padding: 10px 14px; border-radius: 10px; font-size: 13px; max-width: 260px; line-height: 1.5; }
+  #ui b { color: #ffb6d9; }
+  #micBtn { margin-top: 8px; padding: 8px 16px; border: 0; border-radius: 8px; background: #ff6fb1; color: #fff; font-weight: 600; cursor: pointer; }
+  #micBtn:disabled { background: #555; cursor: default; }
+  #state { margin-top: 6px; color: #9fd0ff; }
+  #hint { position: absolute; bottom: 12px; left: 12px; z-index: 10; font-size: 12px; color: #bbb; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <div><b>Addy Placeholder 3D</b></div>
+  <div>Idle: random movements, blinking, breathing, hair sway</div>
+  <div>Speak: mouth follows your voice + gestures</div>
+  <button id="micBtn">Enable microphone</button>
+  <div id="state">state: idle</div>
+</div>
+<div id="hint">Drag to orbit · scroll to zoom</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x1a1028, 6, 12);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 30);
+camera.position.set(0, 1.5, 3.4);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0x8a7fae, 0.9));
+const key = new THREE.DirectionalLight(0xfff2e0, 2.2);
+key.position.set(2, 4, 3);
+key.castShadow = true;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xff9ad5, 1.4);
+rim.position.set(-3, 1.5, -2.5);
+scene.add(rim);
+
+new OrbitControls(camera, renderer.domElement);
+
+const grid = new THREE.GridHelper(6, 12, 0xff6fb1, 0x55446e);
+grid.position.y = -1.35;
+scene.add(grid);
+
+const floor = new THREE.Mesh(new THREE.CircleGeometry(2.6, 48), new THREE.MeshStandardMaterial({ color: 0x2a1f3e, roughness: 0.9 }));
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -1.34;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const root = new THREE.Group();
+scene.add(root);
+
+const mat = (c, r = 0.6) => new THREE.MeshStandardMaterial({ color: c, roughness: r });
+
+const skin = mat(0xffd9c4, 0.5);
+const skinShade = mat(0xffc9ae, 0.5);
+const hair = mat(0x6e4a8e, 0.7);
+const hairLight = mat(0x8a63b5, 0.7);
+const white = mat(0xffffff, 0.4);
+const eyeBlue = mat(0x4a6bd6, 0.25);
+const pupil = mat(0x1a1430, 0.2);
+const shirt = mat(0xfff5fa, 0.7);
+const collar = mat(0xff6fb1, 0.6);
+const skirtC = mat(0xff8fb1, 0.6);
+const boots = mat(0x3a2f52, 0.5);
+
+const torso = new THREE.Group();
+torso.position.y = 0.72;
+root.add(torso);
+
+const chest = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.23, 0.5, 16), shirt);
+chest.position.y = 0.62;
+chest.castShadow = true;
+torso.add(chest);
+
+const boobs = new THREE.Group();
+boobs.position.set(0, 0.74, 0.12);
+torso.add(boobs);
+const b1 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 12), shirt);
+b1.position.set(-0.085, 0, 0);
+const b2 = b1.clone();
+b2.position.x = 0.085;
+boobs.add(b1, b2);
+
+const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.07, 0.12, 12), skin);
+neck.position.y = 0.95;
+torso.add(neck);
+
+const shoulders = new THREE.Group();
+shoulders.position.y = 0.98;
+torso.add(shoulders);
+
+const armGroups = [];
+const buildArm = (side) => {
+  const g = new THREE.Group();
+  g.position.set(side * 0.28, -0.02, 0);
+  const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.04, 0.34, 10), shirt);
+  upper.position.y = -0.17;
+  upper.castShadow = true;
+  const lowerG = new THREE.Group();
+  lowerG.position.y = -0.34;
+  const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.34, 10), skin);
+  lower.position.y = -0.17;
+  lower.castShadow = true;
+  lowerG.add(lower);
+  g.add(upper, lowerG);
+  shoulders.add(g);
+  return { group: g, lowerG, rest: 0.12 };
+};
+armGroups.push(buildArm(-1));
+armGroups.push(buildArm(1));
+armGroups.forEach(a => { a.group.rotation.x = -0.12; a.lowerG.rotation.x = 0.25; });
+
+const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.17, 0.16, 14), skirtC);
+hips.position.y = 0.33;
+torso.add(hips);
+
+const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, 0.22, 16, 1, true), skirtC);
+skirt.position.y = 0.18;
+skirt.rotation.x = Math.PI;
+skirt.castShadow = true;
+torso.add(skirt);
+
+const legGroups = [];
+for (const side of [-1, 1]) {
+  const g = new THREE.Group();
+  g.position.set(side * 0.09, 0.06, 0);
+  const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.045, 0.42, 10), skin);
+  leg.position.y = -0.21;
+  leg.castShadow = true;
+  const boot = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 10), boots);
+  boot.position.set(0, -0.46, 0.02);
+  boot.scale.set(1.15, 0.85, 1.6);
+  boot.castShadow = true;
+  g.add(leg, boot);
+  torso.add(g);
+  legGroups.push(g);
+}
+
+const head = new THREE.Group();
+head.position.y = 1.08;
+torso.add(head);
+
+const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.17, 24, 20), skin);
+cranium.scale.set(1, 1.12, 0.98);
+cranium.castShadow = true;
+head.add(cranium);
+
+const face = new THREE.Mesh(new THREE.SphereGeometry(0.12, 24, 20), skinShade);
+face.position.set(0, -0.045, 0.145);
+head.add(face);
+
+const eyes = [];
+for (const side of [-1, 1]) {
+  const e = new THREE.Group();
+  e.position.set(side * 0.062, 0.0, 0.155);
+  const lidW = new THREE.Mesh(new THREE.SphereGeometry(0.036, 16, 12), white);
+  lidW.scale.set(1, 1.5, 0.5);
+  lidW.position.z = 0.004;
+  const iris = new THREE.Mesh(new THREE.SphereGeometry(0.024, 16, 12), eyeBlue);
+  iris.scale.set(0.85, 1, 0.4);
+  iris.position.set(0, -0.002, 0.02);
+  const pup = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 10), pupil);
+  pup.scale.set(1, 1.2, 0.5);
+  pup.position.set(0, -0.004, 0.032);
+  const shine = new THREE.Mesh(new THREE.SphereGeometry(0.006, 8, 8), white);
+  shine.position.set(0.008, 0.008, 0.036);
+  e.add(lidW, iris, pup, shine);
+  head.add(e);
+  eyes.push(e);
+}
+
+const brows = [];
+for (const side of [-1, 1]) {
+  const b = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.006, 0.005), hair);
+  b.position.set(side * 0.062, 0.05, 0.157);
+  b.rotation.z = -side * 0.15;
+  head.add(b);
+  brows.push(b);
+}
+
+const mouth = new THREE.Group();
+mouth.position.set(0, -0.085, 0.15);
+head.add(mouth);
+const mouthLips = new THREE.Mesh(new THREE.SphereGeometry(0.028, 16, 12), mat(0xd9536f, 0.4));
+mouthLips.scale.set(1, 0.45, 0.5);
+mouth.add(mouthLips);
+const mouthCavity = new THREE.Mesh(new THREE.SphereGeometry(0.02, 12, 10), mat(0x4a1220, 0.3));
+mouthCavity.position.z = 0.012;
+mouthCavity.scale.set(1, 0.5, 0.8);
+mouth.add(mouthCavity);
+
+const hairGroup = new THREE.Group();
+hairGroup.position.y = 0.06;
+head.add(hairGroup);
+
+const backHair = new THREE.Mesh(new THREE.SphereGeometry(0.19, 24, 18), hair);
+backHair.scale.set(1.06, 1.35, 0.85);
+backHair.position.set(0, -0.01, -0.05);
+backHair.castShadow = true;
+hairGroup.add(backHair);
+
+const topHair = new THREE.Mesh(new THREE.SphereGeometry(0.18, 24, 18), hairLight);
+topHair.scale.set(1.05, 0.72, 1.02);
+topHair.position.set(0, 0.16, 0);
+topHair.castShadow = true;
+hairGroup.add(topHair);
+
+const ahoge = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.12, 8), hairLight);
+ahoge.position.set(0, 0.26, 0.01);
+ahoge.rotation.z = -0.35;
+hairGroup.add(ahoge);
+
+const strands = [];
+for (const side of [-1, 1]) {
+  const strand = new THREE.Group();
+  strand.position.set(side * 0.14, -0.18, -0.02);
+  const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.3, 10), hair);
+  seg1.position.y = -0.15;
+  const seg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.018, 0.34, 10), hairLight);
+  seg2.position.y = -0.45;
+  strand.add(seg1, seg2);
+  hairGroup.add(strand);
+  strands.push({ group: strand, seg2 });
+}
+
+const bangs = [];
+for (let i = 0; i < 7; i++) {
+  const bang = new THREE.Mesh(new THREE.SphereGeometry(0.045 + Math.random() * 0.01, 12, 10), hairLight);
+  bang.scale.set(0.8, 0.4, 0.75);
+  const a = -0.85 + (i / 6) * 1.7;
+  bang.position.set(Math.sin(a) * 0.13, 0.1, Math.cos(a) * 0.13 - 0.05);
+  bang.rotation.x = 0.4;
+  hairGroup.add(bang);
+  bangs.push(bang);
+}
+
+const breathTorso = { amp: 0.015, speed: 1.1 };
+let blinkUntil = 0;
+let blinkEvery = 2.6 + Math.random() * 1.4;
+let nextBlink = blinkEvery;
+let lookTarget = { x: 0, y: 0 };
+let lookCur = { x: 0, y: 0 };
+let gesture = null;
+let gestureT = 0;
+let nextGesture = 3 + Math.random() * 3;
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const analyser = audioCtx.createAnalyser();
+analyser.fftSize = 256;
+const samples = new Uint8Array(analyser.frequencyBinCount);
+let micOn = false;
+let mouthOpen = 0;
+let speakLevel = 0;
+let speaking = false;
+
+async function startMic() {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  audioCtx.resume();
+  analyser.connect(audioCtx.destination);
+  audioCtx.createMediaStreamSource(stream).connect(analyser);
+  micOn = true;
+  btn.disabled = true;
+  btn.textContent = "Mic on";
+}
+
+const btn = document.getElementById("micBtn");
+btn.onclick = startMic;
+const stateEl = document.getElementById("state");
+
+const clock = new THREE.Clock();
+let t = 0;
+
+function pickGesture() {
+  const list = [
+    { kind: "headTilt", v: 0.22, dur: 0.7 },
+    { kind: "headTilt", v: -0.22, dur: 0.7 },
+    { kind: "armWave", side: -1, v: -1.1, dur: 0.9 },
+    { kind: "armWave", side: 1, v: -1.1, dur: 0.9 },
+    { kind: "hipShift", v: 0.1, dur: 1.0 },
+    { kind: "lookUp", v: 0.09, dur: 0.9 },
+    { kind: "bounce", v: 0.06, dur: 0.5 },
+  ];
+  gesture = list[Math.floor(Math.random() * list.length)];
+  gestureT = 0;
+}
+
+function updateGesture(dt) {
+  if (gesture) {
+    gestureT += dt;
+    const total = gesture.dur * 2;
+    const p = Math.min(gestureT / total, 1);
+    const eased = Math.sin(Math.PI * p);
+    if (gesture.kind === "headTilt") {
+      head.rotation.z = gesture.v * eased * (p < 0.5 ? 1 : 1 - (p - 0.5) * 2);
+      if (p >= 1) { head.rotation.z = 0; gesture = null; }
+    } else if (gesture.kind === "armWave") {
+      const arm = gesture.side === -1 ? armGroups[0] : armGroups[1];
+      arm.group.rotation.x = gesture.v * eased;
+      if (p >= 1) { arm.group.rotation.x = -0.12; gesture = null; }
+    } else if (gesture.kind === "hipShift") {
+      root.position.x = gesture.v * eased * (p < 0.5 ? 1 : 1 - (p - 0.5) * 2);
+      if (p >= 1) { root.position.x = 0; gesture = null; }
+    } else if (gesture.kind === "lookUp") {
+      lookTarget.y = gesture.v;
+      if (p >= 1) { lookTarget.y = 0; gesture = null; }
+    } else if (gesture.kind === "bounce") {
+      root.position.y = gesture.v * eased;
+      if (p >= 1) { root.position.y = 0; gesture = null; }
+    }
+  } else {
+    nextGesture -= dt;
+    if (nextGesture <= 0) { pickGesture(); nextGesture = 3.5 + Math.random() * 3; }
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  t += dt;
+
+  torso.scale.y = 1 + breathTorso.amp * Math.sin(t * breathTorso.speed * Math.PI * 2);
+  torso.scale.x = 1 - breathTorso.amp * 0.6 * Math.sin(t * breathTorso.speed * Math.PI * 2);
+  torso.position.y = 0.72 + 0.004 * Math.sin(t * breathTorso.speed * Math.PI * 2);
+
+  root.rotation.z = 0.03 * Math.sin(t * 0.5);
+  root.rotation.x = 0.02 * Math.sin(t * 0.33 + 1.3);
+
+  head.rotation.z = 0.06 * Math.sin(t * 0.7 + 0.5) + (lookCur.x * 0.4);
+  head.rotation.x = 0.02 * Math.sin(t * 0.5) - lookCur.y * 0.6;
+
+  hairGroup.rotation.z = 0.06 * Math.sin(t * 0.9);
+  strands.forEach((s, i) => {
+    const swing = 0.1 * Math.sin(t * 1.1 + i * 1.7) + (speaking ? 0.12 * Math.sin(t * 9 + i * 2.3) : 0);
+    s.seg2.rotation.z = -s.group.position.x * 0.4 + swing;
+    s.group.rotation.x = 0.05 * Math.sin(t * 0.8 + i);
+  });
+  ahoge.rotation.z = -0.35 + 0.06 * Math.sin(t * 2.2);
+
+  const now = t;
+  if (now >= nextBlink) {
+    blinkUntil = now + 0.16;
+    nextBlink = now + blinkEvery;
+    blinkEvery = 2.6 + Math.random() * 2;
+  }
+  const blink = now < blinkUntil ? Math.abs(Math.sin((now - (blinkUntil - 0.16)) / 0.16 * Math.PI)) : 1;
+  eyes.forEach(e => e.scale.y = blink);
+  brows.forEach((b, i) => b.rotation.z = -0.15 + (i === 0 ? 1 : -1) * 0.15 * blink * 0.4);
+
+  lookCur.x += (lookTarget.x - lookCur.x) * 0.04;
+  lookCur.y += (lookTarget.y - lookCur.y) * 0.04;
+  eyes.forEach((e, i) => {
+    const d = new THREE.Vector3(lookCur.x * 0.03, -lookCur.y * 0.02, 0);
+    e.children.forEach(c => c.position.set(i === 0 ? -0.062 : 0.062, 0, 0.155).add(d));
+  });
+
+  if (micOn) {
+    analyser.getByteTimeDomainData(samples);
+    let sum = 0;
+    for (let i = 0; i < samples.length; i++) {
+      const v = (samples[i] - 128) / 128;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / samples.length);
+    const target = Math.min(rms * 5.5, 1);
+    mouthOpen += (target - mouthOpen) * 0.35;
+    speakLevel += (target - speakLevel) * 0.05;
+    speaking = speakLevel > 0.05;
+    mouth.scale.y = 0.45 + mouthOpen * 2.2;
+    mouth.scale.z = 0.5 + mouthOpen * 0.4;
+    if (speaking) {
+      head.rotation.x += 0.035 * Math.sin(t * 8.5);
+      torso.rotation.z = 0.02 * Math.sin(t * 3.2);
+      const arm = Math.sin(t * 2) > 0 ? armGroups[0] : armGroups[1];
+      arm.group.rotation.x = -0.5 - 0.3 * Math.sin(t * 6);
+    }
+    stateEl.textContent = speaking ? "state: speaking" : "state: idle (mic listening)";
+  }
+
+  updateGesture(dt);
+
+  renderer.render(scene, camera);
+}
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+animate();
+</script>
+</body>
+</html>

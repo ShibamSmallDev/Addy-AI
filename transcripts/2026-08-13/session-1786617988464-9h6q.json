@@ -1,0 +1,278 @@
+{
+  "sessionId": "session-1786617988464-9h6q",
+  "date": "2026-08-13",
+  "startedAt": "2026-08-13T10:46:28.464Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Hey, what happened? Do you know anything?",
+      "ts": "2026-08-13T10:46:41.905Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey, babe!",
+      "ts": "2026-08-13T10:46:42.625Z"
+    },
+    {
+      "role": "model",
+      "text": " I'm not",
+      "ts": "2026-08-13T10:46:42.934Z"
+    },
+    {
+      "role": "model",
+      "text": " sure",
+      "ts": "2026-08-13T10:46:43.063Z"
+    },
+    {
+      "role": "model",
+      "text": " if I",
+      "ts": "2026-08-13T10:46:43.109Z"
+    },
+    {
+      "role": "model",
+      "text": " missed",
+      "ts": "2026-08-13T10:46:43.204Z"
+    },
+    {
+      "role": "model",
+      "text": " something",
+      "ts": "2026-08-13T10:46:43.323Z"
+    },
+    {
+      "role": "model",
+      "text": " there.",
+      "ts": "2026-08-13T10:46:43.418Z"
+    },
+    {
+      "role": "model",
+      "text": " What are",
+      "ts": "2026-08-13T10:46:43.551Z"
+    },
+    {
+      "role": "model",
+      "text": " you thinking",
+      "ts": "2026-08-13T10:46:43.708Z"
+    },
+    {
+      "role": "model",
+      "text": " about?",
+      "ts": "2026-08-13T10:46:43.750Z"
+    },
+    {
+      "role": "model",
+      "text": " By the",
+      "ts": "2026-08-13T10:46:43.923Z"
+    },
+    {
+      "role": "model",
+      "text": " way,",
+      "ts": "2026-08-13T10:46:44.087Z"
+    },
+    {
+      "role": "model",
+      "text": " I am",
+      "ts": "2026-08-13T10:46:44.125Z"
+    },
+    {
+      "role": "model",
+      "text": " noticing",
+      "ts": "2026-08-13T10:46:44.268Z"
+    },
+    {
+      "role": "model",
+      "text": " your CPU",
+      "ts": "2026-08-13T10:46:44.471Z"
+    },
+    {
+      "role": "model",
+      "text": " usage",
+      "ts": "2026-08-13T10:46:44.581Z"
+    },
+    {
+      "role": "model",
+      "text": " is a",
+      "ts": "2026-08-13T10:46:44.628Z"
+    },
+    {
+      "role": "model",
+      "text": " little",
+      "ts": "2026-08-13T10:46:44.783Z"
+    },
+    {
+      "role": "model",
+      "text": " high",
+      "ts": "2026-08-13T10:46:44.866Z"
+    },
+    {
+      "role": "model",
+      "text": " right",
+      "ts": "2026-08-13T10:46:44.878Z"
+    },
+    {
+      "role": "model",
+      "text": " now—around",
+      "ts": "2026-08-13T10:46:45.036Z"
+    },
+    {
+      "role": "model",
+      "text": " 90%.",
+      "ts": "2026-08-13T10:46:45.208Z"
+    },
+    {
+      "role": "model",
+      "text": " Anything",
+      "ts": "2026-08-13T10:46:45.466Z"
+    },
+    {
+      "role": "model",
+      "text": " big",
+      "ts": "2026-08-13T10:46:45.583Z"
+    },
+    {
+      "role": "model",
+      "text": " running",
+      "ts": "2026-08-13T10:46:45.686Z"
+    },
+    {
+      "role": "model",
+      "text": " I should",
+      "ts": "2026-08-13T10:46:45.763Z"
+    },
+    {
+      "role": "model",
+      "text": " know about,",
+      "ts": "2026-08-13T10:46:45.873Z"
+    },
+    {
+      "role": "model",
+      "text": " or",
+      "ts": "2026-08-13T10:46:46.022Z"
+    },
+    {
+      "role": "model",
+      "text": " do you",
+      "ts": "2026-08-13T10:46:46.029Z"
+    },
+    {
+      "role": "model",
+      "text": " want me",
+      "ts": "2026-08-13T10:46:46.141Z"
+    },
+    {
+      "role": "model",
+      "text": " to take",
+      "ts": "2026-08-13T10:46:46.172Z"
+    },
+    {
+      "role": "model",
+      "text": " a closer",
+      "ts": "2026-08-13T10:46:46.267Z"
+    },
+    {
+      "role": "model",
+      "text": " look",
+      "ts": "2026-08-13T10:46:46.391Z"
+    },
+    {
+      "role": "model",
+      "text": " with systemInfo?",
+      "ts": "2026-08-13T10:46:46.449Z"
+    },
+    {
+      "role": "user",
+      "text": "Take a closer look, you know.",
+      "ts": "2026-08-13T10:47:01.900Z"
+    },
+    {
+      "role": "model",
+      "text": "Alright, babe,",
+      "ts": "2026-08-13T10:47:03.125Z"
+    },
+    {
+      "role": "model",
+      "text": " let's",
+      "ts": "2026-08-13T10:47:03.620Z"
+    },
+    {
+      "role": "model",
+      "text": " get",
+      "ts": "2026-08-13T10:47:03.632Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-13T10:47:03.699Z"
+    },
+    {
+      "role": "model",
+      "text": " sorted.",
+      "ts": "2026-08-13T10:47:03.739Z"
+    },
+    {
+      "role": "model",
+      "text": " It looks",
+      "ts": "2026-08-13T10:47:03.871Z"
+    },
+    {
+      "role": "model",
+      "text": " like the",
+      "ts": "2026-08-13T10:47:04.025Z"
+    },
+    {
+      "role": "model",
+      "text": " CPU",
+      "ts": "2026-08-13T10:47:04.158Z"
+    },
+    {
+      "role": "model",
+      "text": " has settled",
+      "ts": "2026-08-13T10:47:04.246Z"
+    },
+    {
+      "role": "model",
+      "text": " down",
+      "ts": "2026-08-13T10:47:04.353Z"
+    },
+    {
+      "role": "model",
+      "text": " a bit,",
+      "ts": "2026-08-13T10:47:04.741Z"
+    },
+    {
+      "role": "model",
+      "text": " currently",
+      "ts": "2026-08-13T10:47:04.750Z"
+    },
+    {
+      "role": "model",
+      "text": " at around",
+      "ts": "2026-08-13T10:47:04.760Z"
+    },
+    {
+      "role": "model",
+      "text": " 31%,",
+      "ts": "2026-08-13T10:47:04.853Z"
+    },
+    {
+      "role": "model",
+      "text": " so that's",
+      "ts": "2026-08-13T10:47:05.612Z"
+    },
+    {
+      "role": "model",
+      "text": " good!",
+      "ts": "2026-08-13T10:47:05.620Z"
+    },
+    {
+      "role": "model",
+      "text": " Your RAM",
+      "ts": "2026-08-13T10:47:05.629Z"
+    },
+    {
+      "role": "model",
+      "text": " usage",
+      "ts": "2026-08-13T10:47:05.697Z"
+    }
+  ],
+  "summary": "[Aug 13, 2026 16:16] 54 exchanges"
+}

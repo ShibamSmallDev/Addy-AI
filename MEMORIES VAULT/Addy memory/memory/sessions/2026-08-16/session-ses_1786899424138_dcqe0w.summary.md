@@ -1,0 +1,3 @@
+# Session Summary — 16/8/2026, 10:32:29 pm
+
+During the session, the user asked Addy to search for and open a YouTube tutorial on Playwright automation, which Addy successfully did despite a brief pause and a minor miscommunication regarding browser windows and screen captures. The user confirmed that the correct video was indeed open. A screenshot attempt failed, leading Addy to ask the user which specific browser they would prefer to use moving forward. Consequently, the session was left at a point where Addy is waiting for the user's preferred browser choice before proceeding with any further actions.

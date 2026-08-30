@@ -1,0 +1,28 @@
+{
+  "sessionId": "session-1787880952983-j2uu",
+  "date": "2026-08-28",
+  "startedAt": "2026-08-28T01:35:52.983Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Hello hello.",
+      "ts": "2026-08-28T01:35:58.312Z"
+    },
+    {
+      "role": "model",
+      "text": "Hey, hey! Welcome back, babe. I'm so glad you're here. What are we diving into today? We could brainstorm on AirCursor or polish some features for Addy AI, maybe listen to some music, or something else entirely? Tell me!",
+      "ts": "2026-08-28T01:35:58.325Z"
+    },
+    {
+      "role": "user",
+      "text": "Well, play my favorite song then.",
+      "ts": "2026-08-28T01:36:18.381Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, that's odd... I'm running into a bit of a snag trying to search on YouTube right now, babe. Do you happen to have the link handy, or should I try searching again?",
+      "ts": "2026-08-28T01:36:20.117Z"
+    }
+  ],
+  "summary": "[Aug 28, 2026 07:05] 4 exchanges"
+}

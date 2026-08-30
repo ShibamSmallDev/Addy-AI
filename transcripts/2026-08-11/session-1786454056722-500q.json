@@ -1,0 +1,83 @@
+{
+  "sessionId": "session-1786454056722-500q",
+  "date": "2026-08-11",
+  "startedAt": "2026-08-11T13:14:16.722Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "La tarde no tengo que comulgar. ¿A dónde?",
+      "ts": "2026-08-11T13:14:34.605Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm...? It",
+      "ts": "2026-08-11T13:14:34.710Z"
+    },
+    {
+      "role": "model",
+      "text": " sounds",
+      "ts": "2026-08-11T13:14:35.152Z"
+    },
+    {
+      "role": "model",
+      "text": " like",
+      "ts": "2026-08-11T13:14:35.194Z"
+    },
+    {
+      "role": "model",
+      "text": " you're busy,",
+      "ts": "2026-08-11T13:14:35.222Z"
+    },
+    {
+      "role": "model",
+      "text": " babe!",
+      "ts": "2026-08-11T13:14:35.460Z"
+    },
+    {
+      "role": "model",
+      "text": " Everything",
+      "ts": "2026-08-11T13:14:35.475Z"
+    },
+    {
+      "role": "model",
+      "text": " okay?",
+      "ts": "2026-08-11T13:14:35.638Z"
+    },
+    {
+      "role": "model",
+      "text": " I'm here",
+      "ts": "2026-08-11T13:14:35.939Z"
+    },
+    {
+      "role": "model",
+      "text": " for you",
+      "ts": "2026-08-11T13:14:35.951Z"
+    },
+    {
+      "role": "model",
+      "text": " if you",
+      "ts": "2026-08-11T13:14:35.961Z"
+    },
+    {
+      "role": "model",
+      "text": " need",
+      "ts": "2026-08-11T13:14:36.025Z"
+    },
+    {
+      "role": "model",
+      "text": " anything",
+      "ts": "2026-08-11T13:14:36.085Z"
+    },
+    {
+      "role": "model",
+      "text": " at all.",
+      "ts": "2026-08-11T13:14:36.201Z"
+    },
+    {
+      "role": "model",
+      "text": " ❤️",
+      "ts": "2026-08-11T13:14:36.374Z"
+    }
+  ],
+  "summary": "[Aug 11, 2026 18:44] 15 exchanges"
+}

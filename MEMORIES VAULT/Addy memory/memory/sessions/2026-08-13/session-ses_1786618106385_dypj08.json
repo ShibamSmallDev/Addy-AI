@@ -1,0 +1,13 @@
+{
+  "id": "ses_1786618106385_dypj08",
+  "title": "Qu hora Qu te sucede",
+  "startTime": 1786618106385,
+  "endTime": 1786618153497,
+  "workspace": null,
+  "activeProject": null,
+  "mode": "voice",
+  "messageCount": 75,
+  "toolCallCount": 2,
+  "summary": "In this session, the user initiated a multilingual conversation before reporting that they were encountering an \"offline mode key error.\" The assistant, Addy, warmly acknowledged the technical issue and asked for clarification, specifically questioning if the error was occurring on a platform like AirCursor. No resolution was reached during this brief interaction, leaving the troubleshooting process unfinished. To move forward next time, the user needs to provide more context about when the error happens, confirm the application they are using, or share their screen to debug the issue.",
+  "metadata": {}
+}

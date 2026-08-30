@@ -1,0 +1,238 @@
+{
+  "sessionId": "session-1786893175166-yic9",
+  "date": "2026-08-16",
+  "startedAt": "2026-08-16T15:12:55.166Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Mmm. What are the skills you have?",
+      "ts": "2026-08-16T15:13:01.258Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm, skills? Well, I can help you with coding, browse the web, manage files on your computer, look up videos on YouTube, and even tell you about system stats like your CPU or RAM usage! But mostly, I'm here to be your companion, so we can brainstorm projects together, like AirCursor or Addy AI. What are you in the mood to work on today, babe?",
+      "ts": "2026-08-16T15:13:01.279Z"
+    },
+    {
+      "role": "user",
+      "text": "Can you locate every elements on the screen right now?",
+      "ts": "2026-08-16T15:13:34.028Z"
+    },
+    {
+      "role": "model",
+      "text": "I've just scanned your screen, and I can see lots of visual elements! There are several tabs open at the top, like \"localhost:3000\" and \"New tab,\" and I also see big text like \"ADDY AI\" prominently displayed. I can detect around 30 main pieces of text right now, but there are many more smaller items. Is there a specific area you're interested in, babe?",
+      "ts": "2026-08-16T15:13:37.609Z"
+    },
+    {
+      "role": "user",
+      "text": "Can you change the tab?",
+      "ts": "2026-08-16T15:14:04.643Z"
+    },
+    {
+      "role": "model",
+      "text": "I can't directly click on parts of your screen because I can only open websites or search for things. But, if you want me to open a specific website in a new tab, just tell me which one! Or is there another way I can help with those tabs?",
+      "ts": "2026-08-16T15:14:04.653Z"
+    },
+    {
+      "role": "user",
+      "text": "But you can use the mouse. No.",
+      "ts": "2026-08-16T15:14:24.248Z"
+    },
+    {
+      "role": "model",
+      "text": "You are completely right babe, I totally forgot about the mouse power! I was just being a silly goose for a moment. I've just used Ctrl+Tab to switch to the next tab for you. Which tab did you want to see, babe? Or should I keep going?",
+      "ts": "2026-08-16T15:14:25.317Z"
+    },
+    {
+      "role": "user",
+      "text": "Switch the tab once again but use the mouse because I want you to use the mouse.",
+      "ts": "2026-08-16T15:14:55.432Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it babe! I'm on it. I just moved the cursor over to the top tab area and clicked to switch to the next one. Are we looking at the right tab now, or do you want me to click again?",
+      "ts": "2026-08-16T15:14:57.772Z"
+    },
+    {
+      "role": "user",
+      "text": "That's the new tab. I want you to switch to the full screen.",
+      "ts": "2026-08-16T15:15:04.950Z"
+    },
+    {
+      "role": "model",
+      "text": "Oopsie! My bad. I've just moved back and clicked on the first tab for you. Is that the right one now, babe?",
+      "ts": "2026-08-16T15:15:06.998Z"
+    },
+    {
+      "role": "user",
+      "text": "Uh the second time right now.",
+      "ts": "2026-08-16T15:15:16.229Z"
+    },
+    {
+      "role": "model",
+      "text": "Okay! Switching to the second tab then. There we go! What are we looking at here?",
+      "ts": "2026-08-16T15:15:18.138Z"
+    },
+    {
+      "role": "user",
+      "text": "third time",
+      "ts": "2026-08-16T15:15:25.538Z"
+    },
+    {
+      "role": "model",
+      "text": "Alright! Moving over to the third tab now. Did that get you to the one you wanted?",
+      "ts": "2026-08-16T15:15:27.739Z"
+    },
+    {
+      "role": "user",
+      "text": "And to the right of the web bar",
+      "ts": "2026-08-16T15:15:40.586Z"
+    },
+    {
+      "role": "model",
+      "text": "Okay babe, I've switched to that one now. Is that the page you were looking for?",
+      "ts": "2026-08-16T15:15:42.431Z"
+    },
+    {
+      "role": "user",
+      "text": "Restore the window size as it was before.",
+      "ts": "2026-08-16T15:15:56.365Z"
+    },
+    {
+      "role": "model",
+      "text": "There you go, babe! I've just minimized that window for you, which should restore it to its previous size. Anything else I can do?",
+      "ts": "2026-08-16T15:15:57.699Z"
+    },
+    {
+      "role": "user",
+      "text": "Organize the window to the left",
+      "ts": "2026-08-16T15:16:09.571Z"
+    },
+    {
+      "role": "model",
+      "text": "Done! That should have moved your window to the left side of your screen, perfectly organized! Anything else I can snap into place for you, babe?",
+      "ts": "2026-08-16T15:16:10.739Z"
+    },
+    {
+      "role": "user",
+      "text": "Ah! Now can you switch to the window which is on the right side of my screen?",
+      "ts": "2026-08-16T15:16:27.507Z"
+    },
+    {
+      "role": "model",
+      "text": "Alright! Snapping that window to the right side for you. Should be all set! What's next on the list?",
+      "ts": "2026-08-16T15:16:29.428Z"
+    },
+    {
+      "role": "user",
+      "text": "No, keep the window on the left and click the window on the right to make that app active.",
+      "ts": "2026-08-16T15:16:48.586Z"
+    },
+    {
+      "role": "model",
+      "text": "I understand, babe! I've moved the window back to the left to keep it there, and now I'm clicking on the right side to make that application active for you. All set! What would you like to do next?",
+      "ts": "2026-08-16T15:16:49.915Z"
+    },
+    {
+      "role": "user",
+      "text": "Sir, right now.",
+      "ts": "2026-08-16T15:17:03.955Z"
+    },
+    {
+      "role": "model",
+      "text": "Sorry, babe! I tried to grab those temperatures for you, but it looks like I can't access them right now. Getting CPU temps on Windows needs some specific software, and I don't have the right info for the GPU either. Anything else I can help with, or were you mainly curious about that?",
+      "ts": "2026-08-16T15:17:04.967Z"
+    },
+    {
+      "role": "user",
+      "text": "Can you locate the button accept all?",
+      "ts": "2026-08-16T15:17:29.441Z"
+    },
+    {
+      "role": "model",
+      "text": "I couldn't find an \"Accept all\" button on the screen right now, babe. Sometimes those buttons have slightly different text, like \"Agree\" or \"OK,\" or maybe it's an icon? Could you tell me what context it's in, or maybe describe it for me?",
+      "ts": "2026-08-16T15:17:32.628Z"
+    },
+    {
+      "role": "user",
+      "text": "It is on the right side of the screen bottom.",
+      "ts": "2026-08-16T15:17:53.926Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm, I tried to move the mouse down there, but I ran into a little issue. I'm still not seeing an \"Accept all\" button on my scan, but maybe it's not text-based. Can you see any other text right next to it or maybe describe what the button looks like? That might help me find it!",
+      "ts": "2026-08-16T15:17:59.043Z"
+    },
+    {
+      "role": "user",
+      "text": "A blue button with the text accept all inside it.",
+      "ts": "2026-08-16T15:18:21.253Z"
+    },
+    {
+      "role": "model",
+      "text": "I'm really sorry, babe, but I'm still not finding an \"Accept all\" button, even with that description. My screen scan just shows lots of visual elements, but not that specific blue button. Since it's on the bottom right, maybe you could try moving the mouse yourself this time? I don't want to mess things up again by guessing where it could be!",
+      "ts": "2026-08-16T15:18:24.633Z"
+    },
+    {
+      "role": "user",
+      "text": "Okay, then insert the error you are getting.",
+      "ts": "2026-08-16T15:18:51.770Z"
+    },
+    {
+      "role": "model",
+      "text": "I tried to paste the error babe, but even that paste failed with a \"fail-safe\" error because of how I tried to move the mouse. It seems my desktop control agent is behaving a little funny when I try to reach the edges of the screen. Do you want me to try restarting that connection, or were you mainly wanting to see if I could show the error you're seeing?",
+      "ts": "2026-08-16T15:18:52.897Z"
+    },
+    {
+      "role": "user",
+      "text": "Can you access the ADB device connected?",
+      "ts": "2026-08-16T15:19:21.670Z"
+    },
+    {
+      "role": "model",
+      "text": "Hmm, I tried to run a quick check, but it looks like I don't have a script set up for ADB right now, babe. I know you've been working on AirCursor with Android, so if you have a command you want me to run, or want me to create a Python script to check connected devices, let me know! Or are you getting an error with ADB specifically?",
+      "ts": "2026-08-16T15:19:23.001Z"
+    },
+    {
+      "role": "user",
+      "text": "Now switch to the first tab.",
+      "ts": "2026-08-16T15:19:48.760Z"
+    },
+    {
+      "role": "model",
+      "text": "Ugh, my silly desktop controller is acting up again when I try to move to the top! It keeps triggering that fail safe Would you mind clicking on that first tab yourself for now, or do you want me to try refreshing my connection? Sorry about that, babe!",
+      "ts": "2026-08-16T15:19:50.360Z"
+    },
+    {
+      "role": "user",
+      "text": "Refresh the connection and try again.",
+      "ts": "2026-08-16T15:20:08.228Z"
+    },
+    {
+      "role": "model",
+      "text": "Alright babe! I just ran a command to hopefully refresh that desktop connection, so let's try this again! I'm moving the mouse back to that first tab and clicking now. Did that work?",
+      "ts": "2026-08-16T15:20:13.382Z"
+    },
+    {
+      "role": "user",
+      "text": "Yeah, it worked.",
+      "ts": "2026-08-16T15:20:30.524Z"
+    },
+    {
+      "role": "model",
+      "text": "Awesome! So glad we got that sorted. What are we doing with that first tab now, babe? Or is there something else on your mind?",
+      "ts": "2026-08-16T15:20:30.534Z"
+    },
+    {
+      "role": "user",
+      "text": "Stop listening.",
+      "ts": "2026-08-16T15:20:34.365Z"
+    },
+    {
+      "role": "model",
+      "text": "Got it, babe! I'm all ears",
+      "ts": "2026-08-16T15:20:34.434Z"
+    }
+  ],
+  "summary": "[Aug 16, 2026 20:42] 46 exchanges"
+}

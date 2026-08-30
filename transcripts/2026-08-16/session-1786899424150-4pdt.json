@@ -1,0 +1,58 @@
+{
+  "sessionId": "session-1786899424150-4pdt",
+  "date": "2026-08-16",
+  "startedAt": "2026-08-16T16:57:04.150Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "Open YouTube and search for Playwright automation.",
+      "ts": "2026-08-16T16:57:09.096Z"
+    },
+    {
+      "role": "model",
+      "text": "I'm opening YouTube for you, and I'm playing the top video for Playwright automation, which is a full TypeScript tutorial from scratch. It's about six hours long, so let me know if you need anything else, babe!",
+      "ts": "2026-08-16T16:57:13.521Z"
+    },
+    {
+      "role": "user",
+      "text": "tus dos hermanos",
+      "ts": "2026-08-16T16:57:31.244Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh, sure thing! Just take your time, let me know when you're ready to move forward.",
+      "ts": "2026-08-16T16:57:32.262Z"
+    },
+    {
+      "role": "user",
+      "text": "Upani, why are you waiting?",
+      "ts": "2026-08-16T16:57:41.211Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh! I thought you wanted me to pause for a moment when you said \"two, two, wait for a minute\". My mistake, honey! What were you wanting to do next then? Should we brainstorm AirCursor, chat about Addy AI, or did you have something else in mind?",
+      "ts": "2026-08-16T16:57:41.213Z"
+    },
+    {
+      "role": "user",
+      "text": "I told you to open the YouTube video.",
+      "ts": "2026-08-16T16:57:59.137Z"
+    },
+    {
+      "role": "model",
+      "text": "Ah, I see! I did open your video on Playwright automation already, it should be open in your default browser right now. Are you seeing that okay, or am I misunderstanding something?",
+      "ts": "2026-08-16T16:57:59.138Z"
+    },
+    {
+      "role": "user",
+      "text": "No, es eso.",
+      "ts": "2026-08-16T16:58:09.959Z"
+    },
+    {
+      "role": "model",
+      "text": "Oh no, I'm so sorry about that! I must have opened it in an unintended browser. Can you tell me which one you'd prefer me to use? I can try opening it again in Edge for instance, or any other one you have.",
+      "ts": "2026-08-16T16:58:10.942Z"
+    }
+  ],
+  "summary": "[Aug 16, 2026 22:27] 10 exchanges"
+}

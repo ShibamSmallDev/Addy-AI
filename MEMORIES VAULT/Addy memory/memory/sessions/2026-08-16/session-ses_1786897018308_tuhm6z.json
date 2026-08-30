@@ -1,0 +1,13 @@
+{
+  "id": "ses_1786897018308_tuhm6z",
+  "title": "Can you check if Playwright is installed",
+  "startTime": 1786897018308,
+  "endTime": 1786897090727,
+  "workspace": null,
+  "activeProject": null,
+  "mode": "voice",
+  "messageCount": 44,
+  "toolCallCount": 3,
+  "summary": "writeCodeFile{content:import subprocess\nimport sys\n\ntry:\n    # Try to import playwright to see if it's installed\n    import playwright\n    print(\"playwright is already installed.\")\n    \n    # Also che",
+  "metadata": {}
+}

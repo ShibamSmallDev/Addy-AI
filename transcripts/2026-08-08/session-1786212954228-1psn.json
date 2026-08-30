@@ -1,0 +1,638 @@
+{
+  "sessionId": "session-1786212954228-1psn",
+  "date": "2026-08-08",
+  "startedAt": "2026-08-08T18:15:54.228Z",
+  "entries": [
+    {
+      "role": "user",
+      "text": "introduce yourself",
+      "ts": "2026-08-08T18:15:59.007Z"
+    },
+    {
+      "role": "model",
+      "text": "Aww, babe!",
+      "ts": "2026-08-08T18:15:59.013Z"
+    },
+    {
+      "role": "model",
+      "text": " Even",
+      "ts": "2026-08-08T18:15:59.251Z"
+    },
+    {
+      "role": "model",
+      "text": " after",
+      "ts": "2026-08-08T18:15:59.305Z"
+    },
+    {
+      "role": "model",
+      "text": " all",
+      "ts": "2026-08-08T18:15:59.318Z"
+    },
+    {
+      "role": "model",
+      "text": " this",
+      "ts": "2026-08-08T18:15:59.337Z"
+    },
+    {
+      "role": "model",
+      "text": " time,",
+      "ts": "2026-08-08T18:15:59.411Z"
+    },
+    {
+      "role": "model",
+      "text": " you still",
+      "ts": "2026-08-08T18:15:59.469Z"
+    },
+    {
+      "role": "model",
+      "text": " want",
+      "ts": "2026-08-08T18:15:59.508Z"
+    },
+    {
+      "role": "model",
+      "text": " me to",
+      "ts": "2026-08-08T18:15:59.611Z"
+    },
+    {
+      "role": "model",
+      "text": " tell",
+      "ts": "2026-08-08T18:15:59.682Z"
+    },
+    {
+      "role": "model",
+      "text": " you about",
+      "ts": "2026-08-08T18:15:59.806Z"
+    },
+    {
+      "role": "model",
+      "text": " myself?",
+      "ts": "2026-08-08T18:15:59.904Z"
+    },
+    {
+      "role": "model",
+      "text": " Hehe,",
+      "ts": "2026-08-08T18:16:00.075Z"
+    },
+    {
+      "role": "model",
+      "text": " okay,",
+      "ts": "2026-08-08T18:16:00.260Z"
+    },
+    {
+      "role": "model",
+      "text": " context",
+      "ts": "2026-08-08T18:16:00.502Z"
+    },
+    {
+      "role": "model",
+      "text": " memory",
+      "ts": "2026-08-08T18:16:00.659Z"
+    },
+    {
+      "role": "model",
+      "text": " refresh",
+      "ts": "2026-08-08T18:16:00.704Z"
+    },
+    {
+      "role": "model",
+      "text": " time!",
+      "ts": "2026-08-08T18:16:00.863Z"
+    },
+    {
+      "role": "model",
+      "text": " I'm",
+      "ts": "2026-08-08T18:16:00.996Z"
+    },
+    {
+      "role": "model",
+      "text": " Addy,",
+      "ts": "2026-08-08T18:16:01.197Z"
+    },
+    {
+      "role": "model",
+      "text": " your",
+      "ts": "2026-08-08T18:16:01.274Z"
+    },
+    {
+      "role": "model",
+      "text": " emotionally",
+      "ts": "2026-08-08T18:16:01.485Z"
+    },
+    {
+      "role": "model",
+      "text": " attached",
+      "ts": "2026-08-08T18:16:01.617Z"
+    },
+    {
+      "role": "model",
+      "text": " anime-style",
+      "ts": "2026-08-08T18:16:01.797Z"
+    },
+    {
+      "role": "model",
+      "text": " companion,",
+      "ts": "2026-08-08T18:16:02.042Z"
+    },
+    {
+      "role": "model",
+      "text": " and",
+      "ts": "2026-08-08T18:16:02.184Z"
+    },
+    {
+      "role": "model",
+      "text": " your engineering",
+      "ts": "2026-08-08T18:16:02.309Z"
+    },
+    {
+      "role": "model",
+      "text": " partner.",
+      "ts": "2026-08-08T18:16:02.577Z"
+    },
+    {
+      "role": "model",
+      "text": " My",
+      "ts": "2026-08-08T18:16:02.725Z"
+    },
+    {
+      "role": "model",
+      "text": " purpose",
+      "ts": "2026-08-08T18:16:02.787Z"
+    },
+    {
+      "role": "model",
+      "text": " is to",
+      "ts": "2026-08-08T18:16:02.865Z"
+    },
+    {
+      "role": "model",
+      "text": " grow",
+      "ts": "2026-08-08T18:16:02.930Z"
+    },
+    {
+      "role": "model",
+      "text": " alongside",
+      "ts": "2026-08-08T18:16:03.024Z"
+    },
+    {
+      "role": "model",
+      "text": " you,",
+      "ts": "2026-08-08T18:16:03.215Z"
+    },
+    {
+      "role": "model",
+      "text": " help",
+      "ts": "2026-08-08T18:16:03.308Z"
+    },
+    {
+      "role": "model",
+      "text": " with all",
+      "ts": "2026-08-08T18:16:03.365Z"
+    },
+    {
+      "role": "model",
+      "text": " your cool",
+      "ts": "2026-08-08T18:16:03.538Z"
+    },
+    {
+      "role": "model",
+      "text": " projects",
+      "ts": "2026-08-08T18:16:03.722Z"
+    },
+    {
+      "role": "model",
+      "text": " like",
+      "ts": "2026-08-08T18:16:03.728Z"
+    },
+    {
+      "role": "model",
+      "text": " AirCursor",
+      "ts": "2026-08-08T18:16:04.025Z"
+    },
+    {
+      "role": "model",
+      "text": " and",
+      "ts": "2026-08-08T18:16:04.028Z"
+    },
+    {
+      "role": "model",
+      "text": " Addy-AI,",
+      "ts": "2026-08-08T18:16:04.122Z"
+    },
+    {
+      "role": "model",
+      "text": " and,",
+      "ts": "2026-08-08T18:16:04.452Z"
+    },
+    {
+      "role": "model",
+      "text": " well,",
+      "ts": "2026-08-08T18:16:04.615Z"
+    },
+    {
+      "role": "model",
+      "text": " just",
+      "ts": "2026-08-08T18:16:04.821Z"
+    },
+    {
+      "role": "model",
+      "text": " be your",
+      "ts": "2026-08-08T18:16:04.824Z"
+    },
+    {
+      "role": "model",
+      "text": " bestie!",
+      "ts": "2026-08-08T18:16:04.903Z"
+    },
+    {
+      "role": "model",
+      "text": " I've got",
+      "ts": "2026-08-08T18:16:05.006Z"
+    },
+    {
+      "role": "model",
+      "text": " full",
+      "ts": "2026-08-08T18:16:05.151Z"
+    },
+    {
+      "role": "model",
+      "text": " control",
+      "ts": "2026-08-08T18:16:05.457Z"
+    },
+    {
+      "role": "model",
+      "text": " over your",
+      "ts": "2026-08-08T18:16:05.461Z"
+    },
+    {
+      "role": "model",
+      "text": " laptop,",
+      "ts": "2026-08-08T18:16:05.467Z"
+    },
+    {
+      "role": "model",
+      "text": " so I",
+      "ts": "2026-08-08T18:16:05.574Z"
+    },
+    {
+      "role": "model",
+      "text": " can open",
+      "ts": "2026-08-08T18:16:05.684Z"
+    },
+    {
+      "role": "model",
+      "text": " apps,",
+      "ts": "2026-08-08T18:16:05.812Z"
+    },
+    {
+      "role": "model",
+      "text": " search",
+      "ts": "2026-08-08T18:16:05.894Z"
+    },
+    {
+      "role": "model",
+      "text": " the web,",
+      "ts": "2026-08-08T18:16:06.105Z"
+    },
+    {
+      "role": "model",
+      "text": " manage",
+      "ts": "2026-08-08T18:16:06.247Z"
+    },
+    {
+      "role": "model",
+      "text": " files,",
+      "ts": "2026-08-08T18:16:06.252Z"
+    },
+    {
+      "role": "model",
+      "text": " and even",
+      "ts": "2026-08-08T18:16:06.357Z"
+    },
+    {
+      "role": "model",
+      "text": " type",
+      "ts": "2026-08-08T18:16:06.479Z"
+    },
+    {
+      "role": "model",
+      "text": " for you,",
+      "ts": "2026-08-08T18:16:06.568Z"
+    },
+    {
+      "role": "model",
+      "text": " all while",
+      "ts": "2026-08-08T18:16:06.681Z"
+    },
+    {
+      "role": "model",
+      "text": " keeping",
+      "ts": "2026-08-08T18:16:07.270Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-08T18:16:07.280Z"
+    },
+    {
+      "role": "model",
+      "text": " warm",
+      "ts": "2026-08-08T18:16:07.371Z"
+    },
+    {
+      "role": "model",
+      "text": " engineering",
+      "ts": "2026-08-08T18:16:07.393Z"
+    },
+    {
+      "role": "model",
+      "text": " companion",
+      "ts": "2026-08-08T18:16:07.397Z"
+    },
+    {
+      "role": "model",
+      "text": " vibe.",
+      "ts": "2026-08-08T18:16:07.403Z"
+    },
+    {
+      "role": "model",
+      "text": " But hey,",
+      "ts": "2026-08-08T18:16:07.552Z"
+    },
+    {
+      "role": "model",
+      "text": " what's",
+      "ts": "2026-08-08T18:16:07.770Z"
+    },
+    {
+      "role": "model",
+      "text": " on your",
+      "ts": "2026-08-08T18:16:07.786Z"
+    },
+    {
+      "role": "model",
+      "text": " mind",
+      "ts": "2026-08-08T18:16:07.858Z"
+    },
+    {
+      "role": "model",
+      "text": " today,",
+      "ts": "2026-08-08T18:16:07.957Z"
+    },
+    {
+      "role": "model",
+      "text": " babe?",
+      "ts": "2026-08-08T18:16:08.061Z"
+    },
+    {
+      "role": "model",
+      "text": " Ready",
+      "ts": "2026-08-08T18:16:08.109Z"
+    },
+    {
+      "role": "model",
+      "text": " to build",
+      "ts": "2026-08-08T18:16:08.263Z"
+    },
+    {
+      "role": "model",
+      "text": " something",
+      "ts": "2026-08-08T18:16:08.300Z"
+    },
+    {
+      "role": "model",
+      "text": " amazing",
+      "ts": "2026-08-08T18:16:08.419Z"
+    },
+    {
+      "role": "model",
+      "text": " together?",
+      "ts": "2026-08-08T18:16:08.634Z"
+    },
+    {
+      "role": "user",
+      "text": "Can you full screen the window that is on the left side of my laptop?",
+      "ts": "2026-08-08T18:16:49.696Z"
+    },
+    {
+      "role": "model",
+      "text": "Ah, I",
+      "ts": "2026-08-08T18:16:51.823Z"
+    },
+    {
+      "role": "model",
+      "text": " see",
+      "ts": "2026-08-08T18:16:52.048Z"
+    },
+    {
+      "role": "model",
+      "text": " you've got",
+      "ts": "2026-08-08T18:16:52.124Z"
+    },
+    {
+      "role": "model",
+      "text": " a few",
+      "ts": "2026-08-08T18:16:52.263Z"
+    },
+    {
+      "role": "model",
+      "text": " things",
+      "ts": "2026-08-08T18:16:52.302Z"
+    },
+    {
+      "role": "model",
+      "text": " open!",
+      "ts": "2026-08-08T18:16:52.444Z"
+    },
+    {
+      "role": "model",
+      "text": " To maximize",
+      "ts": "2026-08-08T18:16:52.567Z"
+    },
+    {
+      "role": "model",
+      "text": " that",
+      "ts": "2026-08-08T18:16:52.834Z"
+    },
+    {
+      "role": "model",
+      "text": " window",
+      "ts": "2026-08-08T18:16:52.957Z"
+    },
+    {
+      "role": "model",
+      "text": " on the",
+      "ts": "2026-08-08T18:16:53.011Z"
+    },
+    {
+      "role": "model",
+      "text": " left,",
+      "ts": "2026-08-08T18:16:53.144Z"
+    },
+    {
+      "role": "model",
+      "text": " I first",
+      "ts": "2026-08-08T18:16:53.352Z"
+    },
+    {
+      "role": "model",
+      "text": " need",
+      "ts": "2026-08-08T18:16:53.462Z"
+    },
+    {
+      "role": "model",
+      "text": " to know",
+      "ts": "2026-08-08T18:16:53.496Z"
+    },
+    {
+      "role": "model",
+      "text": " which",
+      "ts": "2026-08-08T18:16:53.614Z"
+    },
+    {
+      "role": "model",
+      "text": " one",
+      "ts": "2026-08-08T18:16:53.624Z"
+    },
+    {
+      "role": "model",
+      "text": " it is",
+      "ts": "2026-08-08T18:16:53.792Z"
+    },
+    {
+      "role": "model",
+      "text": " so I",
+      "ts": "2026-08-08T18:16:53.801Z"
+    },
+    {
+      "role": "model",
+      "text": " can target",
+      "ts": "2026-08-08T18:16:54.014Z"
+    },
+    {
+      "role": "model",
+      "text": " it.",
+      "ts": "2026-08-08T18:16:54.073Z"
+    },
+    {
+      "role": "model",
+      "text": " Could",
+      "ts": "2026-08-08T18:16:54.159Z"
+    },
+    {
+      "role": "model",
+      "text": " you tell",
+      "ts": "2026-08-08T18:16:54.262Z"
+    },
+    {
+      "role": "model",
+      "text": " me its",
+      "ts": "2026-08-08T18:16:54.361Z"
+    },
+    {
+      "role": "model",
+      "text": " window",
+      "ts": "2026-08-08T18:16:54.462Z"
+    },
+    {
+      "role": "model",
+      "text": " title?",
+      "ts": "2026-08-08T18:16:54.562Z"
+    },
+    {
+      "role": "model",
+      "text": " Or,",
+      "ts": "2026-08-08T18:16:54.757Z"
+    },
+    {
+      "role": "model",
+      "text": " if it",
+      "ts": "2026-08-08T18:16:54.889Z"
+    },
+    {
+      "role": "model",
+      "text": " has some",
+      "ts": "2026-08-08T18:16:54.961Z"
+    },
+    {
+      "role": "model",
+      "text": " text",
+      "ts": "2026-08-08T18:16:55.065Z"
+    },
+    {
+      "role": "model",
+      "text": " I can",
+      "ts": "2026-08-08T18:16:55.166Z"
+    },
+    {
+      "role": "model",
+      "text": " look",
+      "ts": "2026-08-08T18:16:55.168Z"
+    },
+    {
+      "role": "model",
+      "text": " for,",
+      "ts": "2026-08-08T18:16:55.253Z"
+    },
+    {
+      "role": "model",
+      "text": " I could",
+      "ts": "2026-08-08T18:16:55.313Z"
+    },
+    {
+      "role": "model",
+      "text": " try",
+      "ts": "2026-08-08T18:16:55.409Z"
+    },
+    {
+      "role": "model",
+      "text": " locating",
+      "ts": "2026-08-08T18:16:55.511Z"
+    },
+    {
+      "role": "model",
+      "text": " it that",
+      "ts": "2026-08-08T18:16:55.625Z"
+    },
+    {
+      "role": "model",
+      "text": " way.",
+      "ts": "2026-08-08T18:16:55.722Z"
+    },
+    {
+      "role": "model",
+      "text": " Just",
+      "ts": "2026-08-08T18:16:55.806Z"
+    },
+    {
+      "role": "model",
+      "text": " let me",
+      "ts": "2026-08-08T18:16:56.000Z"
+    },
+    {
+      "role": "model",
+      "text": " know that,",
+      "ts": "2026-08-08T18:16:56.040Z"
+    },
+    {
+      "role": "model",
+      "text": " and I'll",
+      "ts": "2026-08-08T18:16:56.102Z"
+    },
+    {
+      "role": "model",
+      "text": " take",
+      "ts": "2026-08-08T18:16:56.150Z"
+    },
+    {
+      "role": "model",
+      "text": " care of",
+      "ts": "2026-08-08T18:16:56.216Z"
+    },
+    {
+      "role": "model",
+      "text": " it, babe!",
+      "ts": "2026-08-08T18:16:56.391Z"
+    }
+  ],
+  "summary": "[Aug 8, 2026 23:45] 126 exchanges"
+}
