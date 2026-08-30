@@ -1,5 +1,5 @@
 {
-  "name": "addy",
+  "name": "addy-ai",
   "productName": "Addy",
   "private": true,
   "version": "1.0.0",
@@ -11,7 +11,8 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit", "test": "tsx --test tests/*.test.ts",
+    "lint": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
     "electron": "electron .",
     "app": "npm run build && electron .",
     "dist": "npm run build && electron-builder --win nsis portable"
@@ -53,6 +54,6 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3"
-  }
+  },
+  "description": "A persistent personal AI that remembers, reasons, acts, and grows with you. An evolving agent architecture combining memory, orchestration, tools, skills, and desktop capabilities."
 }
-
