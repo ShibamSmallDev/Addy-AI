@@ -34,8 +34,8 @@ export interface AddySettings {
 }
 
 export const DEFAULT_SETTINGS: AddySettings = {
-  assistantName: "Addy",
-  userName: "Shibam",
+  assistantName: "Adri",
+  userName: "Master",
   companionMode: true,
   autoStart: false,
   autoStartScreenShare: true,

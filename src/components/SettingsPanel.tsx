@@ -504,28 +504,28 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
 
                     <div className="space-y-1.5">
                       <label className="block text-[10px] font-mono tracking-wider text-slate-300 uppercase">
-                        Your Name
+                        Your Name / Title
                       </label>
                       <input
                         type="text"
-                        value={settings.userName ?? "Shibam"}
+                        value={settings.userName ?? "Master"}
                         onChange={(e) => onChange({ userName: e.target.value })}
-                        placeholder="Shibam"
+                        placeholder="Master"
                         className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400/50 transition"
                       />
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {["Shibam"].map((name) => (
+                        {["Master", "Boss"].map((name) => (
                           <button
                             key={name}
                             type="button"
                             onClick={() => onChange({ userName: name })}
                             className={`px-1.5 py-0.5 rounded border text-[8px] font-mono transition cursor-pointer ${
-                              (settings.userName ?? "Shibam").toLowerCase() === name.toLowerCase()
+                              (settings.userName ?? "Master").toLowerCase() === name.toLowerCase()
                                 ? "border-cyan-400 bg-cyan-500/20 text-cyan-300 font-bold"
                                 : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
                             }`}
                           >
-                            👤 Shibam
+                            {name === "Master" ? "👑 Master" : "💼 Boss"}
                           </button>
                         ))}
                       </div>

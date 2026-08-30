@@ -1,13 +1,15 @@
 import { useEffect, useState, type ReactNode, type FormEvent } from "react";
-import { Sparkles, Heart, Loader2, User, Bot, ArrowRight } from "lucide-react";
+import { Sparkles, Heart, Loader2, User, Bot, ArrowRight, Zap, Smile } from "lucide-react";
 import { saveSettings } from "../lib/settingsStore";
 
 type Phase = "checking" | "needsSetup" | "ready";
+type PersonalityStyle = "warm_girl" | "playful" | "cyberpunk";
 
 export function IdentitySetupGate({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>("checking");
-  const [assistantName, setAssistantName] = useState("Adrija");
-  const [userName, setUserName] = useState("Shibam");
+  const [assistantName, setAssistantName] = useState("Adri");
+  const [userName, setUserName] = useState("Master");
+  const [personality, setPersonality] = useState<PersonalityStyle>("warm_girl");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,8 +22,8 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
         if (cancelled) return;
         if (data.hasSetup) {
           saveSettings({
-            assistantName: data.assistantName || "Addy",
-            userName: data.userName || "Shibam",
+            assistantName: data.assistantName || "Adri",
+            userName: data.userName || "Master",
           });
           setPhase("ready");
         } else {
@@ -38,8 +40,8 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const aiName = assistantName.trim() || "Addy";
-    const uName = userName.trim() || "Shibam";
+    const aiName = assistantName.trim() || "Adri";
+    const uName = userName.trim() || "Master";
     if (submitting) return;
 
     setSubmitting(true);
@@ -52,6 +54,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
           assistantName: aiName,
           userName: uName,
           companionMode: true,
+          personalityStyle: personality,
         }),
       });
       const data = await res.json();
@@ -87,7 +90,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
       ) : (
         <form
           onSubmit={submit}
-          className="relative z-10 w-[min(92vw,480px)] rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_90px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+          className="relative z-10 w-[min(92vw,500px)] rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_90px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
         >
           <div className="mb-6 flex flex-col items-center text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500/30 to-cyan-500/20 ring-1 ring-white/10 shadow-[0_0_25px_rgba(244,114,182,0.3)]">
@@ -97,7 +100,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
               Meet Your Companion <Sparkles size={18} className="text-pink-400" />
             </h1>
             <p className="mt-2 text-xs leading-relaxed text-slate-300 font-mono">
-              Give your personal AI companion a name and tell her what she should call you. These will be kept in permanent memory until changed.
+              Name your AI assistant and choose how she will address you. These are stored locally and anchored into permanent memory.
             </p>
           </div>
 
@@ -112,12 +115,12 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                 autoFocus
                 value={assistantName}
                 onChange={(e) => setAssistantName(e.target.value)}
-                placeholder="e.g. Adrija, Addy, Luna, Maya"
-                className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white font-mono outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/20"
+                placeholder="e.g. Adri, Addy, Luna"
+                className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-sm text-white font-mono outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/20"
               />
               <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] font-mono text-slate-500">Suggestions:</span>
-                {["Adrija", "Addy", "Luna", "Maya"].map((name) => (
+                {["Adri", "Addy", "Luna", "Maya"].map((name) => (
                   <button
                     key={name}
                     type="button"
@@ -128,7 +131,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                         : "border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    {name === "Adrija" ? "✨ Adrija" : name === "Addy" ? "🌸 Addy" : name}
+                    {name === "Adri" ? "✨ Adri" : name === "Addy" ? "🌸 Addy" : name}
                   </button>
                 ))}
               </div>
@@ -137,18 +140,18 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
             {/* User Name Input */}
             <div>
               <label className="mb-1.5 flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-cyan-300">
-                <User size={13} /> Your Name
+                <User size={13} /> Your Name / Title
               </label>
               <input
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                placeholder="e.g. Shibam"
-                className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white font-mono outline-none transition focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-500/20"
+                placeholder="e.g. Master, Boss"
+                className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-sm text-white font-mono outline-none transition focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-500/20"
               />
               <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-mono text-slate-500">Suggestion:</span>
-                {["Shibam"].map((name) => (
+                <span className="text-[10px] font-mono text-slate-500">Suggestions:</span>
+                {["Master", "Boss"].map((name) => (
                   <button
                     key={name}
                     type="button"
@@ -159,17 +162,59 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                         : "border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    👤 Shibam
+                    {name === "Master" ? "👑 Master" : "💼 Boss"}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Warm Emotional Girl Companion Highlight Badge */}
-            <div className="p-3.5 rounded-2xl border border-pink-500/25 bg-pink-500/10 flex items-start gap-2.5">
-              <Heart size={15} className="text-pink-400 fill-pink-400 shrink-0 mt-0.5" />
-              <div className="text-[11px] font-mono text-pink-200/90 leading-snug">
-                <span className="font-bold text-pink-100">Warm Emotional Girl Structure:</span> She is caring, playfully expressive, comforts you when you're stressed, celebrates your wins, and speaks with genuine heartfelt affection.
+            {/* Personality Style Selector */}
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">
+                Personality &amp; Emotional Structure
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPersonality("warm_girl")}
+                  className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
+                    personality === "warm_girl"
+                      ? "border-pink-400 bg-pink-500/20 text-pink-200"
+                      : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"
+                  }`}
+                >
+                  <Heart size={14} className={personality === "warm_girl" ? "text-pink-400 fill-pink-400" : "text-slate-400"} />
+                  <span className="text-[10px] font-mono font-bold">Warm Girl</span>
+                  <span className="text-[8px] font-mono text-slate-400 leading-tight">Loving, comforting, anime warmth</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPersonality("playful")}
+                  className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
+                    personality === "playful"
+                      ? "border-amber-400 bg-amber-500/20 text-amber-200"
+                      : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"
+                  }`}
+                >
+                  <Smile size={14} className={personality === "playful" ? "text-amber-400" : "text-slate-400"} />
+                  <span className="text-[10px] font-mono font-bold">Playful</span>
+                  <span className="text-[8px] font-mono text-slate-400 leading-tight">Cheeky, teasing, high-energy</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPersonality("cyberpunk")}
+                  className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
+                    personality === "cyberpunk"
+                      ? "border-cyan-400 bg-cyan-500/20 text-cyan-200"
+                      : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"
+                  }`}
+                >
+                  <Zap size={14} className={personality === "cyberpunk" ? "text-cyan-400" : "text-slate-400"} />
+                  <span className="text-[10px] font-mono font-bold">Cyberpunk</span>
+                  <span className="text-[8px] font-mono text-slate-400 leading-tight">Tech co-pilot, hacker vibes</span>
+                </button>
               </div>
             </div>
           </div>
