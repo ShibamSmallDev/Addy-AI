@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AddyAudioSession, LiveState } from "../lib/audio";
 import { Sparkles } from "lucide-react";
+import { ReactingOrb } from "./ReactingOrb";
 
 export type AddyEmotion = 
   | "idle" 
@@ -21,6 +22,7 @@ interface AddyCoreVisualizerProps {
   themeColor: string; // Violet, crimson, emerald, celestial, gold, rose, charcoal
   activeEmotion?: AddyEmotion;
   characterState: "idle" | "thinking" | "talking";
+  visualizerMode?: "orb" | "video";
 }
 
 export const AddyCoreVisualizer: React.FC<AddyCoreVisualizerProps> = ({
@@ -28,7 +30,8 @@ export const AddyCoreVisualizer: React.FC<AddyCoreVisualizerProps> = ({
   state,
   themeColor,
   activeEmotion = "idle",
-  characterState
+  characterState,
+  visualizerMode = "orb",
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -82,6 +85,13 @@ export const AddyCoreVisualizer: React.FC<AddyCoreVisualizerProps> = ({
       } catch (err) {}
     };
 
+    if (visualizerMode === "orb") {
+      pauseVideo(idleVideoRef.current);
+      pauseVideo(thinkingVideoRef.current);
+      pauseVideo(talkingVideoRef.current);
+      return;
+    }
+
     if (characterState === "idle") {
       playVideo(idleVideoRef.current);
       pauseVideo(thinkingVideoRef.current);
@@ -95,7 +105,7 @@ export const AddyCoreVisualizer: React.FC<AddyCoreVisualizerProps> = ({
       pauseVideo(idleVideoRef.current);
       pauseVideo(thinkingVideoRef.current);
     }
-  }, [characterState]);
+  }, [characterState, visualizerMode]);
 
   // Cursor position tracking hook
   useEffect(() => {
@@ -208,27 +218,19 @@ export const AddyCoreVisualizer: React.FC<AddyCoreVisualizerProps> = ({
       const centerX = width / 2;
 
       // ==========================================
-      // 1. DRAW GRAND STAGE VOLUMETRIC PROJECTOR BEAM (Cinematic Glow Backlight)
+      // 1. DRAW GRAND STAGE AMBIENT GLOW BACKLIGHT (Soft Atmospheric Base)
       // ==========================================
       ctx.save();
-      const projectorCenterY = height + 40;
-      const baseDiameterX = 280 * s;
-
-      // Volumetric light beams shooting up from projector base
-      const conicalBeamGrad = ctx.createLinearGradient(centerX, height * 0.25, centerX, height);
-      conicalBeamGrad.addColorStop(0, "rgba(0,0,0,0)");
-      conicalBeamGrad.addColorStop(0.4, colors.primary.replace("1)", "0.03)"));
-      conicalBeamGrad.addColorStop(0.75, colors.primary.replace("1)", "0.08)"));
-      conicalBeamGrad.addColorStop(1, colors.secondary.replace("0.8)", "0.18)"));
-
-      ctx.fillStyle = conicalBeamGrad;
-      ctx.beginPath();
-      ctx.moveTo(centerX - baseDiameterX * 0.35, projectorCenterY - 145);
-      ctx.lineTo(centerX + baseDiameterX * 0.35, projectorCenterY - 145);
-      ctx.lineTo(centerX + baseDiameterX * 1.5, height);
-      ctx.lineTo(centerX - baseDiameterX * 1.5, height);
-      ctx.closePath();
-      ctx.fill();
+      const glowRadius = Math.max(300, width * 0.4);
+      const floorGlow = ctx.createRadialGradient(
+        centerX, height, 20,
+        centerX, height, glowRadius
+      );
+      floorGlow.addColorStop(0, colors.primary.replace("1)", "0.10)"));
+      floorGlow.addColorStop(0.4, colors.secondary.replace("0.8)", "0.04)"));
+      floorGlow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = floorGlow;
+      ctx.fillRect(0, height * 0.3, width, height * 0.7);
       ctx.restore();
 
       // ==========================================
@@ -299,87 +301,99 @@ export const AddyCoreVisualizer: React.FC<AddyCoreVisualizerProps> = ({
         }`} />
       </div>
 
-      {/* 2. Character Videos state crossfade manager (Z-index 10) */}
-      <div 
-        id="Addy-animated-presence"
-        className="absolute z-10 w-full h-full flex items-center justify-center pointer-events-auto transition-all duration-700"
-      >
-        <div className="relative w-full max-w-4xl aspect-[16/9] flex items-center justify-center scale-[0.95] sm:scale-110 select-none pointer-events-none md:max-h-[72vh] max-h-[62vh]">
-          {/* Subtle Outer Ambient Shadow Cast */}
-          <div className="absolute inset-0 rounded-[2.5rem] blur-[30px] opacity-20 bg-cyan-600/15 pointer-events-none mix-blend-screen" />
-
-          {/* IDLE VIDEO */}
-          <video
-            ref={idleVideoRef}
-            src="/assets/idle.mp4"
-            loop
-            muted
-            playsInline
-            autoPlay
-            className={`absolute inset-0 w-full h-full object-cover rounded-[2.5rem] transition-opacity duration-700 ease-in-out ${
-              characterState === "idle" ? "opacity-100 z-10 animate-fade-in" : "opacity-0 z-0"
-            }`}
-            style={{
-              maskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
-              WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
-            }}
-            onError={() => handleVideoError("idle")}
+      {/* 2. Visual Presence: Reacting Holographic Orb OR Character Videos */}
+      {visualizerMode === "orb" ? (
+        <div className="absolute z-10 inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-700 animate-fade-in">
+          <ReactingOrb
+            session={session}
+            state={state}
+            themeColor={themeColor}
+            activeEmotion={activeEmotion}
+            characterState={characterState}
           />
-
-          {/* THINKING VIDEO */}
-          <video
-            ref={thinkingVideoRef}
-            src="/assets/thinking.mp4"
-            loop
-            muted
-            playsInline
-            className={`absolute inset-0 w-full h-full object-cover rounded-[2.5rem] transition-opacity duration-700 ease-in-out ${
-              characterState === "thinking" ? "opacity-100 z-10 animate-fade-in" : "opacity-0 z-0"
-            }`}
-            style={{
-              maskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
-              WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
-            }}
-            onError={() => handleVideoError("thinking")}
-          />
-
-          {/* TALKING VIDEO */}
-          <video
-            ref={talkingVideoRef}
-            src="/assets/talking.mp4"
-            loop
-            muted
-            playsInline
-            className={`absolute inset-0 w-full h-full object-cover rounded-[2.5rem] transition-opacity duration-700 ease-in-out ${
-              characterState === "talking" ? "opacity-100 z-10 animate-fade-in" : "opacity-0 z-0"
-            }`}
-            style={{
-              maskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
-              WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
-            }}
-            onError={() => handleVideoError("talking")}
-          />
-
-          {/* Faint cybernetic visual edge grid guard */}
-          <div className="absolute inset-0 rounded-[2.5rem] border border-white/5 pointer-events-none bg-radial-gradient from-transparent to-black/35" />
-
-          {/* Video Placeholder/Fallback Tutorial Overlay if asset files are absent */}
-          {hasError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#05060f]/90 backdrop-blur-md rounded-3xl p-6 text-center z-50 pointer-events-auto border border-white/5 shadow-2xl animate-fade-in">
-              <Sparkles className="text-cyan-400 mb-2 animate-pulse" size={32} />
-              <h3 className="text-sm font-bold tracking-widest font-mono text-white select-none">AWAITING VIDEOS CORES</h3>
-              <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed font-sans">
-                Please place your character video assets inside the <code className="text-cyan-300 font-mono">/assets</code> directory of your workspace named exactly:
-              </p>
-              <div className="mt-3 space-y-1.5 text-left font-mono text-[10px] text-cyan-200 bg-white/5 px-4 py-2.5 rounded-xl border border-white/5">
-                <div>• idle.mp4 (State: Idle)</div>
-                <div>• thinking.mp4 (State: Thinking)</div>
-                <div>• talking.mp4 (State: Talking)</div>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      ) : (
+        <div 
+          id="Addy-animated-presence"
+          className="absolute z-10 w-full h-full flex items-center justify-center pointer-events-auto transition-all duration-700 animate-fade-in"
+        >
+          <div className="relative w-full max-w-4xl aspect-[16/9] flex items-center justify-center scale-[0.95] sm:scale-110 select-none pointer-events-none md:max-h-[72vh] max-h-[62vh]">
+            {/* Subtle Outer Ambient Shadow Cast */}
+            <div className="absolute inset-0 rounded-[2.5rem] blur-[30px] opacity-20 bg-cyan-600/15 pointer-events-none mix-blend-screen" />
+
+            {/* IDLE VIDEO */}
+            <video
+              ref={idleVideoRef}
+              src="/assets/idle.mp4"
+              loop
+              muted
+              playsInline
+              autoPlay
+              className={`absolute inset-0 w-full h-full object-cover rounded-[2.5rem] transition-opacity duration-700 ease-in-out ${
+                characterState === "idle" ? "opacity-100 z-10 animate-fade-in" : "opacity-0 z-0"
+              }`}
+              style={{
+                maskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
+                WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
+              }}
+              onError={() => handleVideoError("idle")}
+            />
+
+            {/* THINKING VIDEO */}
+            <video
+              ref={thinkingVideoRef}
+              src="/assets/thinking.mp4"
+              loop
+              muted
+              playsInline
+              className={`absolute inset-0 w-full h-full object-cover rounded-[2.5rem] transition-opacity duration-700 ease-in-out ${
+                characterState === "thinking" ? "opacity-100 z-10 animate-fade-in" : "opacity-0 z-0"
+              }`}
+              style={{
+                maskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
+                WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
+              }}
+              onError={() => handleVideoError("thinking")}
+            />
+
+            {/* TALKING VIDEO */}
+            <video
+              ref={talkingVideoRef}
+              src="/assets/talking.mp4"
+              loop
+              muted
+              playsInline
+              className={`absolute inset-0 w-full h-full object-cover rounded-[2.5rem] transition-opacity duration-700 ease-in-out ${
+                characterState === "talking" ? "opacity-100 z-10 animate-fade-in" : "opacity-0 z-0"
+              }`}
+              style={{
+                maskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
+                WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 80%)",
+              }}
+              onError={() => handleVideoError("talking")}
+            />
+
+            {/* Faint cybernetic visual edge grid guard */}
+            <div className="absolute inset-0 rounded-[2.5rem] border border-white/5 pointer-events-none bg-radial-gradient from-transparent to-black/35" />
+
+            {/* Video Placeholder/Fallback Tutorial Overlay if asset files are absent */}
+            {hasError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#05060f]/90 backdrop-blur-md rounded-3xl p-6 text-center z-50 pointer-events-auto border border-white/5 shadow-2xl animate-fade-in">
+                <Sparkles className="text-cyan-400 mb-2 animate-pulse" size={32} />
+                <h3 className="text-sm font-bold tracking-widest font-mono text-white select-none">AWAITING VIDEOS CORES</h3>
+                <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed font-sans">
+                  Please place your character video assets inside the <code className="text-cyan-300 font-mono">/assets</code> directory of your workspace named exactly:
+                </p>
+                <div className="mt-3 space-y-1.5 text-left font-mono text-[10px] text-cyan-200 bg-white/5 px-4 py-2.5 rounded-xl border border-white/5">
+                  <div>• idle.mp4 (State: Idle)</div>
+                  <div>• thinking.mp4 (State: Thinking)</div>
+                  <div>• talking.mp4 (State: Talking)</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 3. Foreground Hover-Responsive Canvas for glowing particles (Holographic Overlay Z-index 20) */}
       <canvas

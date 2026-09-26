@@ -70,10 +70,18 @@ export class GeminiProvider implements AIProvider {
     const lastMessage = recentMessages[recentMessages.length - 1]
     if (!lastMessage) throw new Error('No messages to send')
 
+    const contents = [
+      ...history,
+      {
+        role: lastMessage.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: lastMessage.content }],
+      },
+    ]
+
     const start = Date.now()
     const result = await ai.models.generateContent({
       model: this.modelName,
-      contents: lastMessage.content,
+      contents,
       config: {
         systemInstruction: systemPrompt,
       },

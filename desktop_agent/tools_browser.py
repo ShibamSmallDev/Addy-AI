@@ -135,9 +135,9 @@ def _spawn_native_browser_cdp(port: int = 9222, target_url: str = "") -> bool:
             except Exception:
                 pass
 
-    browser_bin = _find_chrome_executable() or _find_edge_executable()
+    browser_bin = _find_edge_executable() or _find_chrome_executable()
     if not browser_bin:
-        browser_bin = "chrome.exe" if shutil.which("chrome.exe") else "msedge.exe"
+        browser_bin = "msedge.exe" if shutil.which("msedge.exe") else "chrome.exe"
 
     profile_arg = ["--profile-directory=Default"]
 
@@ -205,9 +205,9 @@ async def _ensure_browser_async(cdp_url: Optional[str] = None, target_url: str =
             STATE.context = None
 
     if STATE.context is None:
-        # Priority 2: Launch Google Chrome persistent context directly via exact binary path
+        # Priority 2: Launch Microsoft Edge persistent context directly via exact binary path
         profile_dir = _get_profile_dir()
-        chrome_exe = _find_chrome_executable()
+        edge_exe = _find_edge_executable()
         launch_args = ["--start-maximized", "--no-sandbox", "--disable-blink-features=AutomationControlled"]
         
         try:
@@ -217,35 +217,35 @@ async def _ensure_browser_async(cdp_url: Optional[str] = None, target_url: str =
                 "args": launch_args,
                 "viewport": None,
             }
-            if chrome_exe:
-                launch_kwargs["executable_path"] = chrome_exe
+            if edge_exe:
+                launch_kwargs["executable_path"] = edge_exe
             else:
-                launch_kwargs["channel"] = "chrome"
+                launch_kwargs["channel"] = "msedge"
 
             STATE.context = await STATE.playwright.chromium.launch_persistent_context(**launch_kwargs)
-            logger.info(f"[Browser] Launched native visible Google Chrome ({chrome_exe or 'channel:chrome'}).")
-        except Exception as chrome_err:
-            logger.warning(f"[Browser] Direct Chrome launch failed ({chrome_err}), checking Edge fallback...")
+            logger.info(f"[Browser] Launched native visible Microsoft Edge ({edge_exe or 'channel:msedge'}).")
+        except Exception as edge_err:
+            logger.warning(f"[Browser] Direct Edge launch failed ({edge_err}), checking Chrome fallback...")
             STATE.reset_playwright()
             from playwright.async_api import async_playwright
             STATE.playwright = await async_playwright().start()
-            edge_exe = _find_edge_executable()
+            chrome_exe = _find_chrome_executable()
             try:
-                edge_kwargs = {
+                chrome_kwargs = {
                     "user_data_dir": profile_dir,
                     "headless": False,
                     "args": launch_args,
                     "viewport": None,
                 }
-                if edge_exe:
-                    edge_kwargs["executable_path"] = edge_exe
+                if chrome_exe:
+                    chrome_kwargs["executable_path"] = chrome_exe
                 else:
-                    edge_kwargs["channel"] = "msedge"
+                    chrome_kwargs["channel"] = "chrome"
 
-                STATE.context = await STATE.playwright.chromium.launch_persistent_context(**edge_kwargs)
-                logger.info(f"[Browser] Launched fallback Microsoft Edge ({edge_exe or 'channel:msedge'}).")
-            except Exception as edge_err:
-                logger.error(f"[Browser] Could not launch native Chrome or Edge: {edge_err}")
+                STATE.context = await STATE.playwright.chromium.launch_persistent_context(**chrome_kwargs)
+                logger.info(f"[Browser] Launched fallback Google Chrome ({chrome_exe or 'channel:chrome'}).")
+            except Exception as chrome_err:
+                logger.error(f"[Browser] Could not launch native Edge or Chrome: {chrome_err}")
                 STATE.context = await STATE.playwright.chromium.launch_persistent_context(
                     user_data_dir=profile_dir,
                     headless=False,

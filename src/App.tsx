@@ -31,6 +31,8 @@ import {
   Radio,
   HardDrive,
   LayoutGrid,
+  CircleDot,
+  Video,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Memory, MemoryCategory } from "./lib/memoryTypes";
@@ -294,6 +296,7 @@ export default function App() {
   const [isMicMuted, setIsMicMuted] = useState<boolean>(false);
   const isMicMutedRef = useRef<boolean>(false);
   useEffect(() => { isMicMutedRef.current = isMicMuted; }, [isMicMuted]);
+  const userSpeechBufferRef = useRef<string>("");
 
   // V3: Wake word detector instance (smart-home-grade, lives for the app lifetime)
   const wakeDetectorRef = useRef<AddyWakeWordDetector | null>(null);
@@ -331,6 +334,7 @@ export default function App() {
           sensitivity: settings.sensitivity,
           onTriggered: () => {
             det.stop();
+            setErrorText(null);
             // Dormant mode ends the moment she wakes.
             setWakeForced(false);
             // Auto-unmute if muted
@@ -413,6 +417,7 @@ export default function App() {
       onStateChange: (newState) => {
         setState(newState);
         if (newState === "disconnected") {
+          userSpeechBufferRef.current = "";
           setUserCaption("");
           setModelCaption("");
           setActiveEmotion("idle");
@@ -435,17 +440,20 @@ export default function App() {
           chatMsgIds.current.add(id);
           setChatMessages((prev) => [...prev, { id, role: "user", text, timestamp: Date.now() }]);
           // Stop/interrupt command detection.
-          // ONLY "stop listening" puts Addy to sleep (dormant: no listening,
-          // no responding, wake word stays armed so her name wakes her).
-          // Matched anywhere in the utterance ("just stop listening",
-          // "please stop listening now"), so the command works however
-          // it's phrased. Everything else flows to Gemini normally.
-          const lower = text.toLowerCase().trim();
-          if (stateRef.current !== "disconnected" && lower.includes("stop listening")) {
+          // Puts Addy to sleep (dormant: no listening, no responding, wake word stays armed so her name wakes her).
+          // Supports incremental chunk buffering and various phrases ("stop listening", "go to sleep", "sleep mode", "mute mic", etc.).
+          const chunkLower = text.toLowerCase();
+          userSpeechBufferRef.current = (userSpeechBufferRef.current + " " + chunkLower).trim();
+          const sleepRegex = /\b(stop\s+listening|go\s+to\s+sleep|sleep\s+mode|mute(\s+mic)?|stop\s+talking|shut\s+up)\b/i;
+          if (stateRef.current !== "disconnected" && (sleepRegex.test(userSpeechBufferRef.current) || sleepRegex.test(chunkLower))) {
+            console.log("[App] Voice sleep command detected; putting Addy to sleep.");
+            userSpeechBufferRef.current = "";
             setWakeForced(true);
+            setIsMicMuted(true);
             sessionRef.current?.disconnect();
           }
         } else if (role === "model") {
+          userSpeechBufferRef.current = "";
           const cleanChunk = filterToolCallLeakage(text);
           if (!cleanChunk) return;
 
@@ -531,6 +539,20 @@ export default function App() {
       },
       onMousePosition: (x, y) => {
         setMousePos({ x, y });
+      },
+      onSleepMode: () => {
+        console.log("[App] Core triggered sleep mode: muting and disconnecting session");
+        userSpeechBufferRef.current = "";
+        setWakeForced(true);
+        setIsMicMuted(true);
+        sessionRef.current?.disconnect();
+      },
+      onChangeTheme: (color) => {
+        const colorName = color?.toLowerCase();
+        const validColors = ["violet", "crimson", "emerald", "celestial", "gold", "rose", "charcoal"];
+        if (colorName && validColors.includes(colorName)) {
+          setThemeColor(colorName);
+        }
       },
     });
 
@@ -840,21 +862,18 @@ export default function App() {
           themeColor={themeColor}
           activeEmotion={activeEmotion}
           characterState={characterState}
+          visualizerMode={settings.visualizerMode || "orb"}
         />
       </div>
 
-      {/* Content wrapper — scales when side panels are open */}
+      {/* Content wrapper */}
       <motion.div
         className="relative z-10 flex flex-col justify-between h-full p-6 sm:p-10"
-        animate={{
-          x: isTextChatOpen || showMemoryDashboard || showSettings || showDevPanel || showDesktopPanel ? -180 : 0,
-        }}
-        transition={{ type: "spring", damping: 25, stiffness: 200 }}
       >
       {/* FUTURISTIC COMMAND HUD & FLOATING NAVIGATION ISLAND */}
-      <header className="relative flex flex-wrap items-center justify-between gap-4 w-full max-w-6xl mx-auto select-none shrink-0 z-30 pt-2">
+      <header className="relative w-full max-w-7xl mx-auto flex items-center justify-between gap-4 select-none shrink-0 z-30 pt-2">
         {/* Brand & Core Status */}
-        <div className="flex items-center gap-3 glass-pill px-4 py-2 rounded-2xl border border-white/10 shadow-lg">
+        <div className="flex items-center gap-3 glass-pill px-4 py-2 rounded-2xl border border-white/10 shadow-lg shrink-0">
           <div className="relative flex items-center justify-center">
             <div className={`w-2.5 h-2.5 rounded-full ${
               state === "listening" || state === "speaking" 
@@ -886,100 +905,128 @@ export default function App() {
           </div>
         </div>
 
-        {/* Floating Glass Navigation Dock */}
-        <nav className="flex items-center gap-1.5 glass-panel px-3 py-1.5 rounded-2xl border border-white/10 shadow-2xl">
-          <button
-            onClick={() => setIsTextChatOpen(!isTextChatOpen)}
-            className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
-              isTextChatOpen
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-            title="Chat & Terminal"
-          >
-            <MessageSquare size={14} />
-            <span className="hidden sm:inline">CHAT</span>
-          </button>
+        {/* Floating Glass Navigation Dock — Centered */}
+        <div className="flex-1 flex justify-center">
+          <nav className="flex items-center gap-1.5 glass-panel px-3 py-1.5 rounded-2xl border border-white/10 shadow-2xl">
+            <button
+              onClick={() => setIsTextChatOpen(!isTextChatOpen)}
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                isTextChatOpen
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+              title="Chat & Terminal"
+            >
+              <MessageSquare size={14} />
+              <span className="hidden sm:inline">CHAT</span>
+            </button>
 
-          <button
-            onClick={() => setShowMemoryDashboard(!showMemoryDashboard)}
-            className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
-              showMemoryDashboard
-                ? "bg-purple-500/20 text-purple-300 border border-purple-400/40 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-            title="Recollections & Memory Matrix"
-          >
-            <Brain size={14} />
-            <span className="hidden sm:inline">MEMORY</span>
-          </button>
+            <button
+              onClick={() => setShowMemoryDashboard(!showMemoryDashboard)}
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                showMemoryDashboard
+                  ? "bg-purple-500/20 text-purple-300 border border-purple-400/40 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+              title="Recollections & Memory Matrix"
+            >
+              <Brain size={14} />
+              <span className="hidden sm:inline">MEMORY</span>
+            </button>
 
-          <button
-            onClick={() => setShowDesktopPanel(!showDesktopPanel)}
-            className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
-              showDesktopPanel
-                ? "bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-            title="Desktop Automation & OS Radar"
-          >
-            <Compass size={14} />
-            <span className="hidden sm:inline">DESKTOP</span>
-          </button>
+            <button
+              onClick={() => setShowDesktopPanel(!showDesktopPanel)}
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                showDesktopPanel
+                  ? "bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+              title="Desktop Automation & OS Radar"
+            >
+              <Compass size={14} />
+              <span className="hidden sm:inline">DESKTOP</span>
+            </button>
 
-          <button
-            onClick={() => setShowDevPanel(!showDevPanel)}
-            className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
-              showDevPanel
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-            title="Developer CLI & MCP Tools"
-          >
-            <Terminal size={14} />
-            <span className="hidden sm:inline">DEV</span>
-          </button>
+            <button
+              onClick={() => setShowDevPanel(!showDevPanel)}
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                showDevPanel
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+              title="Developer CLI & MCP Tools"
+            >
+              <Terminal size={14} />
+              <span className="hidden sm:inline">DEV</span>
+            </button>
 
-          <button
-            onClick={isScreenSharing ? stopScreenSharing : startScreenSharing}
-            className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
-              isScreenSharing
-                ? "bg-cyan-500/25 text-cyan-200 border border-cyan-400/60 animate-pulse"
-                : "text-white/60 hover:text-white hover:bg-white/5"
-            }`}
-            title="Screen Vision & Video Stream"
-          >
-            <Monitor size={14} />
-            <span className="hidden sm:inline">{isScreenSharing ? "VISION ON" : "VISION"}</span>
-          </button>
+            <button
+              onClick={isScreenSharing ? stopScreenSharing : startScreenSharing}
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                isScreenSharing
+                  ? "bg-cyan-500/25 text-cyan-200 border border-cyan-400/60 animate-pulse"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+              title="Screen Vision & Video Stream"
+            >
+              <Monitor size={14} />
+              <span className="hidden sm:inline">{isScreenSharing ? "VISION ON" : "VISION"}</span>
+            </button>
 
-          <button
-            onClick={() => setShowSessionManager(!showSessionManager)}
-            className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
-              showSessionManager
-                ? "bg-white/20 text-white border border-white/30"
-                : "text-white/50 hover:text-white hover:bg-white/5"
-            }`}
-            title="Session History"
-          >
-            <Clock size={14} />
-          </button>
+            {/* Visualizer Mode Switcher (Orb vs Video) */}
+            <button
+              onClick={() => {
+                const nextMode = settings.visualizerMode === "video" ? "orb" : "video";
+                handleSettingsChange({ visualizerMode: nextMode });
+              }}
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                settings.visualizerMode === "orb"
+                  ? "bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 hover:bg-cyan-500/25 shadow-[0_0_12px_rgba(34,211,238,0.15)]"
+                  : "bg-purple-500/15 text-purple-300 border border-purple-400/30 hover:bg-purple-500/25 shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+              }`}
+              title={settings.visualizerMode === "orb" ? "Presence: Reacting Orb (click to switch to Character Video)" : "Presence: Character Video (click to switch to Reacting Orb)"}
+            >
+              {settings.visualizerMode === "orb" ? (
+                <>
+                  <CircleDot size={13} className="text-cyan-400 animate-spin [animation-duration:8s]" />
+                  <span className="hidden sm:inline">ORB</span>
+                </>
+              ) : (
+                <>
+                  <Video size={13} className="text-purple-400" />
+                  <span className="hidden sm:inline">AVATAR</span>
+                </>
+              )}
+            </button>
 
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
-              showSettings
-                ? "bg-white/20 text-white border border-white/30"
-                : "text-white/50 hover:text-white hover:bg-white/5"
-            }`}
-            title="Settings & Persona Configuration"
-          >
-            <SettingsIcon size={14} className={showSettings ? "animate-spin [animation-duration:6s]" : ""} />
-          </button>
-        </nav>
+            <button
+              onClick={() => setShowSessionManager(!showSessionManager)}
+              className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                showSessionManager
+                  ? "bg-white/20 text-white border border-white/30"
+                  : "text-white/50 hover:text-white hover:bg-white/5"
+              }`}
+              title="Session History"
+            >
+              <Clock size={14} />
+            </button>
+
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
+                showSettings
+                  ? "bg-white/20 text-white border border-white/30"
+                  : "text-white/50 hover:text-white hover:bg-white/5"
+              }`}
+              title="Settings & Persona Configuration"
+            >
+              <SettingsIcon size={14} className={showSettings ? "animate-spin [animation-duration:6s]" : ""} />
+            </button>
+          </nav>
+        </div>
 
         {/* Live System Telemetry Badges */}
-        <div className="hidden lg:flex items-center gap-2 font-mono text-[10px]">
+        <div className="hidden lg:flex items-center gap-2 font-mono text-[10px] shrink-0">
           <div className="glass-pill px-3 py-1.5 rounded-xl flex items-center gap-2 border border-purple-500/20 bg-purple-950/20 text-purple-300">
             <Mic size={11} className="text-purple-400" />
             <span>WAKE: BABE / ADDY</span>
@@ -1194,13 +1241,14 @@ export default function App() {
           )}
         </div>
 
-        {/* Wake word arming indicator */}
-        <div className="mt-1 text-[10px] tracking-widest uppercase font-medium text-white/35">
-          wake: <span className={
-            wakeState === "listening" ? "text-emerald-400" :
-            wakeState === "triggered" ? "text-purple-300" :
-            wakeState === "error" ? "text-rose-400" : "text-white/25"
-          }>{wakeState}</span>
+        {/* Subtle Wake word status indicator */}
+        <div className="mt-1 flex items-center gap-1.5 text-[9px] tracking-widest uppercase font-mono text-white/30">
+          <span className={`w-1.5 h-1.5 rounded-full ${
+            wakeState === "listening" ? "bg-emerald-400 animate-pulse" :
+            wakeState === "triggered" ? "bg-purple-400 animate-ping" :
+            wakeState === "error" ? "bg-white/20" : "bg-white/10"
+          }`} />
+          <span>WAKE WORD: {wakeState === "error" ? "STANDBY" : wakeState.toUpperCase()}</span>
         </div>
 
       </footer>
@@ -1378,13 +1426,11 @@ export default function App() {
       />
 
       {/* Desktop Panel */}
-      <div
-        className={`fixed top-0 right-0 h-full w-80 max-w-[90vw] z-50 transition-transform duration-300 ease-out ${
-          showDesktopPanel ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <DesktopPanel />
-      </div>
+      <DesktopPanel
+        isOpen={showDesktopPanel}
+        onClose={() => setShowDesktopPanel(false)}
+        themeColor={themeColor}
+      />
 
       {/* Text Chat Panel */}
       <TextChatPanel

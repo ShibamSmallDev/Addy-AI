@@ -1,3 +1,22 @@
+// WebGL Shader Precision Polyfill for Chromium / ANGLE / Windows
+try {
+  if (typeof window !== "undefined") {
+    const patchProto = (proto: any) => {
+      if (!proto || !proto.getShaderPrecisionFormat) return;
+      const orig = proto.getShaderPrecisionFormat;
+      proto.getShaderPrecisionFormat = function(shaderType: number, precisionType: number) {
+        try {
+          const res = orig.call(this, shaderType, precisionType);
+          if (res && typeof res.precision === "number") return res;
+        } catch {}
+        return { rangeMin: 1, rangeMax: 1, precision: 23 };
+      };
+    };
+    if (window.WebGLRenderingContext) patchProto(window.WebGLRenderingContext.prototype);
+    if (window.WebGL2RenderingContext) patchProto(window.WebGL2RenderingContext.prototype);
+  }
+} catch {}
+
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';

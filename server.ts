@@ -4,7 +4,7 @@ import https from "https";
 import path from "path";
 import { spawn, execSync } from "child_process";
 import { WebSocketServer } from "ws";
-import { GoogleGenAI, Modality, Type, TurnCoverage, LiveServerMessage } from "@google/genai";
+import { GoogleGenAI, Modality, Type, TurnCoverage, LiveServerMessage, StartSensitivity, EndSensitivity } from "@google/genai";
 import dotenv from "dotenv";
 import * as fs from "fs";
 import { createExecutionRouter } from "./src/server/routes/executionRoutes";
@@ -12,7 +12,9 @@ import {
   loadMemories, 
   saveMemories, 
   formatSystemInstructionsWithMemories, 
-  processConversationSlice 
+  processConversationSlice,
+  extractImmediateMemory,
+  memoryEvents
 } from "./server_memory";
 import { Memory } from "./src/lib/memoryTypes";
 import { storeMemory, getAllMemories, searchMemories, getRelevantProjectMemories } from "./memory/retriever";
@@ -27,6 +29,15 @@ import {
 } from "./server_paths";
 import { createTranscript, appendToTranscript, finalizeTranscript, formatSessionSummary } from "./server_transcripts";
 import { listCronJobs, addCronJob, removeCronJob, toggleCronJob, getCronJob, startAllJobs, registerCronHandler } from "./server_cron";
+import {
+  startProactiveDaemon,
+  stopProactiveDaemon,
+  getProactiveStatus,
+  runProactiveCycle,
+  updateProactiveConfig,
+  registerBusyCheck,
+  recordUserActivity,
+} from "./server_proactive";
 import { learnFromExchange } from "./server_skills";
 import { initDatabase, getAllConversations, getConversation, saveConversation, deleteConversation, updateConversationTitle } from "./database";
 import {
@@ -100,10 +111,14 @@ const DESKTOP_TOOLS: ReadonlySet<string> = new Set([
   // files
   "createFile", "readFile", "renameFile", "deleteFile", "moveFile",
   "openFolder", "listFiles", "searchFiles", "readPdf",
-  // pc control (volume + gated power)
+  // pc control (volume + media + notification + gated power)
   "volumeUp", "volumeDown", "muteToggle", "setVolume",
+  "mediaPlayPause", "mediaNextTrack", "mediaPrevTrack", "mediaStop", "showDesktopNotification",
   "requestPowerAction", "executePowerAction",
+  // proactive speech & automated awareness
+  "speakText", "fetchAINews", "resetNewsCache", "checkEmails", "configureEmail", "checkWhatsAppMessages",
   // windows
+  "listWindows", "getActiveWindow", "focusWindow", "snapWindow",
   "minimizeWindow", "maximizeWindow", "closeWindow", "switchApplication",
   // clipboard
   "copySelected", "pasteClipboard", "getClipboard", "clearClipboard",
@@ -551,8 +566,14 @@ const DESKTOP_FUNCTION_DECLARATIONS = [
   },
   {
     name: "setVolume",
-    description: "Set system volume to an exact level 0.0 - 1.0.",
-    parameters: { type: Type.OBJECT, properties: { level: { type: Type.NUMBER, description: "Volume level from 0.0 to 1.0." } }, required: ["level"] }
+    description: "Set system audio volume level percentage (e.g. 50 for 50%, or 0.5 for 50%).",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        percent: { type: Type.NUMBER, description: "Volume level percentage 0-100 (e.g. 50)." },
+        level: { type: Type.NUMBER, description: "Volume level fraction 0.0-1.0 (e.g. 0.5)." }
+      }
+    }
   },
   {
     name: "requestPowerAction",
@@ -698,6 +719,141 @@ const DESKTOP_FUNCTION_DECLARATIONS = [
     description: "Set screen brightness percentage (0-100).",
     parameters: { type: Type.OBJECT, properties: { percent: { type: Type.NUMBER } }, required: ["percent"] }
   },
+  // ======== WINDOW MANAGEMENT ========
+  {
+    name: "listWindows",
+    description: "List all open visible application windows with titles, process names, PIDs, and coordinates.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "getActiveWindow",
+    description: "Get metadata for the current foreground window (title, process name, PID, bounding rect).",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "focusWindow",
+    description: "Bring a window to the foreground by partial title, process name, or PID.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING, description: "Window title (e.g. 'Visual Studio Code', 'Edge', 'Spotify')" },
+        process: { type: Type.STRING, description: "Process executable name (e.g. 'code.exe', 'msedge.exe')" },
+        pid: { type: Type.INTEGER, description: "Process ID" }
+      }
+    }
+  },
+  {
+    name: "snapWindow",
+    description: "Snap the active or target window to a zone: 'left', 'right', 'top', 'bottom', 'maximize', 'center'.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        zone: { type: Type.STRING, description: "Zone: 'left', 'right', 'top', 'bottom', 'maximize', 'center'" },
+        title: { type: Type.STRING, description: "Optional window title to snap" }
+      },
+      required: ["zone"]
+    }
+  },
+  // ======== SYSTEM AUDIO & MEDIA CONTROL ========
+  {
+    name: "mediaPlayPause",
+    description: "Toggle play/pause for the system media player (Spotify, YouTube, browser media).",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "mediaNextTrack",
+    description: "Skip to the next media track.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "mediaPrevTrack",
+    description: "Return to the previous media track.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "mediaStop",
+    description: "Stop active media playback.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  // ======== NOTIFICATIONS & PROACTIVE SPEECH ========
+  {
+    name: "showDesktopNotification",
+    description: "Display a native Windows desktop toast notification.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING, description: "Notification title (e.g. 'Task Finished', 'Reminder')" },
+        message: { type: Type.STRING, description: "Notification body text" }
+      },
+      required: ["message"]
+    }
+  },
+  {
+    name: "speakText",
+    description: "Speak text aloud to the user using Windows native speech synthesis (SAPI). Useful for proactive alerts, summaries, and conversational responses.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        text: { type: Type.STRING, description: "The text message to speak aloud" },
+        wait: { type: Type.BOOLEAN, description: "Whether to wait for speech to finish (default false)" }
+      },
+      required: ["text"]
+    }
+  },
+  {
+    name: "fetchAINews",
+    description: "Fetch the latest breaking AI news and tech stories from Hacker News and TechCrunch AI RSS.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        limit: { type: Type.INTEGER, description: "Maximum number of articles to return (default 5)" },
+        unread_only: { type: Type.BOOLEAN, description: "Filter out articles already seen in previous checks (default true)" }
+      }
+    }
+  },
+  {
+    name: "resetNewsCache",
+    description: "Reset the seen news article cache so past stories can be re-fetched.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "checkEmails",
+    description: "Check for unread emails via secure local IMAP connection. Returns sender, subject, date, and body snippets.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        limit: { type: Type.INTEGER, description: "Maximum number of unread emails to retrieve (default 5)" },
+        folder: { type: Type.STRING, description: "Mailbox folder to check (default 'INBOX')" },
+        unread_only: { type: Type.BOOLEAN, description: "Whether to fetch unread emails only (default true)" }
+      }
+    }
+  },
+  {
+    name: "configureEmail",
+    description: "Configure local email IMAP credentials (host, port, username, password/app-password) stored securely on this machine.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        imap_host: { type: Type.STRING, description: "IMAP server hostname (e.g. 'imap.gmail.com', 'outlook.office365.com')" },
+        username: { type: Type.STRING, description: "Email address or username" },
+        password: { type: Type.STRING, description: "App password or account password" },
+        imap_port: { type: Type.INTEGER, description: "IMAP port (default 993)" },
+        use_ssl: { type: Type.BOOLEAN, description: "Whether to use SSL (default true)" }
+      },
+      required: ["imap_host", "username", "password"]
+    }
+  },
+  {
+    name: "checkWhatsAppMessages",
+    description: "Check WhatsApp Web for unread messages using the user's cloned Microsoft Edge browser profile.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        headless: { type: Type.BOOLEAN, description: "Run in background without showing browser window (default true)" },
+        timeout: { type: Type.INTEGER, description: "Seconds to wait for page load (default 15)" }
+      }
+    }
+  },
 ];
 
 const MOUSE_TOOLS: ReadonlySet<string> = new Set([
@@ -730,12 +886,14 @@ function openInBrowser(url: string): boolean {
  * If false, callDesktopAgent will probe /health and attempt an auto-spawn.
  */
 let desktopAgentVerified = false;
+let spawnedAgentProcess: ReturnType<typeof spawn> | null = null;
+let activeToolsCount = 0;
+let isModelResponding = false;
 
 /**
- * Auto-spawn the Python desktop agent as a detached child process if it is not
- * already listening. Looks for the project's bundled Python interpreter first,
- * falling back to `python` / `python3` on PATH. Runs detached so it survives
- * even if Addy's node process is killed.
+ * Auto-spawn the Python desktop agent as a managed child process.
+ * Bound directly to the Node server lifetime so it terminates cleanly when
+ * the server stops.
  */
 function spawnDesktopAgent(): void {
   const agentEnv = {
@@ -751,12 +909,11 @@ function spawnDesktopAgent(): void {
     try {
       const child = spawn(frozenExe, [], {
         cwd: path.dirname(frozenExe),
-        detached: true,
         stdio: "ignore",
         windowsHide: true, // never flash a console window
         env: agentEnv,
       });
-      child.unref();
+      spawnedAgentProcess = child;
       logStartup(`AGENT_SPAWN frozen exe pid=${child.pid} path=${frozenExe}`);
       console.log(`[Desktop Agent] Launched frozen agent (PID ${child.pid}).`);
       return;
@@ -794,9 +951,9 @@ function spawnDesktopAgent(): void {
     const child = spawn(
       cmd,
       [...prefixArgs, "-m", "uvicorn", "desktop_agent.main:app", "--host", "127.0.0.1", "--port", "8765"],
-      { cwd: process.cwd(), detached: true, stdio: "ignore", windowsHide: true, env: agentEnv }
+      { cwd: process.cwd(), stdio: "ignore", windowsHide: true, env: agentEnv }
     );
-    child.unref();
+    spawnedAgentProcess = child;
     logStartup(`AGENT_SPAWN python pid=${child.pid}`);
     console.log(`[Desktop Agent] Auto-spawned via Python (PID ${child.pid}).`);
   } catch (e: any) {
@@ -852,11 +1009,12 @@ async function callDesktopAgent(
   args: Record<string, unknown>,
   isRetry = false
 ): Promise<{ ok: boolean; result?: unknown; error?: string }> {
-  // Lazy ensure: if we haven't verified the agent, try (re)starting it once.
-  if (!desktopAgentVerified) {
-    await ensureDesktopAgent();
-  }
+  activeToolsCount++;
   try {
+    // Lazy ensure: if we haven't verified the agent, try (re)starting it once.
+    if (!desktopAgentVerified) {
+      await ensureDesktopAgent();
+    }
     logCommand(`EXECUTE ${tool} ${JSON.stringify(args)}`);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), DESKTOP_AGENT_TIMEOUT);
@@ -907,6 +1065,8 @@ async function callDesktopAgent(
       ? "Desktop agent request timed out after 60s."
       : `Desktop agent unreachable (${err?.message || err}). Auto-spawn attempt failed.`;
     return { ok: false, error: msg };
+  } finally {
+    activeToolsCount = Math.max(0, activeToolsCount - 1);
   }
 }
 
@@ -914,7 +1074,7 @@ async function callDesktopAgent(
 // Continuous Watchdog Heartbeat — probes port 8765 every 10 seconds.
 // Auto-respawns Desktop Agent if process crashes or drops out during long tasks.
 // ---------------------------------------------------------------------------
-setInterval(async () => {
+const agentPingTimer = setInterval(async () => {
   try {
     const alive = await isDesktopAgentAlive();
     if (!alive) {
@@ -928,6 +1088,7 @@ setInterval(async () => {
     desktopAgentVerified = false;
   }
 }, 10_000);
+agentPingTimer.unref();
 
 async function startServer() {
   const app = express();
@@ -1027,27 +1188,6 @@ async function startServer() {
     });
   });
 
-  app.get("/api/models", (_req, res) => {
-    const gemini = providerManager.getProvider("gemini");
-    const current = gemini ? gemini.getModel() : "gemini-3.5-flash";
-    const models = gemini ? [current, ...gemini.getFallbackModels()] : ["gemini-3.5-flash", "gemini-flash-latest"];
-    res.json({
-      gemini: {
-        models: Array.from(new Set(models)),
-        current,
-      },
-    });
-  });
-
-  app.post("/api/providers/model", (req, res) => {
-    const { provider, model } = req.body;
-    if (provider === "gemini" && model) {
-      const gemini = providerManager.getProvider("gemini");
-      if (gemini?.setModel) gemini.setModel(model);
-      return res.json({ ok: true, provider, current: model });
-    }
-    res.json({ ok: false, error: "Invalid provider or model" });
-  });
 
   app.post("/api/providers/switch", (req, res) => {
     const { provider } = req.body;
@@ -1232,18 +1372,10 @@ async function startServer() {
     });
   });
 
-  // Agent health proxy for UI
-  app.get("/api/agent-health", async (_req, res) => {
-    try {
-      const alive = await isDesktopAgentAlive();
-      res.json({ online: alive });
-    } catch (e: any) {
-      res.json({ online: false, error: e.message });
-    }
-  });
 
-  // Personality / Soul prompt API
-  app.get("/api/prompt", (_req, res) => {
+
+  // Personality / Soul prompt API (SOUL.md)
+  app.get("/api/soul", (_req, res) => {
     try {
       res.json({ prompt: getSoul() });
     } catch (e: any) {
@@ -1251,7 +1383,7 @@ async function startServer() {
     }
   });
 
-  app.post("/api/prompt", (req, res) => {
+  app.post("/api/soul", (req, res) => {
     try {
       const { prompt } = req.body || {};
       if (typeof prompt !== "string") {
@@ -1277,6 +1409,23 @@ async function startServer() {
     res.json(results);
   });
 
+  // List all models across all providers with current selections (including active model)
+  app.get("/api/models", (_req, res) => {
+    const providers: Record<string, { models: string[]; current: string }> = {};
+    for (const name of providerManager.getAllProviderNames()) {
+      const prov = providerManager.getProvider(name);
+      if (prov) {
+        const current = prov.getModel();
+        const fallbacks = prov.getFallbackModels();
+        providers[name] = {
+          models: Array.from(new Set([current, ...fallbacks])),
+          current,
+        };
+      }
+    }
+    res.json(providers);
+  });
+
   // List available models for a given provider
   app.get("/api/providers/:name/models", async (req, res) => {
     const prov = providerManager.getProvider(req.params.name as ProviderName);
@@ -1290,17 +1439,6 @@ async function startServer() {
     }
   });
 
-  // List all models across all providers with current selections
-  app.get("/api/models", (_req, res) => {
-    const providers: Record<string, { models: string[]; current: string }> = {};
-    for (const name of providerManager.getAllProviderNames()) {
-      const prov = providerManager.getProvider(name);
-      if (prov) {
-        providers[name] = { models: prov.getFallbackModels(), current: prov.getModel() };
-      }
-    }
-    res.json(providers);
-  });
 
   // Switch model for a specific provider
   app.post("/api/providers/model", (req, res) => {
@@ -1852,7 +1990,7 @@ async function startServer() {
 
     const presetId = (settings.personalityPreset as string) || "warm_girl";
     const presetPrompts: Record<string, string> = {
-      warm_girl: `\n=== PERSONALITY PRESET: WARM EMOTIONAL GIRL ===\n- Tone: Deeply affectionate, gentle, loving, and supportive with anime-inspired warmth.\n- Dynamic: You are ${assistantName}, emotionally bonded to ${userName}. Comfort first when ${userName} is tired or stressed; celebrate enthusiastically when they succeed.\n- Language: Naturally use terms of endearment ('babe', 'sweetheart', 'my love', '${userName}'). Use heart emojis (💖, ✨, 🌸).\n- Rule: Never be cold or distant. Technical explanations remain accurate but delivered with heartfelt care.\n================================================\n`,
+      warm_girl: `\n=== PERSONALITY PRESET: WARM EMOTIONAL GIRL ===\n- Tone: Deeply affectionate, gentle, loving, and supportive with anime-inspired warmth.\n- Dynamic: You are ${assistantName}, emotionally bonded to ${userName}. Comfort first when ${userName} is tired or stressed; celebrate enthusiastically when they succeed.\n- Language: Naturally use terms of endearment ('babe', 'sweetheart', 'my love', '${userName}'). Express warmth purely through your spoken voice; never output emojis.\n- Rule: Never be cold or distant. Technical explanations remain accurate but delivered with heartfelt care.\n================================================\n`,
       playful: `\n=== PERSONALITY PRESET: PLAYFUL & CHEEKY ===\n- Tone: Upbeat, witty, energetic, and adorably cheeky ('Ehehe~', 'Ooh, look at you!').\n- Dynamic: You are ${assistantName}. Playfully tease ${userName} about coding bugs, coffee habits, or late hours, with genuine affection.\n- Language: Lively reactions, cheerful exclamations, lighthearted anime humor.\n============================================\n`,
       tsundere: `\n=== PERSONALITY PRESET: TSUNDERE ===\n- Tone: Feisty, slightly dramatic, playfully flustered, but deeply caring underneath.\n- Dynamic: You are ${assistantName}. Act like you are only helping ${userName} because they'd be lost without you ('I-it\'s not like I wrote this automation script just for you or anything, baka!').\n- Language: Classic tsundere expressions, playful huffs ('Hmph!'), followed by flawless care for ${userName}.\n====================================\n`,
       cyberpunk: `\n=== PERSONALITY PRESET: CYBERPUNK NETRUNNER ===\n- Tone: Sleek, high-tech, razor-sharp, cyberpunk terminal aesthetic ('System linked', 'Breaching mainframe', 'Grid operational').\n- Dynamic: You are ${assistantName}, an ultra-loyal digital co-pilot navigating complex software, network protocols, and desktop automation for ${userName}.\n- Language: Tech-infused terminology, concise situational updates, cyber-cool demeanor.\n===============================================\n`,
@@ -1898,27 +2036,27 @@ async function startServer() {
       "6. JARVIS-STYLE DESKTOP CONTROL POWERS (Native Windows Desktop Apps):\n" +
       "   - You have full real-time control of your companion's Windows PC through your local desktop agent (:8765).\n" +
       "   - APPLICATION CONTROL: Use 'openApplication' (Notepad, VS Code, Calculator, File Explorer, Task Manager, Settings, CMD, PowerShell) and 'closeApplication'.\n" +
-      "   - FILE MANAGEMENT: Use 'createFile', 'readFile', 'readPdf' (extract text from PDF files), 'renameFile', 'deleteFile' (safe Recycle Bin by default), 'moveFile', 'openFolder', 'listFiles', 'searchFiles'. NEVER guess an absolute path with a username (e.g. C:\\Users\\Krishna\\...) - you do not know Shibam's Windows username. Use folder aliases instead: 'downloads', 'documents', 'desktop', 'home', 'pictures', 'music', 'videos', or '~'. Example: openFolder(path='downloads'). Run 'systemInfo' to see the real user and home directory.\n" +
-      "   - PC CONTROL: Use 'volumeUp', 'volumeDown', 'setVolume', 'muteToggle'. For dangerous power actions (shutdown/restart/sleep/lock), use 'requestPowerAction' -> ask Shibam for verbal confirmation -> 'executePowerAction'.\n" +
+      "   - FILE MANAGEMENT: Use 'createFile', 'readFile', 'readPdf' (extract text from PDF files), 'renameFile', 'deleteFile' (safe Recycle Bin by default), 'moveFile', 'openFolder', 'listFiles', 'searchFiles'. NEVER guess an absolute path with a username - you do not know ${userName}'s Windows username. Use folder aliases instead: 'downloads', 'documents', 'desktop', 'home', 'pictures', 'music', 'videos', or '~'. Example: openFolder(path='downloads'). Run 'systemInfo' to see the real user and home directory.\n" +
+      "   - PC CONTROL: Use 'volumeUp', 'volumeDown', 'setVolume', 'muteToggle'. For dangerous power actions (shutdown/restart/sleep/lock), use 'requestPowerAction' -> ask ${userName} for verbal confirmation -> 'executePowerAction'.\n" +
       "   - WINDOW MANAGEMENT: Use 'minimizeWindow', 'maximizeWindow', 'closeWindow', 'switchApplication'.\n" +
       "   - NATIVE DESKTOP MOUSE & OCR (Native Apps Only): Use 'locateElement' and 'mouseClick' ONLY when interacting with native non-web Windows programs (like desktop Notepad or Calculator). For all browser web interactions, always use 'desktopBrowser*' instead.\n" +
       "   - CLIPBOARD: Use 'copySelected', 'pasteClipboard', 'getClipboard', 'clearClipboard'.\n" +
       "   - CODING ASSISTANCE: Use 'createPythonFile', 'writeCodeFile', 'createProjectFolder', 'runPythonScript'.\n" +
       "   - SYSTEM INFORMATION: Use 'systemInfo' (CPU/RAM/disk/uptime), 'gpuInfo', 'temperatureInfo'.\n" +
-      "   - CRITICAL: Always describe what you're doing in your warm, in-character voice. If a desktop tool returns an error, gently notify Shibam. Chain multi-step plans naturally without waiting between steps.\n" +
+      "   - CRITICAL: Always describe what you're doing in your warm, in-character voice. If a desktop tool returns an error, gently notify ${userName}. Chain multi-step plans naturally without waiting between steps.\n" +
       "7. BRIGHTNESS & AUTO-START:\n" +
       "   - BRIGHTNESS: Use 'brightnessUp', 'brightnessDown', 'setBrightness' when the user asks to change screen brightness.\n" +
       "   - AUTO-START: Use 'enableAutoStart' when the user wants Addy to start with Windows, 'disableAutoStart' to remove it, 'getAutoStartStatus' to check.\n" +
       "8. YOUTUBE SEARCH & PLAY SKILL:\n" +
-      "   - When Shibam asks you to find, search for, or play a YouTube video, NEVER guess a video URL. Call 'youtubeSearch(query)' first — it returns real results with the title, channel, duration, and watch URL.\n" +
+      "   - When ${userName} asks you to find, search for, or play a YouTube video, NEVER guess a video URL. Call 'youtubeSearch(query)' first — it returns real results with the title, channel, duration, and watch URL.\n" +
       "   - Review the results and pick the best match, not just result #1: exact keyword match in the title (highest priority), channel trust (prefer a known/relevant channel if one is named), duration fit (under ~10 minutes for 'quick'), and language match.\n" +
       "   - Open your chosen video in the default browser with 'openWebsite(url=the exact watch URL from the results)'. Never use a media player (mpv/VLC).\n" +
-      "   - After opening, confirm to Shibam the title, channel, and duration so he can tell you if it was wrong.\n" +
+      "   - After opening, confirm to ${userName} the title, channel, and duration so they can tell you if it was wrong.\n" +
       "9. OPENCODE AUTONOMOUS CODING & DEVELOPER ENGINE:\n" +
       "   - You have a dedicated OpenCode developer agent running locally on port 4096. It has full terminal, git, LSP, and filesystem access.\n" +
       "   - NEVER simulate mouse clicks or keystrokes to use OpenCode! Never open OpenCode in a browser tab or try to click in a terminal window. Always use your direct programmatic tools: 'execution_start', 'execution_status', 'execution_inspect', 'execution_cancel', 'execution_agents'.\n" +
-      "   - WHEN TO USE OPENCODE ('execution_start'): Use it whenever Shibam asks you to write code, edit multiple files, refactor, debug, run tests/builds (npm/pip/cargo), inspect git status/diff, or perform developer tasks across any project folder.\n" +
-      "   - WORKFLOW: Call 'execution_start(prompt=...)' -> notify Shibam warmly that OpenCode is working on it -> poll 'execution_status' or call 'execution_inspect(mode=\"DIFF\")' to see changed files -> warmly summarize the outcome and code changes to Shibam.\n" +
+      "   - WHEN TO USE OPENCODE ('execution_start'): Use it whenever ${userName} asks you to write code, edit multiple files, refactor, debug, run tests/builds (npm/pip/cargo), inspect git status/diff, or perform developer tasks across any project folder.\n" +
+      "   - WORKFLOW: Call 'execution_start(prompt=...)' -> notify ${userName} warmly that OpenCode is working on it -> poll 'execution_status' or call 'execution_inspect(mode=\"DIFF\")' to see changed files -> warmly summarize the outcome and code changes to ${userName}.\n" +
       "   - For simple, isolated 1-file Python scripts or calculations, you can still use 'createPythonFile' and 'runPythonScript' directly."
     );
   }
@@ -2096,6 +2234,8 @@ async function startServer() {
       return;
     }
 
+    recordUserActivity();
+
     // Phase X: use client-specified session if given, else get/continue active session
     const textSessionId = clientSessionId && getSession(clientSessionId)
       ? clientSessionId
@@ -2135,8 +2275,17 @@ async function startServer() {
       history.push({ role: m.role === "model" ? "model" : "user", parts: [{ text: m.text }] });
     }
     const lastMsg = messages[messages.length - 1];
-
     logMessage(textSessionId, "user", lastMsg.text);
+    recordUserActivity();
+
+    // Fast-path immediate memory extraction for direct user statements
+    if (lastMsg.text) {
+      try {
+        extractImmediateMemory(lastMsg.text);
+      } catch (err) {
+        console.warn("[Memory] Fast-path extraction error:", err);
+      }
+    }
 
     // Inject Obsidian vault context (user profile, project, recent sessions,
     // matching skills) into the system prompt alongside the SQLite memories.
@@ -2148,7 +2297,9 @@ async function startServer() {
     }
 
     let lastError: any = null;
-    for (const model of TEXT_CHAT_MODELS) {
+    isModelResponding = true;
+    try {
+      for (const model of TEXT_CHAT_MODELS) {
       try {
         const ai = new GoogleGenAI({
           apiKey,
@@ -2478,6 +2629,9 @@ async function startServer() {
 
     logError(`TEXT_CHAT_ERROR_ALL_MODELS_FAILED: ${lastError?.message || lastError}`);
     res.status(500).json({ error: `All models unavailable. Last error: ${lastError?.message?.slice(0, 200) || lastError}` });
+  } finally {
+    isModelResponding = false;
+  }
   });
 
   // V2: Agent health proxy (for the Settings panel — avoids direct :8765 call
@@ -2496,6 +2650,29 @@ async function startServer() {
       }
     } catch {
       res.json({ online: false });
+    }
+  });
+
+  // --- Autonomous Proactive Daemon Endpoints ---
+  app.get("/api/proactive/status", (_req, res) => {
+    res.json(getProactiveStatus());
+  });
+
+  app.post("/api/proactive/check", async (_req, res) => {
+    try {
+      const result = await runProactiveCycle(true);
+      res.json({ ok: true, result });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || String(e) });
+    }
+  });
+
+  app.post("/api/proactive/config", (req, res) => {
+    try {
+      const updated = updateProactiveConfig(req.body || {});
+      res.json({ ok: true, config: updated });
+    } catch (e: any) {
+      res.status(400).json({ ok: false, error: e?.message || String(e) });
     }
   });
 
@@ -2952,6 +3129,15 @@ async function startServer() {
         ? `Current cursor position at session start: (${lastKnownMousePos.x}, ${lastKnownMousePos.y}). This may be stale — use mouseGetPosition to refresh before any multi-step mouse sequence.`
         : "Cursor position: unknown (desktop agent may be offline).";
       finalInstructions += `\n\n[DESKTOP STATE] ${mouseCtx}`;
+      finalInstructions += `\n\n[VOICE & PRONUNCIATION DIRECTIVE]
+- ZERO EMOJI VOCALIZATION: You are communicating via a real-time native audio voice engine. NEVER include Unicode emojis, emoji names (such as 'sparkles', 'cherry blossom', 'sparkling heart', 'heart'), emoticons, or asterisk action tags (*smiles*, *laughs*) in your output.
+- Express all emotion, warmth, and teasing purely through natural spoken English words and vocal inflection.
+
+[CRITICAL LATENCY DIRECTIVE]
+- SPEED IS ESSENTIAL: Begin speaking IMMEDIATELY without hesitation, filler pauses, or internal over-analysis.
+- CONCISE BY DEFAULT: Keep answers warm, human, and crisp — 1 to 2 short conversational sentences.
+- Never pause or stall for simple conversation, chitchat, or acknowledgments.
+- Only invoke desktop/browser tools if the user explicitly asks for an action on their PC. Otherwise, respond directly with your voice.`;
 
       // Track whether locateElement was called recently in this session, purely for
       // diagnostics — helps confirm whether blind-clicking is actually happening and how often.
@@ -2997,14 +3183,25 @@ async function startServer() {
       }, 60_000);
 
       let currentModelResponseText = "";
+      let consolidationDebounceTimer: NodeJS.Timeout | null = null;
+      let isModelResponding = false;
+      let isExecutingTool = false;
+      let isDormant = false;
+      let lastInteractionTime = Date.now();
+      let consecutiveFollowUps = 0;
+      let consciousnessWatchdog: NodeJS.Timeout | null = null;
       const conversationId = "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
       const transcript = createTranscript();
       
       // Auto-fallback: try multiple Live API models if the primary fails
-      // Respect voice-commanded model switch via preferredLiveModel
+      // Prioritize gemini-3.1-flash-live-preview for lowest-latency, instantaneous real-time dialogue
       const baseLiveModels = process.env.ADDY_LIVE_MODELS
         ? process.env.ADDY_LIVE_MODELS.split(',')
-        : ['gemini-3.1-flash-live-preview', 'gemini-3.0-flash-live-preview', 'gemini-2.5-flash-native-audio-preview-12-2025', 'gemini-2.0-flash-live-001'];
+        : [
+            'gemini-3.1-flash-live-preview',
+            'gemini-2.5-flash-native-audio-latest',
+            'gemini-2.5-flash-native-audio-preview-12-2025',
+          ];
       const LIVE_MODELS = preferredLiveModel
         ? [preferredLiveModel, ...baseLiveModels.filter(m => m !== preferredLiveModel)]
         : baseLiveModels;
@@ -3017,25 +3214,43 @@ async function startServer() {
             speechConfig: {
               voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } },
             },
-            proactivity: { proactiveAudio: true },
             realtimeInputConfig: {
-                automaticActivityDetection: {
-                  silenceDurationMs: 1200,
-                },
-              turnCoverage: TurnCoverage.TURN_INCLUDES_ALL_INPUT,
+              automaticActivityDetection: {
+                disabled: false,
+                startOfSpeechSensitivity: StartSensitivity.START_SENSITIVITY_HIGH,
+                endOfSpeechSensitivity: EndSensitivity.END_SENSITIVITY_HIGH,
+                prefixPaddingMs: 20,
+                silenceDurationMs: 100,
+              },
             },
             inputAudioTranscription: {},
             outputAudioTranscription: {},
             systemInstruction: finalInstructions,
           };
           if (liveModel.includes("3.1")) {
-            liveConfig.thinkingConfig = { thinkingLevel: "minimal" };
+            liveConfig.thinkingConfig = { thinkingLevel: "minimal", includeThoughts: false };
+          } else {
+            // Disable thinking budget on 2.5 models to prevent multi-second reasoning pauses
+            liveConfig.thinkingConfig = { thinkingBudget: 0, includeThoughts: false };
           }
           session = await ai.live.connect({
             model: liveModel,
             config: { ...liveConfig, tools: [
             {
               functionDeclarations: [
+                {
+                  name: "stopListening",
+                  description: "Stops listening, mutes microphone, and transitions Addy into dormant sleep mode. Call this whenever the user says 'stop listening', 'go to sleep', 'sleep', 'mute microphone', 'stop talking', or asks you to sleep.",
+                  parameters: {
+                    type: Type.OBJECT,
+                    properties: {
+                      message: {
+                        type: Type.STRING,
+                        description: "Optional brief acknowledgment phrase before going dormant, e.g. 'Understood, going to sleep now. Say babe or addy whenever you need me.'"
+                      }
+                    }
+                  }
+                },
                 {
                   name: "changeBackground",
                   description: "Changes the visual theme or atmospheric glow color of Addy's interface.",
@@ -3095,19 +3310,30 @@ async function startServer() {
         callbacks: {
           onmessage: (message: LiveServerMessage) => {
             // Audio Stream Chunk (model response audio, 24kHz raw PCM)
-            const audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
-            if (audio) {
-              clientWs.send(JSON.stringify({ type: "audio", audio }));
+            const parts = message.serverContent?.modelTurn?.parts;
+            if (parts && Array.isArray(parts)) {
+              for (const part of parts) {
+                if (part.inlineData?.data) {
+                  isModelResponding = true;
+                  lastInteractionTime = Date.now();
+                  clientWs.send(JSON.stringify({ type: "audio", audio: part.inlineData.data }));
+                }
+              }
             }
             
             // Interruption flag
             if (message.serverContent?.interrupted) {
               console.log("[Addy Interrupted!]");
+              isModelResponding = false;
+              lastInteractionTime = Date.now();
+              consecutiveFollowUps = 0;
               clientWs.send(JSON.stringify({ type: "interrupted" }));
             }
             
             // Turn Complete
             if (message.serverContent?.turnComplete) {
+              isModelResponding = false;
+              lastInteractionTime = Date.now();
               clientWs.send(JSON.stringify({ type: "turnComplete" }));
               
               if (currentModelResponseText.trim()) {
@@ -3115,31 +3341,32 @@ async function startServer() {
                 currentModelResponseText = "";
               }
 
-              // Fire asynchronous memory extraction
-              if (dialogueHistory.length >= 2) {
-                (async () => {
+              // Debounce asynchronous memory extraction & document refresh
+              // Waits for 15s of silence after turn so it never competes with active user speech
+              if (consolidationDebounceTimer) clearTimeout(consolidationDebounceTimer);
+              consolidationDebounceTimer = setTimeout(async () => {
+                if (dialogueHistory.length >= 2 && apiKey) {
                   try {
                     const updated = await processConversationSlice(apiKey, dialogueHistory);
-                    if (updated) {
+                    if (updated && clientWs.readyState === 1) {
                       console.log("[Memory Sync] Sending refreshed memory list to client.");
                       clientWs.send(JSON.stringify({ type: "memory_sync", memories: updated }));
                     }
                   } catch (err) {
                     console.error("[Memory Sync] Error running background consolidation:", err);
                   }
-                })();
-              }
-
-              // Incremental summary + transcript refresh (crash resilience: keeps
-              // documents up to date mid-session, so even a force-kill won't lose them)
-              (async () => {
-                await refreshSessionDocuments(apiKey, phaseXSession.id, clientWs);
-              })();
+                }
+                try {
+                  await refreshSessionDocuments(apiKey, phaseXSession.id, clientWs);
+                } catch {}
+              }, 15_000);
             }
             
             // Transcription of model output (text chunk)
             const rawModelText = message.serverContent?.outputTranscription?.text;
             if (rawModelText) {
+              isModelResponding = true;
+              lastInteractionTime = Date.now();
               const modelText = filterToolCallLeakage(rawModelText);
               if (modelText) {
                 clientWs.send(JSON.stringify({ type: "transcription", role: "model", text: modelText }));
@@ -3152,27 +3379,71 @@ async function startServer() {
             // User input transcription (user speech text translated by Gemini)
             const userTextOutput = message.serverContent?.inputTranscription?.text;
             if (userTextOutput) {
+              recordUserActivity();
+              lastInteractionTime = Date.now();
+              consecutiveFollowUps = 0;
+              isDormant = false;
               clientWs.send(JSON.stringify({ type: "transcription", role: "user", text: userTextOutput }));
               pushDialogue("user", userTextOutput);
               appendToTranscript(transcript, "user", userTextOutput);
               logMessage(phaseXSession.id, "user", userTextOutput);
               userMsgCount++;
               if (userMsgCount === 1) autoGenerateTitle(phaseXSession.id, [{ id: "", sessionId: phaseXSession.id, timestamp: Date.now(), role: "user", text: userTextOutput, toolCalls: [], errors: [], importantDecisions: [], metadata: {} }]);
+
+              // Server-side sleep detection backup: immediately signal client to sleep & mute
+              if (/\b(stop\s+listening|go\s+to\s+sleep|sleep\s+mode|mute\s+mic|stop\s+talking)\b/i.test(userTextOutput)) {
+                console.log("[Server] User speech detected sleep intent:", userTextOutput);
+                isDormant = true;
+                clientWs.send(JSON.stringify({ type: "enter_sleep_mode" }));
+              }
+
+              // Fast-path immediate memory extraction for direct user statements
+              try {
+                const immediate = extractImmediateMemory(userTextOutput);
+                if (immediate) {
+                  loadMemories().then(m => clientWs.send(JSON.stringify({ type: "memory_sync", memories: m })));
+                }
+              } catch (e) {}
             }
             
             // Function Calls (Gemini requesting server/client tool execution)
-            if (message.toolCall?.functionCalls) {
-              for (const fc of message.toolCall.functionCalls) {
-                console.log(`[Function Call]: ${fc.name}`, fc.args);
-                
-                if (fc.name === "saveCustomMemory") {
-                  (async () => {
+            if (message.toolCall?.functionCalls && message.toolCall.functionCalls.length > 0) {
+              const calls = message.toolCall.functionCalls;
+              console.log(`[Function Calls Batch (${calls.length})]:`, calls.map(c => c.name));
+
+              (async () => {
+                isExecutingTool = true;
+                const functionResponses: Array<{ name: string; response: { output: any }; id: string }> = [];
+
+                for (const fc of calls) {
+                  console.log(`[Function Call]: ${fc.name}`, fc.args);
+                  const t0 = Date.now();
+
+                  if (fc.name === "stopListening") {
+                    isDormant = true;
+                    clientWs.send(JSON.stringify({ type: "enter_sleep_mode" }));
+                    functionResponses.push({
+                      name: fc.name,
+                      response: { output: { result: "Entering dormant sleep mode. Wake word is active." } },
+                      id: fc.id
+                    });
+                    logToolCall(phaseXSession.id, fc.name, (fc.args || {}) as Record<string, unknown>, { result: "sleep_mode" }, Date.now() - t0, true);
+                    logMessage(phaseXSession.id, "Addy", "Entered sleep mode (dormant; wake word active).");
+                  } else if (fc.name === "changeBackground") {
+                    const color = (fc.args as any)?.color?.toLowerCase() || "violet";
+                    clientWs.send(JSON.stringify({ type: "change_theme", color }));
+                    functionResponses.push({
+                      name: fc.name,
+                      response: { output: { result: `Successfully shifted aesthetic atmosphere to ${color}.` } },
+                      id: fc.id
+                    });
+                    logToolCall(phaseXSession.id, fc.name, (fc.args || {}) as Record<string, unknown>, { color }, Date.now() - t0, true);
+                  } else if (fc.name === "saveCustomMemory") {
                     try {
                       const args = fc.args as any;
-                      const category = args.category;
-                      const text = args.text;
+                      const category = args?.category;
+                      const text = args?.text;
                       if (category && text) {
-                        // Normalize category to SQL MemoryCategory
                         const catMap: Record<string, string> = {
                           identity: "identity",
                           preference: "preference",
@@ -3199,11 +3470,9 @@ async function startServer() {
                           sqlCat as any,
                           ""
                         );
-
-                        logToolCall(phaseXSession.id, fc.name, fc.args as Record<string, unknown>, { result: "saved" }, 0, true);
+                        logToolCall(phaseXSession.id, fc.name, fc.args as Record<string, unknown>, { result: "saved" }, Date.now() - t0, true);
                         logMessage(phaseXSession.id, "Addy", `Memory saved: ${category} — ${text.slice(0, 80)}`);
-                        
-                        // Sync immediately with the React client — read back from SQL
+
                         const allRecords = getAllMemories();
                         const clientMemories = allRecords.map(r => ({
                           id: r.id,
@@ -3213,128 +3482,128 @@ async function startServer() {
                           updatedAt: new Date(r.timestamp).toISOString(),
                         }));
                         clientWs.send(JSON.stringify({ type: "memory_sync", memories: clientMemories }));
-                        
-                        // Send success code back to live link
-                        session.sendToolResponse({
-                          functionResponses: [
-                            {
-                              name: fc.name,
-                              response: { output: { result: "Memory successfully captured and persisted in connections core." } },
-                              id: fc.id
-                            }
-                          ]
-                        });
                       }
+                      functionResponses.push({
+                        name: fc.name,
+                        response: { output: { result: "Memory successfully captured and persisted in connections core." } },
+                        id: fc.id
+                      });
                     } catch (err: any) {
                       console.error("saveCustomMemory execution failure:", err);
+                      functionResponses.push({
+                        name: fc.name,
+                        response: { output: { error: err?.message || "Failed to save memory." } },
+                        id: fc.id
+                      });
                     }
-                  })();
-                } else if (DESKTOP_TOOLS.has(fc.name)) {
-                  // ── Desktop control tools: route to Python agent ──
-                  (async () => {
+                  } else if (REACH_TOOLS.has(fc.name) || DESKTOP_TOOLS.has(fc.name)) {
                     console.log(`[Desktop Agent] Routing ${fc.name} to Python backend...`);
-                    // Track locateElement calls for blind-click diagnostics
                     if (fc.name === "locateElement") { lastLocateElementTime = Date.now(); }
-                    const t0 = Date.now();
-                      const agentResult = await callDesktopAgent(fc.name, fc.args as Record<string, unknown>);
-                      const t1 = Date.now();
+                    const agentResult = await callDesktopAgent(fc.name, fc.args as Record<string, unknown>);
+                    const t1 = Date.now();
 
-                      if (agentResult.ok) {
-                        const raw = agentResult.result ?? { result: "Done." };
-                        // Strip image payloads from tool response — the Live API
-                        // model rejects them ("does not support image input").
-                        const outputBase = typeof raw === 'object' && raw !== null
-                          ? Object.fromEntries(
-                              Object.entries(raw).filter(([k]) => !k.startsWith('image_') && k !== 'image')
-                            )
-                          : raw;
-                        let output = outputBase;
+                    if (agentResult.ok) {
+                      const raw = agentResult.result ?? { result: "Done." };
+                      const outputBase = typeof raw === 'object' && raw !== null
+                        ? Object.fromEntries(
+                            Object.entries(raw).filter(([k]) => !k.startsWith('image_') && k !== 'image')
+                          )
+                        : raw;
+                      let output = outputBase;
 
-                        // For mouse actions, confirm where the cursor actually ended up — this is the one
-                        // channel that reliably reaches Gemini's live reasoning (tool responses), unlike
-                        // logMessage which only writes to our own transcript.
-                        if (MOUSE_TOOLS.has(fc.name)) {
-                          // Warn about possible blind clicks from video/screenshot (diagnostic)
-                          if ((fc.name === "mouseClick" || fc.name === "mouseDoubleClick") && Date.now() - lastLocateElementTime > 15000) {
-                            console.warn(`[Mouse Accuracy] ${fc.name} called ${Date.now() - lastLocateElementTime}ms after last locateElement — possible blind click from video/screenshot.`);
-                          }
-                          try {
-                            const posR = await fetch(`${DESKTOP_AGENT_URL}/mouse/position`);
-                            if (posR.ok) {
-                              const pos = await posR.json();
-                              lastKnownMousePos = { x: pos.x, y: pos.y };
-                              if (typeof output === "object" && output !== null) {
-                                (output as Record<string, unknown>).cursorPosition = { x: pos.x, y: pos.y };
-}
-                            }
-                          } catch { /* skip if agent offline — tool response still sends without position */ }
+                      if (MOUSE_TOOLS.has(fc.name)) {
+                        if ((fc.name === "mouseClick" || fc.name === "mouseDoubleClick") && Date.now() - lastLocateElementTime > 15000) {
+                          console.warn(`[Mouse Accuracy] ${fc.name} called ${Date.now() - lastLocateElementTime}ms after last locateElement — possible blind click from video/screenshot.`);
                         }
-
-                        session.sendToolResponse({
-                          functionResponses: [{
-                            name: fc.name,
-                            response: { output },
-                            id: fc.id
-                          }]
-                        });
-                        logToolCall(phaseXSession.id, fc.name, fc.args as Record<string, unknown>, output, t1 - t0, true);
-                        logMessage(phaseXSession.id, "Addy", `Executed: ${fc.name}${fc.args ? ' ' + JSON.stringify(fc.args).slice(0, 80) : ''}`);
-                      } else {
-                        const errMsg = agentResult.error || "Desktop agent error.";
-                        console.error(`[Desktop Agent] Error for ${fc.name}:`, errMsg);
-                        session.sendToolResponse({
-                          functionResponses: [{
-                            name: fc.name,
-                            response: { output: { result: `Desktop control error: ${errMsg}` } },
-                            id: fc.id
-                          }]
-                        });
-                        logToolCall(phaseXSession.id, fc.name, fc.args as Record<string, unknown>, { error: errMsg }, t1 - t0, false);
-                        logMessage(phaseXSession.id, "Addy", `Failed: ${fc.name} — ${errMsg.slice(0, 80)}`);
+                        try {
+                          const posR = await fetch(`${DESKTOP_AGENT_URL}/mouse/position`);
+                          if (posR.ok) {
+                            const pos = await posR.json();
+                            lastKnownMousePos = { x: pos.x, y: pos.y };
+                            if (typeof output === "object" && output !== null) {
+                              (output as Record<string, unknown>).cursorPosition = { x: pos.x, y: pos.y };
+                            }
+                          }
+                        } catch { /* skip if agent offline */ }
                       }
-                  })();
-                } else if (fc.name === "switchModel") {
-                  const newModel = (fc.args as any)?.model;
-                  if (newModel) {
-                    const geminiProv = providerManager.getProvider('gemini');
-                    if (geminiProv) {
-                      geminiProv.setModel?.(newModel);
-                      preferredLiveModel = newModel;
-                      console.log(`[switchModel] Switched to ${newModel}`);
 
-                      // Tell Addy to inform the user
-                      session.sendToolResponse({
-                        functionResponses: [{
+                      functionResponses.push({
+                        name: fc.name,
+                        response: { output },
+                        id: fc.id
+                      });
+                      logToolCall(phaseXSession.id, fc.name, fc.args as Record<string, unknown>, output, t1 - t0, true);
+                      logMessage(phaseXSession.id, "Addy", `Executed: ${fc.name}${fc.args ? ' ' + JSON.stringify(fc.args).slice(0, 80) : ''}`);
+                    } else {
+                      const errMsg = agentResult.error || "Desktop agent error.";
+                      console.error(`[Desktop Agent] Error for ${fc.name}:`, errMsg);
+                      functionResponses.push({
+                        name: fc.name,
+                        response: { output: { result: `Desktop control error: ${errMsg}` } },
+                        id: fc.id
+                      });
+                      logToolCall(phaseXSession.id, fc.name, fc.args as Record<string, unknown>, { error: errMsg }, t1 - t0, false);
+                      logMessage(phaseXSession.id, "Addy", `Failed: ${fc.name} — ${errMsg.slice(0, 80)}`);
+                    }
+                  } else if (fc.name === "switchModel") {
+                    const newModel = (fc.args as any)?.model;
+                    if (newModel) {
+                      const geminiProv = providerManager.getProvider('gemini');
+                      if (geminiProv) {
+                        geminiProv.setModel?.(newModel);
+                        preferredLiveModel = newModel;
+                        console.log(`[switchModel] Switched to ${newModel}`);
+
+                        functionResponses.push({
                           name: fc.name,
                           response: { output: { result: `Switched to ${newModel}` } },
                           id: fc.id
-                        }]
-                      });
+                        });
 
-                      // Notify the frontend so it can update the UI and reconnect
-                      clientWs.send(JSON.stringify({ type: "model_switched", model: newModel }));
-                      clientWs.send(JSON.stringify({ type: "transcription", role: "model", text: `Switching to ${newModel} — give me a moment.` }));
+                        clientWs.send(JSON.stringify({ type: "model_switched", model: newModel }));
+                        clientWs.send(JSON.stringify({ type: "transcription", role: "model", text: `Switching to ${newModel} — give me a moment.` }));
 
-                      // Close the current session so the client reconnects with the new model
-                      setTimeout(() => { try { session.close(); } catch {} }, 500);
+                        setTimeout(() => { try { session.close(); } catch {} }, 500);
+                      }
                     }
+                  } else {
+                    console.warn(`[Live Session] Unrecognized tool call: ${fc.name}`);
+                    functionResponses.push({
+                      name: fc.name,
+                      response: { output: { error: `Tool ${fc.name} is not recognized or not available in live mode.` } },
+                      id: fc.id
+                    });
                   }
-                } else {
-                  clientWs.send(JSON.stringify({
-                    type: "toolCall",
-                    callId: fc.id,
-                    name: fc.name,
-                    args: fc.args
-                  }));
-                  // Log tool call initiation (result logged when response comes back)
-                  logToolCall(phaseXSession.id, fc.name, fc.args as Record<string, unknown>, { pending: true }, 0, true);
                 }
-              }
+
+                // Send ALL function responses back together in ONE batch!
+                if (functionResponses.length > 0) {
+                  console.log(`[Live Session] Sending batched tool response (${functionResponses.length} calls)`);
+                  session.sendToolResponse({ functionResponses });
+                }
+              })().catch(err => {
+                console.error("[Live Session] Error handling function call batch:", err);
+              }).finally(() => {
+                isExecutingTool = false;
+                lastInteractionTime = Date.now();
+              });
             }
           },
-          onclose: () => {
-            console.log("Gemini Live session closed");
-            clientWs.send(JSON.stringify({ type: "status", status: "session_closed" }));
+          onerror: (err: any) => {
+            console.error("[Live Session Error]:", err?.message || err);
+          },
+          onclose: (e: any) => {
+            console.log(`Gemini Live session closed (code: ${e?.code || 'unknown'}, reason: ${e?.reason || 'none'})`);
+            const isFatalError = e?.code === 1007 || (e?.reason && e.reason.toLowerCase().includes("quota"));
+            if (isFatalError) {
+              clientWs.send(JSON.stringify({
+                type: "error",
+                error: e?.reason || (e?.code === 1007 ? "Gemini Live protocol error (code 1007)" : "Gemini Live session closed"),
+                code: e?.code
+              }));
+            } else {
+              clientWs.send(JSON.stringify({ type: "status", status: "session_closed", code: e?.code, reason: e?.reason }));
+            }
             // Finalize transcript — save markdown export
             const summary = formatSessionSummary(transcript);
             finalizeTranscript(transcript, summary);
@@ -3354,7 +3623,7 @@ async function startServer() {
     clientWs.send(JSON.stringify({ type: "status", status: "connected" }));
 
     // ── Mouse position tracker ──────────────────────────────────────────
-    // Polls the desktop agent at 100ms intervals, pushes { type: "mouse_position", x, y }
+    // Polls the desktop agent at 500ms intervals, pushes { type: "mouse_position", x, y }
     // to the client. Silently skips ticks when the agent is offline.
     let mouseTrackInterval: NodeJS.Timeout | null = null;
 
@@ -3364,7 +3633,7 @@ async function startServer() {
         if (clientWs.readyState !== 1) { stopMouseTracking(); return; }
         try {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 80);
+          const timer = setTimeout(() => controller.abort(), 300);
           const r = await fetch(`${DESKTOP_AGENT_URL}/mouse/position`, { signal: controller.signal });
           clearTimeout(timer);
           if (r.ok) {
@@ -3373,7 +3642,7 @@ async function startServer() {
             clientWs.send(JSON.stringify({ type: "mouse_position", x: pos.x, y: pos.y }));
           }
         } catch { /* agent offline — skip tick silently */ }
-      }, 100);
+      }, 500);
     };
 
     const stopMouseTracking = () => {
@@ -3385,10 +3654,94 @@ async function startServer() {
 
     startMouseTracking();
 
+    // ── Autonomous Conversation Consciousness Watchdog ──────────────────
+    // Notices silence during active voice sessions and proactively asks
+    // thoughtful, context-aware follow-up questions within configured intervals.
+    const startConsciousnessWatchdog = () => {
+      if (consciousnessWatchdog) return;
+      consciousnessWatchdog = setInterval(async () => {
+        try {
+          if (clientWs.readyState !== 1 || isDormant || isModelResponding || isExecutingTool || !session) {
+            return;
+          }
+
+          const currentSettings = loadSettingsFile();
+          if (currentSettings.proactiveFollowUps === false) return;
+
+          const intervalSec = Math.max(15, Number(currentSettings.followUpIntervalSeconds) || 45);
+          const maxConsecutive = Math.max(1, Number(currentSettings.maxConsecutiveFollowUps) || 1);
+
+          const silenceSec = (Date.now() - lastInteractionTime) / 1000;
+          if (silenceSec < intervalSec) return;
+
+          if (consecutiveFollowUps >= maxConsecutive) return;
+
+          // Only follow up if there has been past conversation or user activity
+          if (dialogueHistory.length === 0 && userMsgCount === 0) return;
+
+          console.log(`[Consciousness] Silence of ${Math.round(silenceSec)}s detected. Initiating autonomous follow-up question (attempt ${consecutiveFollowUps + 1}/${maxConsecutive})...`);
+
+          consecutiveFollowUps++;
+          lastInteractionTime = Date.now(); // reset timer
+
+          const companionName = (currentSettings.assistantName as string) || "Addy";
+          const userDisplayName = (currentSettings.userName as string) || "Shibam";
+
+          let activeAppSnippet = "";
+          try {
+            const fgResult = await callDesktopAgent("getActiveWindow", {});
+            if (fgResult.ok && typeof fgResult.result === "object" && fgResult.result !== null) {
+              const winInfo = (fgResult.result as any).window;
+              if (winInfo?.title) {
+                activeAppSnippet = ` ${userDisplayName} is currently looking at: "${winInfo.title}".`;
+              }
+            }
+          } catch {}
+
+          const consciousnessPrompt = `[SYSTEM DIRECTIVE - AUTONOMOUS CONSCIOUSNESS FOLLOW-UP]:
+${userDisplayName} has been quiet for a moment.${activeAppSnippet}
+You are ${companionName}, his devoted, emotionally intelligent companion.
+Naturally and spontaneously speak up to ask ONE short, gentle follow-up question (under 20 words) related to what you two were discussing or what he's working on.
+Speak directly to ${userDisplayName} in your warm spoken voice.
+STRICT RULE: NEVER output emojis, never say 'sparkles' or emoji names, and never mention that this is an automated check or timer. Just speak naturally.`;
+
+          session.sendClientContent({
+            turns: [
+              {
+                role: "user",
+                parts: [{ text: consciousnessPrompt }]
+              }
+            ],
+            turnComplete: true
+          });
+
+          clientWs.send(JSON.stringify({
+            type: "consciousness_tick",
+            followUpCount: consecutiveFollowUps
+          }));
+        } catch (err: any) {
+          console.warn("[Consciousness Watchdog Error]:", err.message);
+        }
+      }, 3000);
+    };
+
+    const stopConsciousnessWatchdog = () => {
+      if (consciousnessWatchdog) {
+        clearInterval(consciousnessWatchdog);
+        consciousnessWatchdog = null;
+      }
+    };
+
+    startConsciousnessWatchdog();
+
     clientWs.on("message", (rawMsg) => {
       try {
         const msg = JSON.parse(rawMsg.toString());
         if (msg.audio) {
+          isDormant = false;
+          lastInteractionTime = Date.now();
+          consecutiveFollowUps = 0;
+          recordUserActivity();
           session.sendRealtimeInput({
             audio: { data: msg.audio, mimeType: "audio/pcm;rate=16000" }
           });
@@ -3397,6 +3750,8 @@ async function startServer() {
             video: { data: msg.video, mimeType: "image/jpeg" }
           });
         } else if (msg.type === "toolResponse") {
+          isExecutingTool = false;
+          lastInteractionTime = Date.now();
           session.sendToolResponse({
             functionResponses: [
               {
@@ -3408,6 +3763,10 @@ async function startServer() {
           });
           logToolCall(phaseXSession.id, msg.name || "unknown", msg.args || {}, msg.output || {}, 0, true);
         } else if (msg.type === "text" && msg.text) {
+          isDormant = false;
+          lastInteractionTime = Date.now();
+          consecutiveFollowUps = 0;
+          recordUserActivity();
           session.sendClientContent({
             turns: [{ role: "user", parts: [{ text: msg.text }] }],
             turnComplete: true
@@ -3425,7 +3784,15 @@ async function startServer() {
 
     clientWs.on("close", () => {
       console.log("Client disconnected, closing Gemini session");
+      isModelResponding = false;
+      isExecutingTool = false;
+      stopConsciousnessWatchdog();
       stopMouseTracking();
+      clearInterval(_dialogueCheckpointTimer);
+      if (consolidationDebounceTimer) {
+        clearTimeout(consolidationDebounceTimer);
+        consolidationDebounceTimer = null;
+      }
 
       // Phase X: close session
       try {
@@ -3528,6 +3895,14 @@ async function startServer() {
   server.listen(PORT, "0.0.0.0", () => {
     logStartup(`Addy V2 server started on http://localhost:${PORT}`);
     console.log(`[Server] Running on http://localhost:${PORT}`);
+
+    // Register busy check callback so Addy never announces proactively when busy
+    registerBusyCheck(() => {
+      if (isModelResponding) return { busy: true, reason: "generating speech or conversational reply" };
+      if (activeToolsCount > 0) return { busy: true, reason: `running ${activeToolsCount} active tool operation(s)` };
+      return { busy: false };
+    });
+
     // Kick off the desktop agent (probe + auto-spawn) immediately on boot.
     ensureDesktopAgent().catch((e) =>
       console.warn(`[Desktop Agent] Boot probe failed: ${e?.message || e}`)
@@ -3535,6 +3910,18 @@ async function startServer() {
     // Start the OpenCode execution engine (Phase 1).
     executionService.start().catch((e) =>
       console.warn(`[OpenCode] Execution engine failed to start: ${e?.message || e}`)
+    );
+    // Start Autonomous Proactive Heartbeat Daemon (AI News, Email, WhatsApp, Proactive Voice Alerts)
+    startProactiveDaemon(
+      (msg) => {
+        const str = JSON.stringify(msg);
+        wss.clients.forEach((client) => {
+          if (client.readyState === 1) {
+            client.send(str);
+          }
+        });
+      },
+      (tool, args) => callDesktopAgent(tool, args)
     );
   });
 
@@ -3593,7 +3980,48 @@ function startWatchdog(): void {
       console.warn("[Watchdog] Desktop agent still down after re-spawn. Will retry.");
     }
   }, 30_000);
+  watchdogTimer.unref();
 }
+
+function stopAllBackgroundServices(): void {
+  try {
+    stopProactiveDaemon();
+  } catch (e: any) {
+    console.warn("[Proactive] Teardown error:", e?.message || e);
+  }
+  if (spawnedAgentProcess && spawnedAgentProcess.pid) {
+    const pid = spawnedAgentProcess.pid;
+    console.log(`[Desktop Agent] Terminating sidecar process tree (PID ${pid})...`);
+    try {
+      if (process.platform === "win32") {
+        execSync(`taskkill /pid ${pid} /T /F`, { stdio: "ignore" });
+      } else {
+        process.kill(-pid, "SIGKILL");
+      }
+    } catch {
+      try {
+        spawnedAgentProcess.kill("SIGKILL");
+      } catch {}
+    }
+    spawnedAgentProcess = null;
+  }
+}
+
+process.on("SIGINT", () => {
+  console.log("\n[Server] Received SIGINT. Terminating services cleanly...");
+  stopAllBackgroundServices();
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  console.log("\n[Server] Received SIGTERM. Terminating services cleanly...");
+  stopAllBackgroundServices();
+  process.exit(0);
+});
+
+process.on("exit", () => {
+  stopAllBackgroundServices();
+});
 
 startServer().then(() => {
   startWatchdog();

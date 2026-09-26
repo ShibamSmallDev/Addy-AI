@@ -13,6 +13,9 @@ import {
   PenSquare,
   Save,
   Loader2,
+  CircleDot,
+  Video,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -299,6 +302,40 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                     onChange={(v) => onChange({ autoStartScreenShare: v })}
                   />
 
+                  {/* Visualizer Presence Selector (Orb vs Video) */}
+                  <div className="pt-3 border-t border-white/5 space-y-2">
+                    <div className="flex flex-col text-left">
+                      <span className="text-[10px] font-bold font-mono text-slate-200">VISUALIZER PRESENCE</span>
+                      <span className="text-[8px] text-slate-400 uppercase font-mono">
+                        Select main screen presence form (toggleable anytime in top dock)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => onChange({ visualizerMode: "orb" })}
+                        className={`p-2.5 rounded-xl border text-[10px] font-mono flex items-center justify-center gap-2 transition cursor-pointer ${
+                          settings.visualizerMode === "orb"
+                            ? "border-cyan-400 bg-cyan-400/15 text-cyan-200 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                            : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        <CircleDot size={13} className={settings.visualizerMode === "orb" ? "text-cyan-400 animate-spin [animation-duration:8s]" : ""} />
+                        <span>REACTING ORB</span>
+                      </button>
+                      <button
+                        onClick={() => onChange({ visualizerMode: "video" })}
+                        className={`p-2.5 rounded-xl border text-[10px] font-mono flex items-center justify-center gap-2 transition cursor-pointer ${
+                          settings.visualizerMode === "video"
+                            ? "border-purple-400 bg-purple-400/15 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                            : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        <Video size={13} />
+                        <span>CHARACTER VIDEO</span>
+                      </button>
+                    </div>
+                  </div>
+
                   {settings.autoStart && (
                     <div className="mt-2 p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 flex items-center gap-2">
                       <Check size={14} className="text-emerald-400 shrink-0" />
@@ -480,24 +517,24 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                       </label>
                       <input
                         type="text"
-                        value={settings.assistantName ?? "Adrija"}
+                        value={settings.assistantName ?? "Addy"}
                         onChange={(e) => onChange({ assistantName: e.target.value })}
-                        placeholder="Adrija"
+                        placeholder="Addy"
                         className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400/50 transition"
                       />
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {["Adrija", "Addy", "Luna", "Maya"].map((name) => (
+                        {["Addy", "Luna", "Maya", "Nova"].map((name) => (
                           <button
                             key={name}
                             type="button"
                             onClick={() => onChange({ assistantName: name })}
                             className={`px-1.5 py-0.5 rounded border text-[8px] font-mono transition cursor-pointer ${
-                              (settings.assistantName ?? "Adrija").toLowerCase() === name.toLowerCase()
+                              (settings.assistantName ?? "Addy").toLowerCase() === name.toLowerCase()
                                 ? "border-pink-400 bg-pink-500/20 text-pink-300 font-bold"
                                 : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
                             }`}
                           >
-                            {name === "Adrija" ? "✨ Adrija" : name === "Addy" ? "🌸 Addy" : name}
+                            {name === "Addy" ? "🌸 Addy" : name === "Luna" ? "🌙 Luna" : name}
                           </button>
                         ))}
                       </div>
@@ -509,24 +546,24 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                       </label>
                       <input
                         type="text"
-                        value={settings.userName ?? "Master"}
+                        value={settings.userName ?? "Shibam"}
                         onChange={(e) => onChange({ userName: e.target.value })}
-                        placeholder="Master"
+                        placeholder="Shibam"
                         className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400/50 transition"
                       />
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {["Master", "Boss"].map((name) => (
+                        {["Shibam", "Master", "Boss"].map((name) => (
                           <button
                             key={name}
                             type="button"
                             onClick={() => onChange({ userName: name })}
                             className={`px-1.5 py-0.5 rounded border text-[8px] font-mono transition cursor-pointer ${
-                              (settings.userName ?? "Master").toLowerCase() === name.toLowerCase()
+                              (settings.userName ?? "Shibam").toLowerCase() === name.toLowerCase()
                                 ? "border-cyan-400 bg-cyan-500/20 text-cyan-300 font-bold"
                                 : "border-white/10 bg-white/5 text-slate-400 hover:text-white"
                             }`}
                           >
-                            {name === "Master" ? "👑 Master" : "💼 Boss"}
+                            {name === "Shibam" ? "👤 Shibam" : name === "Master" ? "👑 Master" : "💼 Boss"}
                           </button>
                         ))}
                       </div>
@@ -588,6 +625,63 @@ export function SettingsPanel({ isOpen, onClose, settings, onChange, themeColor 
                         }`}
                       />
                     </button>
+                  </div>
+
+                  {/* Autonomous Conversation Consciousness & Timed Follow-ups */}
+                  <div className="p-3.5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                          <MessageSquare size={16} className="text-cyan-400" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-mono font-bold text-cyan-300 flex items-center gap-1.5">
+                            AUTONOMOUS CONSCIOUSNESS
+                            <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                              Proactive
+                            </span>
+                          </div>
+                          <div className="text-[9px] font-mono text-slate-400 max-w-[260px] leading-tight">
+                            Addy notices when you go silent and asks thoughtful follow-up questions about your conversation or current project.
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => onChange({ proactiveFollowUps: !(settings.proactiveFollowUps ?? true) })}
+                        className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none cursor-pointer shrink-0 ${
+                          (settings.proactiveFollowUps ?? true) ? "bg-cyan-500" : "bg-white/10"
+                        }`}
+                      >
+                        <div
+                          className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-200 ease-in-out ${
+                            (settings.proactiveFollowUps ?? true) ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {(settings.proactiveFollowUps ?? true) && (
+                      <div className="pt-2 border-t border-white/5 space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-slate-400">Silence Before Follow-up:</span>
+                          <span className="text-cyan-300 font-bold">{settings.followUpIntervalSeconds ?? 45}s</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={20}
+                          max={180}
+                          step={5}
+                          value={settings.followUpIntervalSeconds ?? 45}
+                          onChange={(e) => onChange({ followUpIntervalSeconds: Number(e.target.value) })}
+                          className="w-full accent-cyan-400 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <div className="flex justify-between text-[8px] font-mono text-slate-500">
+                          <span>20s (Fast)</span>
+                          <span>45s (Balanced)</span>
+                          <span>180s (Relaxed)</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-2 border-t border-white/5 text-[10px] font-mono uppercase tracking-widest text-slate-500">

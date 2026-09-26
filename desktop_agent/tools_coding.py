@@ -69,14 +69,20 @@ def _detect_python() -> str:
     exe = sys.executable
     if exe and Path(exe).exists():
         return exe
+    local_app_data = os.environ.get("LOCALAPPDATA", "")
     candidates = [
-        r"C:\Users\MSI\AppData\Local\Programs\Python\Python311\python.exe",
-        r"C:\Python311\python.exe",
         "python",
         "python3",
+        "py",
+        os.path.join(local_app_data, "Programs", "Python", "Python312", "python.exe"),
+        os.path.join(local_app_data, "Programs", "Python", "Python311", "python.exe"),
+        os.path.join(local_app_data, "Programs", "Python", "Python310", "python.exe"),
+        r"C:\Python312\python.exe",
+        r"C:\Python311\python.exe",
+        r"C:\Python310\python.exe",
     ]
     for c in candidates:
-        if shutil.which(c):
+        if c and (Path(c).exists() or shutil.which(c)):
             return c
     raise ToolError("No usable Python interpreter found on this system.")
 

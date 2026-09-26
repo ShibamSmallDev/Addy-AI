@@ -4,5 +4,14 @@
   "wakePhrase": "babe",
   "micDeviceId": "",
   "sensitivity": 60,
-  "animations": true
+  "animations": true,
+  "assistantName": "Addy",
+  "userName": "Shibam",
+  "companionMode": true,
+  "personalityPreset": "warm_girl",
+  "autoStartScreenShare": true,
+  "visualizerMode": "video",
+  "proactiveFollowUps": true,
+  "followUpIntervalSeconds": 45,
+  "maxConsecutiveFollowUps": 1
 }

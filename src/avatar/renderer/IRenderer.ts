@@ -1,7 +1,7 @@
 import type { ParamValueMap } from "../types";
 
 export interface IRenderer {
-  readonly type: "live2d" | "pixi" | "none";
+  readonly type: "three" | "live2d" | "pixi" | "none";
 
   init(canvas: HTMLCanvasElement): Promise<void>;
 

@@ -4,6 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Addy</title>
+    <script>
+      // WebGL Shader Precision Polyfill for Chromium / ANGLE / Windows
+      (function() {
+        function patchGlProto(proto) {
+          if (!proto || !proto.getShaderPrecisionFormat) return;
+          var orig = proto.getShaderPrecisionFormat;
+          proto.getShaderPrecisionFormat = function(shaderType, precisionType) {
+            try {
+              var res = orig.call(this, shaderType, precisionType);
+              if (res && typeof res.precision === "number") return res;
+            } catch (e) {}
+            return { rangeMin: 1, rangeMax: 1, precision: 23 };
+          };
+        }
+        try {
+          if (typeof window !== "undefined") {
+            if (window.WebGLRenderingContext) patchGlProto(window.WebGLRenderingContext.prototype);
+            if (window.WebGL2RenderingContext) patchGlProto(window.WebGL2RenderingContext.prototype);
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

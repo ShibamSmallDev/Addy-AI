@@ -39,8 +39,8 @@ echo   Done.
 echo.
 
 echo [2/4] Starting Desktop Control Agent ^(Python, port 8765^)...
-start "Addy Desktop Agent" /MIN cmd /k "cd /d "%PROJECT_DIR%" && %PYTHON_CMD% -m uvicorn desktop_agent.main:app --host 127.0.0.1 --port 8765 "
-echo   Launching in background window...
+start "" /B %PYTHON_CMD% -m uvicorn desktop_agent.main:app --host 127.0.0.1 --port 8765 >nul 2>&1
+echo   Launching agent in background...
 echo.
 
 echo [3/4] Waiting for agent to be ready...
@@ -69,7 +69,7 @@ echo  Addy UI   : http://localhost:3000
 echo ============================================================
 echo.
 echo  Close this window to stop Addy.
-echo  ^(Desktop Agent runs in its own minimized window.\)
+echo  ^(Desktop Agent and UI both run cleanly in this single window.\)
 echo.
 
 cd /d "%PROJECT_DIR%"

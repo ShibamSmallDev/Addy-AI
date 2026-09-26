@@ -72,6 +72,10 @@ export class DesktopDispatcher {
   }
 
   private checkPermission(action: DesktopAction): boolean {
+    // Read-only queries like coordinate polling and screen reading are auto-allowed
+    if (action === 'mouseGetPosition' || action === 'takeScreenshot' || action === 'readScreen' || action === 'locateElement' || action === 'getScreenElements') {
+      return true;
+    }
     const key = `${action}`;
     const entry = this.permissions.get(key);
     if (!entry) return false;

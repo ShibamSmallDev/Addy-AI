@@ -110,14 +110,23 @@ DESKTOP_TOOL_NAMES = [
     "openFolder",
     "listFiles",
     "searchFiles",
-    # pc control (volume + gated power)
+    # pc control (volume + media + notification + gated power)
     "volumeUp",
     "volumeDown",
     "muteToggle",
     "setVolume",
+    "mediaPlayPause",
+    "mediaNextTrack",
+    "mediaPrevTrack",
+    "mediaStop",
+    "showDesktopNotification",
     "requestPowerAction",  # first step: issues a confirmation token
     "executePowerAction",  # second step: runs the gated action
     # windows
+    "listWindows",
+    "getActiveWindow",
+    "focusWindow",
+    "snapWindow",
     "minimizeWindow",
     "maximizeWindow",
     "closeWindow",
@@ -192,6 +201,13 @@ DESKTOP_TOOL_NAMES = [
     "socialYouTubeGetTranscript",
     "socialDiscordWebhookSend",
     "socialPostDraft",
+    # proactive speech & automated awareness
+    "speakText",
+    "fetchAINews",
+    "resetNewsCache",
+    "checkEmails",
+    "configureEmail",
+    "checkWhatsAppMessages",
 ]
 
 
@@ -218,6 +234,10 @@ _MODULE_NAMES = [
     "tools_startup",
     "tools_reach",
     "tools_social",
+    "tools_speech",
+    "tools_news",
+    "tools_email",
+    "tools_whatsapp",
 ]
 
 

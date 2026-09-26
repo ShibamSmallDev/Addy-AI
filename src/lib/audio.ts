@@ -88,9 +88,12 @@ export class AddyAudioSession {
   private onMemorySync?: (memories: any[]) => void;
   private onMousePosition?: (x: number, y: number) => void;
   private onSessionInit?: (sessionId: string) => void;
+  private onSleepMode?: () => void;
+  private onChangeTheme?: (color: string) => void;
   
   private currentState: LiveState = "disconnected";
   private isActivated = false;
+  private reconnectAttempts = 0;
 
   constructor(handlers: {
     onStateChange: (state: LiveState) => void;
@@ -100,6 +103,8 @@ export class AddyAudioSession {
     onMemorySync?: (memories: any[]) => void;
     onMousePosition?: (x: number, y: number) => void;
     onSessionInit?: (sessionId: string) => void;
+    onSleepMode?: () => void;
+    onChangeTheme?: (color: string) => void;
   }) {
     this.onStateChange = handlers.onStateChange;
     this.onTranscription = handlers.onTranscription;
@@ -108,6 +113,8 @@ export class AddyAudioSession {
     this.onMemorySync = handlers.onMemorySync;
     this.onMousePosition = handlers.onMousePosition;
     this.onSessionInit = handlers.onSessionInit;
+    this.onSleepMode = handlers.onSleepMode;
+    this.onChangeTheme = handlers.onChangeTheme;
   }
 
   private setState(state: LiveState) {
@@ -206,8 +213,8 @@ export class AddyAudioSession {
           this.micSourceNode = this.inputAudioCtx.createMediaStreamSource(this.micStream);
           this.micSourceNode.connect(this.inputAnalyser);
 
-          // Stream input PCM 16-bit to WS
-          this.micProcessorNode = this.inputAudioCtx.createScriptProcessor(2048, 1, 1);
+          // Stream input PCM 16-bit to WS with 512 buffer size (32ms latency)
+          this.micProcessorNode = this.inputAudioCtx.createScriptProcessor(512, 1, 1);
           this.micSourceNode.connect(this.micProcessorNode);
           this.micProcessorNode.connect(this.inputAudioCtx.destination);
 
@@ -215,6 +222,22 @@ export class AddyAudioSession {
             if (this.currentState === "disconnected" || this.currentState === "connecting") return;
             
             const channelData = e.inputBuffer.getChannelData(0);
+
+            let sum = 0;
+            for (let i = 0; i < channelData.length; i++) {
+              sum += channelData[i] * channelData[i];
+            }
+            const rms = Math.sqrt(sum / channelData.length);
+
+            // While speaking, suppress speaker echo so playback doesn't loop back into Gemini VAD
+            if (this.currentState === "speaking" && this.activeSources.length > 0 && rms < 0.015) {
+              return;
+            }
+
+            // Zero out faint room noise / ambient hiss floor (< 0.003) so Gemini VAD commits end-of-speech immediately
+            if (rms < 0.003) {
+              channelData.fill(0);
+            }
             
             // Convert to base64 Int16 Little Endian PCM
             const pcmBuffer = floatTo16BitPCM(channelData);
@@ -252,9 +275,24 @@ export class AddyAudioSession {
             if (data.status === "connecting_gemini") {
               // Wait for Gemini Live connection
             } else if (data.status === "connected") {
+              this.reconnectAttempts = 0;
               this.setState("listening");
             } else if (data.status === "session_closed") {
+              const wasActivated = this.isActivated;
               this.disconnect();
+              if (wasActivated) {
+                if (this.reconnectAttempts < 3) {
+                  this.reconnectAttempts++;
+                  console.log(`[Addy WS] Session closed upstream; auto-reconnecting in 1.5s (attempt ${this.reconnectAttempts}/3)...`);
+                  setTimeout(() => {
+                    this.connect().catch((err) => console.warn("[Addy WS] Reconnect attempt error:", err));
+                  }, 1500);
+                } else {
+                  console.warn("[Addy WS] Max auto-reconnect attempts reached (3). Halting reconnect loop.");
+                  this.reconnectAttempts = 0;
+                  this.onError("Connection to Addy closed. Say babe or click Connect to wake.");
+                }
+              }
             }
             return;
           }
@@ -305,6 +343,20 @@ export class AddyAudioSession {
             }
           }
 
+          // Handle sleep mode command from server/model
+          if (data.type === "enter_sleep_mode") {
+            if (this.onSleepMode) {
+              this.onSleepMode();
+            }
+          }
+
+          // Handle theme change from server/model
+          if (data.type === "change_theme" && data.color) {
+            if (this.onChangeTheme) {
+              this.onChangeTheme(data.color);
+            }
+          }
+
           // Handle Tool Calling
           if (data.type === "toolCall") {
             const { callId, name, args } = data;
@@ -328,7 +380,9 @@ export class AddyAudioSession {
 
       this.ws.onerror = (wsError) => {
         console.error("WebSocket transport error:", wsError);
-        this.onError("Holographic network link lost. Please check connection.");
+        if (this.currentState !== "disconnected") {
+          this.onError("Holographic network link lost. Please check connection.");
+        }
         this.disconnect();
       };
 
@@ -387,8 +441,8 @@ export class AddyAudioSession {
       
       // Gapless scheduler sync
       if (this.nextStartTime < currentTime) {
-        // Start fresh: 30ms ahead to bridge schedule timing
-        this.nextStartTime = currentTime + 0.03;
+        // Start fresh: 5ms ahead for near-zero schedule delay
+        this.nextStartTime = currentTime + 0.005;
       }
 
       source.start(this.nextStartTime);
@@ -419,9 +473,12 @@ export class AddyAudioSession {
     this.isActivated = false;
     this.setState("disconnected");
 
-    // Close WS socket
+    // Close WS socket cleanly without firing spurious onError callbacks
     if (this.ws) {
       try {
+        this.ws.onerror = null;
+        this.ws.onclose = null;
+        this.ws.onmessage = null;
         this.ws.close();
       } catch (e) {}
       this.ws = null;

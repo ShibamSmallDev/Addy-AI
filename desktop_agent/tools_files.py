@@ -36,6 +36,8 @@ SAFE_ROOTS: List[Path] = [
     HOME / "Videos",
     Path(os.getcwd()),  # project root
 ]
+if Path(r"C:\MY PROJECTS").exists():
+    SAFE_ROOTS.append(Path(r"C:\MY PROJECTS"))
 
 # Friendly folder aliases -> resolved path.
 FOLDER_ALIASES: Dict[str, Path] = {
@@ -43,6 +45,7 @@ FOLDER_ALIASES: Dict[str, Path] = {
     "documents": HOME / "Documents",
     "downloads": HOME / "Downloads",
     "pictures": HOME / "Pictures",
+    "projects": Path(r"C:\MY PROJECTS") if Path(r"C:\MY PROJECTS").exists() else HOME / "Documents",
     "photos": HOME / "Pictures",
     "music": HOME / "Music",
     "videos": HOME / "Videos",

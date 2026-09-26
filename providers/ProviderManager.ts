@@ -83,23 +83,27 @@ export class ProviderManager {
     const modelChain = [originalModel, ...execProv.getFallbackModels()]
     const lastError: Error[] = []
 
-    for (const modelName of modelChain) {
-      try {
-        if (modelName !== execProv.getModel()) {
-          execProv.setModel?.(modelName)
+    try {
+      for (const modelName of modelChain) {
+        try {
+          if (modelName !== execProv.getModel()) {
+            execProv.setModel?.(modelName)
+          }
+          const result = await execProv.chat({
+            messages: messages as any,
+            systemPrompt,
+            signal,
+          })
+          return result
+        } catch (e: any) {
+          lastError.push(e)
+          console.log('[ProviderManager] Model ' + modelName + ' failed: ' + e.message.slice(0, 100))
         }
-        const result = await execProv.chat({
-          messages: messages as any,
-          systemPrompt,
-          signal,
-        })
-        if (execProv.getModel() !== originalModel) {
-          try { setSetting(MODEL_SETTING_PREFIX + this.executionProvider, execProv.getModel()) } catch {}
-        }
-        return result
-      } catch (e: any) {
-        lastError.push(e)
-        console.log('[ProviderManager] Model ' + modelName + ' failed: ' + e.message.slice(0, 100))
+      }
+    } finally {
+      // Restore user's configured model so transient errors do not permanently demote selection
+      if (execProv.getModel() !== originalModel) {
+        execProv.setModel?.(originalModel)
       }
     }
 

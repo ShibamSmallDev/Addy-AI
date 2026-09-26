@@ -11,9 +11,9 @@
  */
 
 export interface AddySettings {
-  /** Name of the AI companion / assistant (e.g. "Adri", "Addy", "Luna"). */
+  /** Name of the AI companion / assistant (e.g. "Addy", "Luna", "Maya"). */
   assistantName: string;
-  /** Your preferred name / nickname (e.g. "Master", "Shibam"). */
+  /** Your preferred name / nickname (e.g. "Shibam", "Master"). */
   userName: string;
   /** Personality style preset id ("warm_girl" | "playful" | "tsundere" | "cyberpunk" | "devoted_maid" | "pro_copilot"). */
   personalityPreset: string;
@@ -33,11 +33,19 @@ export interface AddySettings {
   sensitivity: number;
   /** Master toggle for UI animations. */
   animations: boolean;
+  /** Visualizer presence mode on main screen ('orb' = reacting holographic orb, 'video' = character video playback). */
+  visualizerMode: 'orb' | 'video';
+  /** Autonomous conversation consciousness: Addy proactively asks follow-up questions during silence. */
+  proactiveFollowUps: boolean;
+  /** Seconds of silence before Addy asks a follow-up question (default 45s). */
+  followUpIntervalSeconds: number;
+  /** Maximum consecutive follow-ups without a user reply before gracefully resting. */
+  maxConsecutiveFollowUps: number;
 }
 
 export const DEFAULT_SETTINGS: AddySettings = {
-  assistantName: "Adri",
-  userName: "Master",
+  assistantName: "Addy",
+  userName: "Shibam",
   personalityPreset: "warm_girl",
   companionMode: true,
   autoStart: false,
@@ -47,6 +55,10 @@ export const DEFAULT_SETTINGS: AddySettings = {
   micDeviceId: "",
   sensitivity: 60,
   animations: true,
+  visualizerMode: "orb",
+  proactiveFollowUps: true,
+  followUpIntervalSeconds: 45,
+  maxConsecutiveFollowUps: 1,
 };
 
 const STORAGE_KEY = "Addy.settings.v2";

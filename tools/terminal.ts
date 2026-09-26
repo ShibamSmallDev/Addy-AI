@@ -87,13 +87,14 @@ export async function executeCommand(
 
     killProcess(socketId)
 
-    const parts = command.split(/\s+/)
-    const cmd = parts[0]!
-    const args = parts.slice(1)
-
     let proc: ChildProcess
     try {
-      proc = spawn(cmd, args, { cwd, windowsHide: true, env: { ...process.env } })
+      proc = spawn(trimmed, {
+        shell: true,
+        cwd,
+        windowsHide: true,
+        env: { ...process.env },
+      })
     } catch (err: any) {
       resolve({ output, exit: { exitCode: null, signal: null, error: err.message } })
       return

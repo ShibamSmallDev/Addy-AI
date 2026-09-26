@@ -92,8 +92,12 @@ def _set_volume_scalar(value: float) -> None:
 
 # VK codes for media keys
 VK_VOLUME_MUTE = 0xAD
-VK_VOLUME_UP = 0xAF
 VK_VOLUME_DOWN = 0xAE
+VK_VOLUME_UP = 0xAF
+VK_MEDIA_NEXT_TRACK = 0xB0
+VK_MEDIA_PREV_TRACK = 0xB1
+VK_MEDIA_STOP = 0xB2
+VK_MEDIA_PLAY_PAUSE = 0xCD
 KEYEVENTF_KEYUP = 0x0002
 
 
@@ -113,6 +117,14 @@ def _press_vk(vk: int) -> None:
                 pyautogui.press("volumedown")
             elif vk == VK_VOLUME_MUTE:
                 pyautogui.press("volumemute")
+            elif vk == VK_MEDIA_PLAY_PAUSE:
+                pyautogui.press("playpause")
+            elif vk == VK_MEDIA_NEXT_TRACK:
+                pyautogui.press("nexttrack")
+            elif vk == VK_MEDIA_PREV_TRACK:
+                pyautogui.press("prevtrack")
+            elif vk == VK_MEDIA_STOP:
+                pyautogui.press("stop")
         except Exception:
             pass
 
@@ -166,15 +178,34 @@ def volume_down(args: Dict[str, Any]) -> Dict[str, Any]:
 
 @register("setVolume")
 def set_volume(args: Dict[str, Any]) -> Dict[str, Any]:
+    raw_val = None
     if "percent" in args:
-        pct = float(args["percent"])
+        raw_val = float(args["percent"])
     elif "level" in args:
-        pct = float(args["level"])
+        raw_val = float(args["level"])
+    elif "volume" in args:
+        raw_val = float(args["volume"])
     else:
-        raise ToolError("Parameter 'percent' (0-100) is required.")
-    pct = max(0.0, min(100.0, pct))
-    _set_volume_scalar(pct / 100.0)
-    return {"result": f"Volume set to {int(pct)}%."}
+        raise ToolError("Parameter 'percent' (0-100) or 'level' (0.0-1.0) is required.")
+
+    # Automatically distinguish between 0.0-1.0 scalar and 0-100 percentage:
+    # If the user or model passes 0.5 (or any value <= 1.0 that isn't explicitly 0),
+    # treat values <= 1.0 as a scalar fraction, and values > 1.0 as percentage (0-100).
+    # Exception: if percent parameter was used with 1, 0.5 etc. or level with 50.
+    if "level" in args and raw_val <= 1.0:
+        scalar = max(0.0, min(1.0, raw_val))
+        pct = scalar * 100.0
+    elif raw_val <= 1.0 and raw_val > 0.0:
+        # e.g. 0.5 passed -> 50%
+        scalar = max(0.0, min(1.0, raw_val))
+        pct = scalar * 100.0
+    else:
+        # e.g. 50 or 80 passed
+        pct = max(0.0, min(100.0, raw_val))
+        scalar = pct / 100.0
+
+    _set_volume_scalar(scalar)
+    return {"result": f"Volume set to {int(round(pct))}%."}
 
 
 @register("muteToggle")
@@ -354,6 +385,81 @@ def set_brightness(args: Dict[str, Any]) -> Dict[str, Any]:
     return {"result": f"Brightness set to {new}%.", "brightness": new}
 
 
+# --- Media playback control --------------------------------------------------
+
+
+@register("mediaPlayPause")
+def media_play_pause(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Toggle play/pause for active media (Spotify, YouTube, browser audio)."""
+    _press_vk(VK_MEDIA_PLAY_PAUSE)
+    return {"result": "Toggled media play/pause."}
+
+
+@register("mediaNextTrack")
+def media_next_track(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Skip to next media track."""
+    _press_vk(VK_MEDIA_NEXT_TRACK)
+    return {"result": "Skipped to next track."}
+
+
+@register("mediaPrevTrack")
+def media_prev_track(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Return to previous media track."""
+    _press_vk(VK_MEDIA_PREV_TRACK)
+    return {"result": "Returned to previous track."}
+
+
+@register("mediaStop")
+def media_stop(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Stop media playback."""
+    _press_vk(VK_MEDIA_STOP)
+    return {"result": "Stopped media playback."}
+
+
+# --- Desktop Notifications ---------------------------------------------------
+
+
+@register("showDesktopNotification")
+def show_desktop_notification(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Display a native Windows 10/11 desktop notification with title and message."""
+    title = (args.get("title") or "Addy AI").replace('"', '`"')
+    message = (args.get("message") or args.get("text") or "").replace('"', '`"')
+    if not message:
+        raise ToolError("Parameter 'message' is required.")
+
+    if platform.system() == "Windows":
+        ps_script = f"""
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+$template = @"
+<toast>
+    <visual>
+        <binding template="ToastGeneric">
+            <text>{title}</text>
+            <text>{message}</text>
+        </binding>
+    </visual>
+</toast>
+"@
+$xml.LoadXml($template)
+$toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Addy AI")
+$notifier.Show($toast)
+"""
+        try:
+            subprocess.run(
+                ["powershell", "-NoProfile", "-Command", ps_script],
+                check=False,
+                capture_output=True,
+                timeout=5,
+            )
+            return {"result": f"Notification displayed: '{title} - {message}'"}
+        except Exception as e:
+            return {"result": f"Notification triggered: {e}"}
+    return {"result": f"Notification: [{title}] {message}"}
+
+
 __all__ = [
     "volume_up",
     "volume_down",
@@ -364,4 +470,9 @@ __all__ = [
     "brightness_up",
     "brightness_down",
     "set_brightness",
+    "media_play_pause",
+    "media_next_track",
+    "media_prev_track",
+    "media_stop",
+    "show_desktop_notification",
 ]

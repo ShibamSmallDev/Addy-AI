@@ -7,8 +7,8 @@ type Phase = "checking" | "needsSetup" | "ready";
 
 export function IdentitySetupGate({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>("checking");
-  const [assistantName, setAssistantName] = useState("Adri");
-  const [userName, setUserName] = useState("Master");
+  const [assistantName, setAssistantName] = useState("Addy");
+  const [userName, setUserName] = useState("Shibam");
   const [personality, setPersonality] = useState("warm_girl");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +22,8 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
         if (cancelled) return;
         if (data.hasSetup) {
           saveSettings({
-            assistantName: data.assistantName || "Adri",
-            userName: data.userName || "Master",
+            assistantName: data.assistantName || "Addy",
+            userName: data.userName || "Shibam",
             personalityPreset: data.personalityPreset || "warm_girl",
           });
           setPhase("ready");
@@ -41,8 +41,8 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const aiName = assistantName.trim() || "Adri";
-    const uName = userName.trim() || "Master";
+    const aiName = assistantName.trim() || "Addy";
+    const uName = userName.trim() || "Shibam";
     if (submitting) return;
 
     setSubmitting(true);
@@ -149,12 +149,12 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                 autoFocus
                 value={assistantName}
                 onChange={(e) => setAssistantName(e.target.value)}
-                placeholder="e.g. Adri, Addy, Luna"
+                placeholder="e.g. Addy, Luna, Maya"
                 className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-sm text-white font-mono outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/20"
               />
               <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] font-mono text-slate-500">Suggestions:</span>
-                {["Adri", "Addy", "Luna", "Maya"].map((name) => (
+                {["Addy", "Luna", "Maya", "Nova"].map((name) => (
                   <button
                     key={name}
                     type="button"
@@ -165,7 +165,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                         : "border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    {name === "Adri" ? "✨ Adri" : name === "Addy" ? "🌸 Addy" : name}
+                    {name === "Addy" ? "🌸 Addy" : name === "Luna" ? "🌙 Luna" : name}
                   </button>
                 ))}
               </div>
@@ -180,12 +180,12 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                placeholder="e.g. Master, Boss"
+                placeholder="e.g. Shibam, Master, Boss"
                 className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-sm text-white font-mono outline-none transition focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-500/20"
               />
               <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] font-mono text-slate-500">Suggestions:</span>
-                {["Master", "Boss"].map((name) => (
+                {["Shibam", "Master", "Boss"].map((name) => (
                   <button
                     key={name}
                     type="button"
@@ -196,7 +196,7 @@ export function IdentitySetupGate({ children }: { children: ReactNode }) {
                         : "border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    {name === "Master" ? "👑 Master" : "💼 Boss"}
+                    {name === "Shibam" ? "👤 Shibam" : name === "Master" ? "👑 Master" : "💼 Boss"}
                   </button>
                 ))}
               </div>

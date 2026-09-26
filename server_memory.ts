@@ -1,10 +1,90 @@
 import fs from "fs/promises";
 import path from "path";
+import { EventEmitter } from "events";
 import { GoogleGenAI, Type } from "@google/genai";
 import { Memory, MemoryTransaction } from "./src/lib/memoryTypes";
 import { MEMORY_ROOT } from "./server_paths";
-import { storeMemory, getAllMemories, deleteMemory, searchMemories } from "./memory/retriever";
+import { storeMemory, getAllMemories, deleteMemory, searchMemories, type MemoryCategory } from "./memory/retriever";
 import { generateContentWithFallback } from "./providers/GeminiProvider";
+
+export const memoryEvents = new EventEmitter();
+
+/**
+ * Real-time fast-path memory extractor.
+ * Immediately captures explicit user statements, preferences, facts, and instructions
+ * and persists them to SQLite without waiting for background batch consolidation.
+ */
+export function extractImmediateMemory(
+  userText: string,
+  projectPath?: string
+): { key: string; value: string; category: MemoryCategory; id: string } | null {
+  if (!userText || userText.trim().length < 5) return null;
+  const text = userText.trim();
+
+  const patterns: {
+    regex: RegExp;
+    category: MemoryCategory;
+    transform?: (match: RegExpMatchArray) => { key: string; value: string };
+  }[] = [
+    {
+      regex: /^(?:please\s+)?remember\s+(?:that\s+|:\s*)?(.+)$/i,
+      category: "preference",
+      transform: (m) => ({ key: m[1].slice(0, 30), value: m[1].trim() }),
+    },
+    {
+      regex: /^(?:please\s+)?don'?t\s+forget\s+(?:that\s+|:\s*)?(.+)$/i,
+      category: "reminder",
+      transform: (m) => ({ key: m[1].slice(0, 30), value: m[1].trim() }),
+    },
+    {
+      regex: /^(?:please\s+)?keep\s+in\s+mind\s+(?:that\s+|:\s*)?(.+)$/i,
+      category: "preference",
+      transform: (m) => ({ key: m[1].slice(0, 30), value: m[1].trim() }),
+    },
+    {
+      regex: /^(?:please\s+)?note\s+(?:that\s+|:\s*)?(.+)$/i,
+      category: "project_note",
+      transform: (m) => ({ key: m[1].slice(0, 30), value: m[1].trim() }),
+    },
+    {
+      regex: /^my\s+favorite\s+(\w+)\s+is\s+(.+)$/i,
+      category: "preference",
+      transform: (m) => ({ key: `favorite_${m[1]}`, value: `User's favorite ${m[1]} is ${m[2].trim()}` }),
+    },
+    {
+      regex: /^my\s+(dog|cat|pet|wife|husband|partner|son|daughter|kid|editor|language|stack|os|operating system|job|role|hobby|birthday)\s+is\s+(.+)$/i,
+      category: "identity",
+      transform: (m) => ({ key: `user_${m[1].replace(/\s+/g, '_')}`, value: `User's ${m[1]} is ${m[2].trim()}` }),
+    },
+  ];
+
+  for (const p of patterns) {
+    const m = text.match(p.regex);
+    if (m) {
+      const { key, value } = p.transform ? p.transform(m) : { key: m[1].slice(0, 30), value: m[1].trim() };
+      try {
+        const id = storeMemory(
+          key.toLowerCase().replace(/[^\w\s-]/g, '').trim(),
+          value,
+          p.category,
+          projectPath,
+          {
+            source: 'user_direct_statement',
+            importance: 0.9,
+            confidence: 1.0,
+          }
+        );
+        console.log(`[Memory] Real-time instant memory stored: [${p.category}] "${value}" (ID: ${id})`);
+        const item = { id, key, value, category: p.category };
+        memoryEvents.emit('memory_created', item);
+        return item;
+      } catch (err: any) {
+        console.error('[Memory] Error storing immediate memory:', err.message);
+      }
+    }
+  }
+  return null;
+}
 
 // Mirror file lives in the vault (outside the Vite root) so writes never trigger
 // a dev-server page reload. SQL remains the source of truth.
@@ -58,7 +138,8 @@ export async function saveMemories(memories: Memory[]): Promise<void> {
     // Only delete specific removed memories if a valid list was supplied
     if (memories.length > 0 && existing.length > 0) {
       for (const e of existing) {
-        if (!targetIds.has(e.id) && e.status === 'active') {
+        // Preserve historical session memories and pinned memories across session turns
+        if (!targetIds.has(e.id) && e.status === 'active' && e.category !== 'session' && !e.pinned) {
           try { deleteMemory(e.id); } catch {}
         }
       }
@@ -155,7 +236,7 @@ export function formatSystemInstructionsWithMemories(baseInstruction: string, me
     "CURRENT PERSISTENT KNOWLEDGE CARD:\n";
 
   const categoriesOrdered = [
-    { key: "session", label: "Previous Session Summary (what was discussed last time)" },
+    { key: "session", label: "Previous Sessions History & Chronology (what was discussed in past sessions with dates/times)" },
     { key: "identity", label: "Identity (Name, nick, profession, background)" },
     { key: "preference", label: "Preferences & Tastes (Likes, dislikes, games, movies)" },
     { key: "goal", label: "Active Goals & Aspirations" },
@@ -166,7 +247,12 @@ export function formatSystemInstructionsWithMemories(baseInstruction: string, me
   ];
 
   categoriesOrdered.forEach((cat) => {
-    const list = grouped[cat.key] || [];
+    let list = grouped[cat.key] || [];
+    // Keep most recent/relevant entries per category to avoid multi-thousand token prompt bloat in voice mode
+    const limit = cat.key === "session" ? 4 : 6;
+    if (list.length > limit) {
+      list = list.slice(-limit);
+    }
     if (list.length > 0) {
       memoryBlock += `* ${cat.label}:\n` + list.map(t => `  - ${t}`).join("\n") + "\n";
     }
@@ -182,19 +268,52 @@ let isConsolidating = false;
 let lastConsolidationTime = 0;
 const CONSOLIDATION_COOLDOWN_MS = 30_000;
 
+// Persistent rolling buffer: keeps turns that arrived during cooldown so no messages are dropped
+let unconsolidatedBuffer: { role: string; text: string }[] = [];
+let pendingConsolidationTimer: NodeJS.Timeout | null = null;
+let lastConsolidationApiKey: string = "";
+
+export function queueDialogueForConsolidation(slice: { role: string; text: string }[]): void {
+  for (const item of slice) {
+    if (item.text?.trim()) {
+      unconsolidatedBuffer.push({ role: item.role, text: item.text.trim() });
+    }
+  }
+  if (unconsolidatedBuffer.length > 50) {
+    unconsolidatedBuffer = unconsolidatedBuffer.slice(-50);
+  }
+}
+
 export async function processConversationSlice(
   apiKey: string,
   dialogueHistory: { role: string; text: string }[],
   terminal = false
 ): Promise<Memory[] | null> {
+  if (apiKey) lastConsolidationApiKey = apiKey;
+  if (dialogueHistory.length > 0) {
+    queueDialogueForConsolidation(dialogueHistory);
+  }
+
   const now = Date.now();
   if (!terminal) {
     if (now - lastConsolidationTime < CONSOLIDATION_COOLDOWN_MS) {
-      console.log(`[Memory] Consolidation gate active (${Math.round((now - lastConsolidationTime) / 1000)}s since last), skipping`);
+      const waitMs = CONSOLIDATION_COOLDOWN_MS - (now - lastConsolidationTime);
+      console.log(`[Memory] Consolidation gate active (${Math.round((now - lastConsolidationTime) / 1000)}s since last). Queued ${unconsolidatedBuffer.length} messages.`);
+      
+      // Auto-schedule delayed drain if not already scheduled
+      if (!pendingConsolidationTimer && lastConsolidationApiKey) {
+        pendingConsolidationTimer = setTimeout(async () => {
+          pendingConsolidationTimer = null;
+          if (unconsolidatedBuffer.length >= 2 && !isConsolidating) {
+            console.log(`[Memory] Auto-draining unconsolidated buffer (${unconsolidatedBuffer.length} messages)...`);
+            await processConversationSlice(lastConsolidationApiKey, [], false);
+          }
+        }, waitMs + 500);
+      }
       return null;
     }
     if (isConsolidating) {
-      console.log("[Memory] Consolidation loop busy, skipping slice processing");
+      console.log("[Memory] Consolidation loop busy, dialogue queued in buffer");
       return null;
     }
   } else {
@@ -203,14 +322,19 @@ export async function processConversationSlice(
       console.log("[Memory] Terminal consolidation waiting for in-progress run...");
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
+    if (pendingConsolidationTimer) {
+      clearTimeout(pendingConsolidationTimer);
+      pendingConsolidationTimer = null;
+    }
   }
 
-  if (dialogueHistory.length < 2) {
+  const batchToProcess = [...unconsolidatedBuffer];
+  if (batchToProcess.length < 2) {
     return null;
   }
 
   isConsolidating = true;
-  console.log("[Memory] Initiating pipeline for dialogue slice of length:", dialogueHistory.length);
+  console.log("[Memory] Initiating pipeline for dialogue batch of length:", batchToProcess.length);
 
   try {
     const ai = new GoogleGenAI({
@@ -374,25 +498,38 @@ ${dialogueContext}
       }
     }
 
-    // Save/update the session summary as a persistent memory
+    // Save the session summary as a persistent chronological memory with date & time
     if (hasSessionSummary) {
-      const existingSessionIdx = updatedMemories.findIndex(m => m.category === "session");
-      if (existingSessionIdx !== -1) {
-        updatedMemories[existingSessionIdx] = {
-          ...updatedMemories[existingSessionIdx],
-          text: sessionSummary!,
-          updatedAt: timestamp
-        };
-      } else {
-        updatedMemories.push({
+      const dateStr = new Date().toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      const timeStr = new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const sessionMemoryText = `[Session on ${dateStr} at ${timeStr}]: ${sessionSummary!}`;
+
+      const isDuplicate = updatedMemories.some(
+        (m) => m.category === "session" && (m.text === sessionMemoryText || m.text.includes(sessionSummary!))
+      );
+      if (!isDuplicate) {
+        const newSessionMem: Memory = {
           id: Math.random().toString(36).substring(2, 11),
           category: "session",
-          text: sessionSummary!,
+          text: sessionMemoryText,
           createdAt: timestamp,
-          updatedAt: timestamp
-        });
+          updatedAt: timestamp,
+        };
+        updatedMemories.push(newSessionMem);
+        memoryEvents.emit("memory_created", newSessionMem);
       }
     }
+
+    // Drain processed batch from buffer
+    unconsolidatedBuffer = unconsolidatedBuffer.filter(item => !batchToProcess.includes(item));
 
     await saveMemories(updatedMemories);
     isConsolidating = false;

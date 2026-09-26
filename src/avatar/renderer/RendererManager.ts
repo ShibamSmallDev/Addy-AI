@@ -1,4 +1,5 @@
 import type { IRenderer } from "./IRenderer";
+import { ThreeRenderer } from "./ThreeRenderer";
 import { PixiJSRenderer } from "./PixiJSRenderer";
 import { Live2DRenderer } from "./Live2DRenderer";
 
@@ -6,6 +7,15 @@ export class RendererManager {
   private renderer: IRenderer = { type: "none" as const, init: async () => {}, render: () => {}, resize: () => {}, destroy: () => {} };
 
   async select(canvas: HTMLCanvasElement): Promise<IRenderer> {
+    try {
+      const three = new ThreeRenderer();
+      await three.init(canvas);
+      this.renderer = three;
+      return this.renderer;
+    } catch (e) {
+      console.warn("[RendererManager] ThreeRenderer failed, trying fallbacks:", e);
+    }
+
     const live2d = new Live2DRenderer();
     await live2d.init(canvas);
 

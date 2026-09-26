@@ -50,8 +50,19 @@ async function proposeSkill(userText: string, replyText: string): Promise<SkillP
     "You are a skill-extraction assistant for a personal AI companion."
   );
 
-  const json = raw.replace(/```json|```/g, "").trim();
-  const parsed = JSON.parse(json) as SkillProposal;
+  const startIdx = raw.indexOf('{');
+  const endIdx = raw.lastIndexOf('}');
+  if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
+    return null;
+  }
+
+  let parsed: SkillProposal;
+  try {
+    parsed = JSON.parse(raw.slice(startIdx, endIdx + 1)) as SkillProposal;
+  } catch {
+    return null;
+  }
+
   if (!parsed.trigger || !Array.isArray(parsed.steps) || parsed.steps.length < 2) {
     return null;
   }

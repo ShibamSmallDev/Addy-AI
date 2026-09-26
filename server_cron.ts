@@ -1,9 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { DATA_DIR } from "./server_paths";
 
 interface CronJob {
   id: string;
@@ -20,7 +17,7 @@ interface CronJob {
   maxRuns?: number;        // optional limit
 }
 
-const CRON_FILE = path.resolve(__dirname, "..", "cron_jobs.json");
+const CRON_FILE = path.join(DATA_DIR, "cron_jobs.json");
 const handlers = new Map<string, (payload: Record<string, unknown>) => Promise<void>>();
 const jobs = new Map<string, CronJob>();
 let jobTimers = new Map<string, ReturnType<typeof setTimeout> | ReturnType<typeof setInterval>>();

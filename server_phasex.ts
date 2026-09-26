@@ -76,12 +76,23 @@ export interface PhaseXToolCall {
   timestamp: number;
 }
 
+export interface PhaseXSessionSummary {
+  id: string;
+  title: string;
+  startTime: number;
+  endTime: number | null;
+  durationMinutes: number;
+  messageCount: number;
+  summary: string | null;
+}
+
 export interface RecallContext {
   session: {
     lastSessionSummary: string | null;
     lastSessionId: string | null;
     lastSessionTime: number | null;
   };
+  recentSessions?: PhaseXSessionSummary[];
   longTerm: {
     preferences: Record<string, string>;
     projects: string[];
@@ -794,16 +805,39 @@ export function addLongTermEntry(category: Exclude<LtmCategory, "preferences">, 
 // Immediate Recall
 // ---------------------------------------------------------------------------
 
+function formatSessionDate(ts: number): string {
+  const d = new Date(ts);
+  return d.toLocaleDateString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function buildRecallContext(currentSessionId: string | null): RecallContext {
-  // Get last completed session (ignore placeholder summaries written when
-  // summary generation failed; a placeholder must never surface as recall)
-  const lastSession = queryOne(
-    "SELECT id, summary, end_time FROM phasex_sessions WHERE end_time IS NOT NULL ORDER BY end_time DESC LIMIT 1"
+  // Query up to 5 most recent completed sessions with messages or summaries
+  const pastSessionsRaw = query(
+    "SELECT id, title, start_time, end_time, message_count, summary FROM phasex_sessions WHERE end_time IS NOT NULL AND (message_count > 0 OR summary IS NOT NULL) ORDER BY end_time DESC LIMIT 5"
   );
-  const lastSessionSummary =
-    lastSession?.summary && !/^summary unavailable\.?$/i.test(lastSession.summary.trim())
-      ? lastSession.summary
-      : null;
+
+  const recentSessions: PhaseXSessionSummary[] = pastSessionsRaw
+    .map((row: any) => ({
+      id: row.id,
+      title: row.title || "Previous Session",
+      startTime: row.start_time,
+      endTime: row.end_time,
+      durationMinutes: Math.max(1, Math.round(((row.end_time || Date.now()) - row.start_time) / 60000)),
+      messageCount: row.message_count || 0,
+      summary: row.summary && !/^summary unavailable\.?$/i.test(row.summary.trim()) ? row.summary.trim() : null,
+    }))
+    .filter((s) => s.summary || s.messageCount > 0);
+
+  const lastSessionSummary = recentSessions.find((s) => s.summary)?.summary || null;
+  const lastSessionId = recentSessions[0]?.id || null;
+  const lastSessionTime = recentSessions[0]?.endTime || null;
 
   // Get current active session for workspace/project
   const currentSession = currentSessionId ? getSession(currentSessionId) : null;
@@ -818,17 +852,18 @@ export function buildRecallContext(currentSessionId: string | null): RecallConte
   if (currentSessionId) {
     const recent = getRecentSessionMessages(currentSessionId, 10);
     recentConversation = recent.map((m) => ({ role: m.role, text: m.text }));
-  } else if (lastSession) {
-    const recent = getRecentSessionMessages(lastSession.id, 10);
+  } else if (lastSessionId) {
+    const recent = getRecentSessionMessages(lastSessionId, 10);
     recentConversation = recent.map((m) => ({ role: m.role, text: m.text }));
   }
 
   return {
     session: {
       lastSessionSummary,
-      lastSessionId: lastSessionSummary ? lastSession?.id || null : null,
-      lastSessionTime: lastSessionSummary ? lastSession?.end_time || null : null,
+      lastSessionId,
+      lastSessionTime,
     },
+    recentSessions,
     longTerm: {
       preferences,
       projects,
@@ -857,11 +892,26 @@ export function formatRecallPrompt(context: RecallContext): string {
     );
   }
 
-  if (context.session.lastSessionSummary) {
+  if (context.recentSessions && context.recentSessions.length > 0) {
+    const timeline = context.recentSessions
+      .map((s) => {
+        const dateStr = formatSessionDate(s.startTime);
+        const header = `• [${dateStr} | Duration: ~${s.durationMinutes} min] "${s.title}"`;
+        const body = s.summary ? `  Summary: ${s.summary}` : `  Activity: ${s.messageCount} messages exchanged.`;
+        return `${header}\n${body}`;
+      })
+      .join("\n\n");
+
+    parts.push(
+      `=== CHRONOLOGICAL SESSION HISTORY (PREVIOUS SESSIONS WITH DATES & TIMES) ===\n` +
+      `Here is what you and the user discussed across previous sessions with exact dates and times. Retain full historical memory and continuity across sessions:\n` +
+      `${timeline}`
+    );
+  } else if (context.session.lastSessionSummary) {
     parts.push(`=== PREVIOUS SESSION SUMMARY ===\n${context.session.lastSessionSummary}`);
   }
 
-  if (context.session.lastSessionId) {
+  if (context.session.lastSessionId && (!context.recentSessions || context.recentSessions.length === 0)) {
     parts.push(`[Previous session: ${context.session.lastSessionId}]`);
   }
 

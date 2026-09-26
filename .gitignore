@@ -31,3 +31,7 @@ transcripts/
 Shibam_Balance_Routine.txt
 custom_prompt.txt
 config/opencode-sessions.json
+identity.json
+proactive_alerts.json
+proactive_config.json
+*.blend1

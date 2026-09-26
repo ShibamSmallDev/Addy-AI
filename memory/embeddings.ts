@@ -40,12 +40,12 @@ async function processBatch() {
     
     // Extract 384-dim vector slice per item
     const dim = 384
-    const rawData = Array.from(results.data) as number[]
+    const data = results.data
 
     currentBatch.forEach((item, index) => {
       const start = index * dim
-      const slice = rawData.slice(start, start + dim)
-      item.resolve(slice.length === dim ? slice : [])
+      const slice = data.subarray ? Array.from(data.subarray(start, start + dim)) : Array.from(data.slice(start, start + dim))
+      item.resolve(slice.length === dim ? (slice as number[]) : [])
     })
   } catch (err) {
     console.error('[Embeddings] Batch execution failed, falling back to individual:', err)
