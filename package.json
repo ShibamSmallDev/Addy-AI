@@ -1,6 +1,7 @@
 {
   "name": "addy-ai",
   "productName": "Addy",
+  "description": "Local-first multimodal AI companion & desktop co-pilot with real-time voice, 3D anime avatar, autonomous proactive awareness, persistent memory, and 106+ native OS automation tools.",
   "private": true,
   "version": "1.0.0",
   "type": "module",
