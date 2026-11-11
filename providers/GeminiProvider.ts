@@ -1,5 +1,13 @@
 import { GoogleGenAI } from '@google/genai'
 import { type AIProvider, type ChatOptions, type HealthCheckResult, type ModelInfo, type ProviderStats } from './AIProvider'
+import {
+  getGeminiApiKey,
+  getGeminiApiKeys,
+  reportGeminiKeyFailure,
+  reportGeminiKeySuccess,
+  isKeyError,
+  isCapacityError,
+} from '../server_paths'
 
 const DEFAULT_MODEL = 'gemini-3.5-flash'
 const FALLBACK_MODELS = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.6-flash', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite']
@@ -49,14 +57,20 @@ export class GeminiProvider implements AIProvider {
   }
 
   private getApiKey(): string {
-    return process.env.ADDY_GEMINI_API_KEY || process.env.ADJ_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
+    // Delegate to the canonical resolver so a key entered in the Settings UI
+    // (secrets.json) is used here too, not just an .env variable.
+    return getGeminiApiKey() || ''
+  }
+
+  /** Full key pool, healthiest first, for rotation on credential/quota errors. */
+  private getApiKeys(): string[] {
+    const keys = getGeminiApiKeys()
+    return keys.length > 0 ? keys : [this.getApiKey()].filter(Boolean)
   }
 
   async chat(options: ChatOptions): Promise<string> {
-    const apiKey = this.getApiKey()
-    if (!apiKey) throw new Error('Gemini API key not configured')
+    if (this.getApiKeys().length === 0) throw new Error('Gemini API key not configured')
 
-    const ai = new GoogleGenAI({ apiKey })
     const recentMessages = options.messages.slice(-20)
 
     let systemPrompt = options.systemPrompt
@@ -79,21 +93,44 @@ export class GeminiProvider implements AIProvider {
     ]
 
     const start = Date.now()
-    const result = await ai.models.generateContent({
-      model: this.modelName,
-      contents,
-      config: {
-        systemInstruction: systemPrompt,
-      },
-    })
-    const latency = Date.now() - start
-    this.latencies.push(latency)
-    if (this.latencies.length > 100) this.latencies.shift()
 
-    this.totalRequests++
-    this.lastRequestTime = Date.now()
+    // Try each configured key in turn. A key that fails for credential/quota
+    // reasons is benched so the next call starts with a different one; anything
+    // else (bad request, network) is a real error and is rethrown untouched.
+    let lastErr: unknown = null
+    for (const apiKey of this.getApiKeys()) {
+      const ai = new GoogleGenAI({ apiKey })
+      try {
+        const result = await ai.models.generateContent({
+          model: this.modelName,
+          contents,
+          config: {
+            systemInstruction: systemPrompt,
+          },
+        })
+        const latency = Date.now() - start
+        this.latencies.push(latency)
+        if (this.latencies.length > 100) this.latencies.shift()
 
-    return result.text || ''
+        this.totalRequests++
+        this.lastRequestTime = Date.now()
+        reportGeminiKeySuccess(apiKey)
+        return result.text || ''
+      } catch (e) {
+        lastErr = e
+        // A capacity error is upstream: another model or key will hit the same
+        // overloaded backend, and each attempt costs seconds. Fail fast.
+        if (isCapacityError(e)) {
+          console.warn('[GeminiProvider] Upstream capacity error - not retrying other keys.')
+          throw e
+        }
+        if (!isKeyError(e)) throw e
+        reportGeminiKeyFailure(apiKey)
+        console.warn(`[GeminiProvider] key …${apiKey.slice(-4)} failed, trying next: ${(e as Error)?.message}`)
+      }
+    }
+
+    throw lastErr instanceof Error ? lastErr : new Error('All Gemini API keys failed')
   }
 
   async healthCheck(): Promise<HealthCheckResult> {

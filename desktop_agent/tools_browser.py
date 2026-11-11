@@ -343,7 +343,18 @@ def _flatten_accessibility_tree(node: Dict[str, Any], elements: Dict[int, Dict[s
 
 @register("desktopBrowserOpen")
 async def browser_open(args: Dict[str, Any]) -> Dict[str, Any]:
-    url = _normalize_url(args.get("url") or "https://www.google.com")
+    raw = args.get("url") or "https://www.google.com"
+    # A filesystem path is not a web page. Refuse clearly rather than letting
+    # _normalize_url turn "C:\...\file.pdf" into "https://c/Users/...".
+    from .tools_websites import looks_like_local_path
+
+    if looks_like_local_path(raw):
+        raise ToolError(
+            f"{raw} is a local file path, not a web URL, so the browser cannot open it. "
+            "Use openWebsite with that path to open it in its default app, "
+            "listFiles/searchFiles to find it, or readPdf to extract its text."
+        )
+    url = _normalize_url(raw)
     page = await _page(target_url=url)
     try:
         await page.goto(url, wait_until="domcontentloaded", timeout=25000)
@@ -359,7 +370,7 @@ async def browser_open(args: Dict[str, Any]) -> Dict[str, Any]:
         _bring_chrome_window_to_front()
     except Exception as e:
         raise ToolError(f"Could not open {url}: {e}")
-    return {"result": f"Opened {url} in the visible Google Chrome browser.", "url": page.url, "title": await page.title()}
+    return {"result": f"Opened {url} in the visible Microsoft Edge browser.", "url": page.url, "title": await page.title()}
 
 
 @register("desktopBrowserNavigate")

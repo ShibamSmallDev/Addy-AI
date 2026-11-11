@@ -423,7 +423,7 @@ export class OpenCodeSdkAdapter extends EventEmitter implements OpenCodeAdapter 
     await this.request(() => client.mcp.add({ body: body as never }));
   }
 
-  async getGitStatus(): Promise<GitStatus> {
+  async getGitStatus(cwd?: string): Promise<GitStatus> {
     const client = this.getClient();
     const res = await this.request(() => client.vcs.get({}));
     const vcs = ((res as { data?: unknown }).data ?? res) as { branch: string };
@@ -434,7 +434,7 @@ export class OpenCodeSdkAdapter extends EventEmitter implements OpenCodeAdapter 
     const files: Array<{ status: string; path: string }> = [];
     try {
       const { stdout } = await execFileAsync('git', ['status', '--porcelain', '--branch'], {
-        cwd: process.cwd(),
+        cwd: cwd || process.cwd(),
       });
       const lines = stdout.split('\n').filter((l) => l.trim());
       for (const line of lines) {

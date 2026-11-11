@@ -278,7 +278,7 @@ export interface OpenCodeAdapter {
   getLspStatus(): Promise<LspStatus[]>;
   getMcpStatus(): Promise<McpStatus[]>;
   addMcpServer(config: McpServerConfig): Promise<void>;
-  getGitStatus(): Promise<GitStatus>;
+  getGitStatus(cwd?: string): Promise<GitStatus>;
   getGitDiff(): Promise<GitDiff>;
   getGitLog(options?: GitLogOptions): Promise<GitCommit[]>;
 }

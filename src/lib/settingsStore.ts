@@ -67,52 +67,84 @@ const STORAGE_KEY = "Addy.settings.v2";
 const NEVER_PERSIST: ReadonlySet<keyof AddySettings> = new Set([]);
 
 /**
- * Load settings from localStorage, merged over defaults so new keys always
- * have a sane value even when an older payload is present.
+ * localStorage holds ONLY explicitly-set overrides — never the whole
+ * defaults-merged object. That distinction is what lets boot hydration tell
+ * "the user chose this" apart from "this is just a default", so settings.json
+ * can be the base and fresh browsers can't clobber it.
  */
-export function loadSettings(): AddySettings {
-  if (typeof window === "undefined") return { ...DEFAULT_SETTINGS };
+function readStoredOverrides(): Partial<AddySettings> {
+  if (typeof window === "undefined") return {};
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_SETTINGS };
-    const parsed = JSON.parse(raw) as Partial<AddySettings>;
-    return { ...DEFAULT_SETTINGS, ...parsed };
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? (parsed as Partial<AddySettings>) : {};
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return {};
   }
 }
 
 /**
- * Persist a full or partial settings update to localStorage.
+ * Load settings for immediate render: defaults with local overrides applied.
+ */
+export function loadSettings(): AddySettings {
+  return { ...DEFAULT_SETTINGS, ...readStoredOverrides() };
+}
+
+/**
+ * Hydrate from the durable backend store on boot.
+ *
+ * Precedence: defaults < settings.json (server, durable) < local overrides.
+ * The server is the base, so a fresh browser profile (or a settings.json edited
+ * out-of-band) picks up the saved preferences instead of silently replacing them
+ * with defaults.
+ */
+export async function hydrateSettingsFromBackend(): Promise<AddySettings> {
+  const overrides = readStoredOverrides();
+  try {
+    const res = await fetch("/api/settings", { cache: "no-store" });
+    if (!res.ok) return { ...DEFAULT_SETTINGS, ...overrides };
+    const server = (await res.json()) as Partial<AddySettings>;
+    if (!server || typeof server !== "object") return { ...DEFAULT_SETTINGS, ...overrides };
+    return { ...DEFAULT_SETTINGS, ...server, ...overrides } as AddySettings;
+  } catch {
+    return { ...DEFAULT_SETTINGS, ...overrides };
+  }
+}
+
+/**
+ * Persist a settings patch.
  * Returns the fully merged settings object.
  */
 export function saveSettings(patch: Partial<AddySettings>): AddySettings {
-  const current = loadSettings();
-  const next: AddySettings = { ...current, ...patch };
+  const stored = readStoredOverrides();
+  const nextStored: Partial<AddySettings> = { ...stored };
+  (Object.keys(patch) as (keyof AddySettings)[]).forEach((k) => {
+    if (!NEVER_PERSIST.has(k)) (nextStored as Record<string, unknown>)[k] = patch[k];
+  });
   if (typeof window !== "undefined") {
     try {
-      // Strip any sensitive keys before writing to localStorage.
-      const safe: Record<string, unknown> = {};
-      (Object.keys(next) as (keyof AddySettings)[]).forEach((k) => {
-        if (!NEVER_PERSIST.has(k)) safe[k] = next[k];
-      });
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextStored));
     } catch {
       /* localStorage may be unavailable (private mode) — fail silently. */
     }
   }
+  const next: AddySettings = { ...DEFAULT_SETTINGS, ...nextStored } as AddySettings;
   // Best-effort sync to backend so the Python agent can read auto-start state.
-  void syncSettingsToBackend(next).catch(() => {});
+  // Send ONLY the patch — the server merges it over settings.json. Shipping the
+  // whole defaults-merged object made any browser with empty localStorage
+  // overwrite the user's stored preferences (e.g. visualizerMode -> "orb").
+  void syncSettingsToBackend(patch).catch(() => {});
   return next;
 }
 
-/** Push settings to the backend (server.ts persists to settings.json). */
-async function syncSettingsToBackend(settings: AddySettings): Promise<void> {
+/** Push a settings patch to the backend (server.ts merges it into settings.json). */
+async function syncSettingsToBackend(patch: Partial<AddySettings>): Promise<void> {
   try {
     await fetch("/api/settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settings),
+      body: JSON.stringify(patch),
     });
   } catch {
     /* Backend may be briefly unavailable during boot — non-fatal. */

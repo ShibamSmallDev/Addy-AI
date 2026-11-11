@@ -289,7 +289,6 @@ export class AddyAudioSession {
                   }, 1500);
                 } else {
                   console.warn("[Addy WS] Max auto-reconnect attempts reached (3). Halting reconnect loop.");
-                  this.reconnectAttempts = 0;
                   this.onError("Connection to Addy closed. Say babe or click Connect to wake.");
                 }
               }

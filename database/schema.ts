@@ -40,23 +40,4 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS provider_keys (
-  id TEXT PRIMARY KEY,
-  provider TEXT NOT NULL,
-  name TEXT NOT NULL,
-  api_key_encrypted TEXT NOT NULL,
-  enabled INTEGER DEFAULT 1,
-  priority INTEGER DEFAULT 0,
-  requests INTEGER DEFAULT 0,
-  failures INTEGER DEFAULT 0,
-  last_success INTEGER,
-  last_failure INTEGER,
-  quota_state TEXT DEFAULT 'ok',
-  cooldown_until INTEGER,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER
-);
-
-CREATE INDEX IF NOT EXISTS idx_provider_keys_provider ON provider_keys(provider);
 `

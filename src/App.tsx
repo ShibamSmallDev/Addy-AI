@@ -42,7 +42,7 @@ import { DevPanel } from "./components/DevPanel";
 import { DesktopPanel } from "./components/DesktopPanel";
 import { SessionManagerPanel } from "./components/SessionManagerPanel";
 import { TextChatPanel, ChatMessage } from "./components/TextChatPanel";
-import { AddySettings, DEFAULT_SETTINGS, loadSettings, saveSettings } from "./lib/settingsStore";
+import { AddySettings, DEFAULT_SETTINGS, loadSettings, saveSettings, hydrateSettingsFromBackend } from "./lib/settingsStore";
 import { AddyWakeWordDetector } from "./lib/wakeWord";
 import { filterToolCallLeakage } from "./lib/textSanitizer";
 
@@ -69,6 +69,11 @@ export default function App() {
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
   const screenCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const screenIntervalRef = useRef<any>(null);
+  // Real screen-stream telemetry: count frames actually sent and report the
+  // measured rate instead of a hardcoded number.
+  const screenFramesRef = useRef<number>(0);
+  const screenFpsTimerRef = useRef<any>(null);
+  const [screenFps, setScreenFps] = useState<number>(0);
 
   const isPausedRef = useRef<boolean>(false);
   const screenVisionRef = useRef<boolean>(true);
@@ -110,8 +115,10 @@ export default function App() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Restrict maximum resolution size to keep payload light for Gemini Live
-      const maxDim = 960;
+      // Restrict maximum resolution. 1280 (not 960) keeps small UI text legible
+      // for Gemini — a blurry frame makes on-screen controls unreadable, which
+      // reads as "Addy can't do it" rather than "the frame was too low-res".
+      const maxDim = 1280;
       let width = video.videoWidth;
       let height = video.videoHeight;
 
@@ -136,6 +143,7 @@ export default function App() {
 
       if (sessionRef.current) {
         sessionRef.current.sendVideoFrame(base64);
+        screenFramesRef.current++;
       }
     } catch (err) {
       console.error("[Screen Capture] Failed drawing frame to canvas:", err);
@@ -175,13 +183,25 @@ export default function App() {
         stopScreenSharing();
       };
 
-      // Set up frame capture interval (one frame every 2 seconds is highly robust, preventing overload)
+      // Capture every 500ms (2 fps). Gemini Live treats video as periodic
+      // context rather than a smooth stream, so a higher rate only costs
+      // bandwidth/tokens without improving its understanding.
       if (screenIntervalRef.current) {
         clearInterval(screenIntervalRef.current);
       }
       screenIntervalRef.current = setInterval(() => {
         captureFrameAndSend();
       }, 500);
+
+      // Measure the real achieved frame rate once per second.
+      if (screenFpsTimerRef.current) {
+        clearInterval(screenFpsTimerRef.current);
+      }
+      screenFramesRef.current = 0;
+      screenFpsTimerRef.current = setInterval(() => {
+        setScreenFps(screenFramesRef.current);
+        screenFramesRef.current = 0;
+      }, 1000);
 
       // Promptly capture first frame immediately
       setTimeout(() => {
@@ -201,6 +221,11 @@ export default function App() {
       clearInterval(screenIntervalRef.current);
       screenIntervalRef.current = null;
     }
+    if (screenFpsTimerRef.current) {
+      clearInterval(screenFpsTimerRef.current);
+      screenFpsTimerRef.current = null;
+    }
+    setScreenFps(0);
 
     if (screenStreamRef.current) {
       screenStreamRef.current.getTracks().forEach((track) => {
@@ -284,6 +309,15 @@ export default function App() {
 
   // V2: Settings + wake word state
   const [settings, setSettings] = useState<AddySettings>(() => loadSettings());
+  // Seed from the durable settings.json when this browser has no local payload,
+  // so defaults never overwrite the user's saved preferences.
+  useEffect(() => {
+    let cancelled = false;
+    void hydrateSettingsFromBackend().then((s) => {
+      if (!cancelled) setSettings(s);
+    });
+    return () => { cancelled = true; };
+  }, []);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const showSettingsRef = useRef<boolean>(false);
   useEffect(() => { showSettingsRef.current = showSettings; }, [showSettings]);
@@ -1313,7 +1347,7 @@ export default function App() {
               {!isScreenSharingPaused && screenVisionMode && (
                 <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-400/20 text-[9px] font-mono text-cyan-300">
                   <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping" />
-                  <span>Streaming FPS: 0.5</span>
+                  <span>Streaming FPS: {screenFps}</span>
                 </div>
               )}
             </div>

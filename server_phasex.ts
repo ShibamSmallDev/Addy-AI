@@ -27,6 +27,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { run, query, saveDatabase } from "./database";
 import { MEMORY_ROOT } from "./server_paths";
+import { storeMemory } from "./memory/store";
 
 function queryOne(sql: string, params?: any[]): any | null {
   const results = query(sql, params);
@@ -303,9 +304,6 @@ export function createSession(opts?: {
   // Note: Initial files are lazily created upon first message/tool to prevent empty file clutter
   saveDatabase();
   return session;
-
-  saveDatabase();
-  return session;
 }
 
 export function getOrCreateActiveSession(opts?: {
@@ -372,7 +370,6 @@ export function closeSession(id: string, summary?: string): void {
   try {
     const stmData = shortTermStore.get(id);
     if (stmData && Object.keys(stmData).length > 0) {
-      const { storeMemory } = require('./memory/store');
       const session = queryOne('SELECT active_project FROM phasex_sessions WHERE id = ?', [id]);
       const projectPath = session?.active_project || '';
       for (const [stmKey, stmVal] of Object.entries(stmData)) {

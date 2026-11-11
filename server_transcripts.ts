@@ -250,9 +250,8 @@ export async function refreshSessionDocuments(
   clientWs?: any | null,
 ): Promise<void> {
   try {
-    const { summaryFilePath, writeTranscriptDoc } = await import("./server_phasex");
-    const { storeMemory } = await import("./memory/retriever");
-    const { run, saveDatabase } = await import("./database");
+const { summaryFilePath, writeTranscriptDoc } = await import("./server_phasex");
+      const { run, saveDatabase } = await import("./database");
 
     const summary = await generateSessionSummary(apiKey, sessionId);
     if (!summary) {
@@ -268,14 +267,10 @@ export async function refreshSessionDocuments(
     writeTranscriptDoc(sessionId);
     saveDatabase();
 
-    const safeText = summary.slice(0, 500);
-    storeMemory(
-      safeText.split(/\s+/).slice(0, 5).join(" ").toLowerCase(),
-      safeText,
-      "session" as any,
-      "",
-      { source: 'agent_inference', importance: 0.7 }
-    );
+    // NOTE: we deliberately do NOT storeMemory() the summary here. This function
+    // runs after every voice turn, so it was appending a fresh "session" memory
+    // each time — hundreds of near-duplicates. server_memory.ts now keeps a
+    // single rolling session summary, which is the canonical one.
 
     if (clientWs && clientWs.readyState === 1) {
       clientWs.send(

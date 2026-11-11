@@ -25,10 +25,15 @@ import {
   getGeminiApiKey,
   hasGeminiApiKey,
   setGeminiApiKey,
+  addGeminiApiKey,
+  isKeyError,
+  reportGeminiKeyFailure,
+  reportGeminiKeySuccess,
+  getGeminiKeyStatus,
   MEMORY_ROOT,
 } from "./server_paths";
 import { createTranscript, appendToTranscript, finalizeTranscript, formatSessionSummary } from "./server_transcripts";
-import { listCronJobs, addCronJob, removeCronJob, toggleCronJob, getCronJob, startAllJobs, registerCronHandler } from "./server_cron";
+import { listCronJobs, addCronJob, removeCronJob, toggleCronJob, getCronJob, startAllJobs, stopAllJobs, registerCronHandler } from "./server_cron";
 import {
   startProactiveDaemon,
   stopProactiveDaemon,
@@ -51,11 +56,11 @@ import {
 } from "./server_phasex";
 import { providerManager } from "./providers/ProviderManager";
 import { GeminiProvider, generateContentWithFallback } from "./providers/GeminiProvider";
-import { startCurationScheduler } from "./memory/curator";
+import { startCurationScheduler, stopCurationScheduler } from "./memory/curator";
 import { getSoul, watchSoul, reloadSoul } from "./soul";
 import { refreshSessionDocuments } from "./server_transcripts";
 import type { ProviderName } from "./providers/AIProvider";
-import { AgentLoop, type AgentState } from "./agent/loop";
+import { AgentTaskManager, type AgentProgress } from "./agent/task-manager";
 import { detectAvailableAgents } from "./orchestration/AgentRegistry";
 import { delegateToAgent } from "./orchestration/AgentExecutor";
 import { initArtifactDir, generateArtifact, generateArtifactFromSpec, getArtifact, listArtifacts, deleteArtifact } from "./artifacts";
@@ -99,6 +104,17 @@ const logError = (m: string) => appendLog("errors.log", m);
 // ---------------------------------------------------------------------------
 const DESKTOP_AGENT_URL = process.env.DESKTOP_AGENT_URL || "http://127.0.0.1:8765";
 const DESKTOP_AGENT_TIMEOUT = 60_000; // ms (increased to 60s for long browser operations)
+
+/**
+ * Live-voice speaker: registered by the /live WebSocket handler (and cleared on
+ * disconnect) so autonomous agent `spokenCue`s can be voiced through the active
+ * Gemini Live session. Same injection mechanism the consciousness watchdog uses
+ * to make Addy speak on her own.
+ */
+let liveVoiceSpeaker: ((text: string) => void) | null = null;
+function setLiveVoiceSpeaker(fn: ((text: string) => void) | null): void {
+  liveVoiceSpeaker = fn;
+}
 
 /**
  * The complete set of tool names routed to the Python desktop agent.
@@ -421,6 +437,30 @@ const REACH_FUNCTION_DECLARATIONS = [
     parameters: {
       type: Type.OBJECT,
       properties: {},
+    },
+  },
+  // ======== AUTONOMOUS REACT TASK TOOLS (model-triggered, background) ========
+  {
+    name: "agent_run",
+    description:
+      "Delegate a complex, multi-step desktop goal to Addy's autonomous ReAct planner. Addy builds a plan, executes each step with self-healing retries, verifies the outcome, and narrates progress live. Runs in the background and returns a taskId immediately. Use this for goals that need many coordinated actions or may fail mid-way; use ordinary single tools for one-off actions.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        goal: { type: Type.STRING, description: "The complete natural-language goal to accomplish autonomously." },
+      },
+      required: ["goal"],
+    },
+  },
+  {
+    name: "agent_abort",
+    description: "Stop a running autonomous task by its taskId. The task halts at the next safe point.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        taskId: { type: Type.STRING, description: "The taskId returned by agent_run." },
+      },
+      required: ["taskId"],
     },
   },
 ];
@@ -854,6 +894,289 @@ const DESKTOP_FUNCTION_DECLARATIONS = [
       }
     }
   },
+
+  // ======== FILE MANAGEMENT (previously routable but never declared) ========
+  {
+    name: "renameFile",
+    description: "Rename a file or folder on disk.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        path: { type: Type.STRING, description: "Full path of the file/folder to rename." },
+        new_name: { type: Type.STRING, description: "The new name (not the full path)." }
+      },
+      required: ["path", "new_name"]
+    }
+  },
+  {
+    name: "deleteFile",
+    description: "Delete a file. Goes to the Recycle Bin by default; only set permanent=true if the user explicitly asks for irreversible deletion.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        path: { type: Type.STRING, description: "Full path of the file to delete." },
+        permanent: { type: Type.BOOLEAN, description: "Bypass the Recycle Bin (default false)." }
+      },
+      required: ["path"]
+    }
+  },
+  {
+    name: "moveFile",
+    description: "Move a file to another folder (optionally renaming it).",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        path: { type: Type.STRING, description: "Full path of the file to move." },
+        destination: { type: Type.STRING, description: "Destination folder path." },
+        name: { type: Type.STRING, description: "Optional new filename." }
+      },
+      required: ["path", "destination"]
+    }
+  },
+  {
+    name: "openFolder",
+    description: "Open a folder in Windows File Explorer. Accepts a full path or an alias such as desktop, downloads, documents, projects.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        path: { type: Type.STRING, description: "Folder path or alias (desktop, downloads, documents, projects)." },
+        name: { type: Type.STRING, description: "Alias of 'path'." }
+      }
+    }
+  },
+  {
+    name: "listFiles",
+    description: "List the contents of a folder.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        path: { type: Type.STRING, description: "Folder path or alias (desktop, downloads, documents, projects)." },
+        name: { type: Type.STRING, description: "Alias of 'path'." },
+        pattern: { type: Type.STRING, description: "Glob filter, e.g. '*.pdf' (default '*')." }
+      }
+    }
+  },
+  {
+    name: "searchFiles",
+    description: "Find files recursively by name glob or extension, e.g. name='*.py' under 'Documents'.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        folder: { type: Type.STRING, description: "Folder to search in (path or alias). Default 'home'." },
+        under: { type: Type.STRING, description: "Alias of 'folder'." },
+        name: { type: Type.STRING, description: "Filename glob, e.g. 'report*'." },
+        pattern: { type: Type.STRING, description: "Alias of 'name'." },
+        extension: { type: Type.STRING, description: "Extension to match, e.g. 'pdf'. Alternative to 'name'." },
+        limit: { type: Type.INTEGER, description: "Max results (default 100)." }
+      }
+    }
+  },
+
+  // ======== CLIPBOARD ========
+  {
+    name: "copySelected",
+    description: "Press Ctrl+C to copy the current selection and read it back from the clipboard.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        wait: { type: Type.NUMBER, description: "Seconds to wait before reading (default 0.4)." }
+      }
+    }
+  },
+  {
+    name: "pasteClipboard",
+    description: "Put text on the clipboard and paste it into the focused app, or just paste existing clipboard contents.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        text: { type: Type.STRING, description: "Text to place on the clipboard first. Omit to paste what is already there." }
+      }
+    }
+  },
+  {
+    name: "getClipboard",
+    description: "Read the current clipboard text.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        max_chars: { type: Type.INTEGER, description: "Truncate result to this many characters." }
+      }
+    }
+  },
+  {
+    name: "clearClipboard",
+    description: "Clear the clipboard contents.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+
+  // ======== SCREEN / OCR ========
+  {
+    name: "saveScreenshot",
+    description: "Capture the screen and save it as a PNG under Pictures\\ADDScreenshots.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        name: { type: Type.STRING, description: "Optional filename for the saved screenshot." }
+      }
+    }
+  },
+  {
+    name: "analyzeScreenshot",
+    description: "Capture the screen and read all visible text out of it using OCR.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        max_chars: { type: Type.INTEGER, description: "Truncate OCR output to this many characters." }
+      }
+    }
+  },
+  {
+    name: "readScreen",
+    description: "Read the text on screen from the foreground window and report its title.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        max_chars: { type: Type.INTEGER, description: "Truncate OCR output to this many characters." }
+      }
+    }
+  },
+
+  // ======== SYSTEM / STARTUP ========
+  {
+    name: "createProjectFolder",
+    description: "Create a project directory with a standard subfolder structure and starter files.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        path: { type: Type.STRING, description: "Parent folder for the new project." },
+        name: { type: Type.STRING, description: "Project folder name." },
+        scaffold_standard: { type: Type.BOOLEAN, description: "Create the standard subfolder tree (default true)." }
+      },
+      required: ["name"]
+    }
+  },
+  {
+    name: "temperatureInfo",
+    description: "Report GPU and CPU temperatures. Windows usually cannot read CPU temperature without extra hardware monitoring software, so CPU may be unavailable.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "enableAutoStart",
+    description: "Start Addy automatically when the user signs in to Windows (adds a Run registry entry).",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "disableAutoStart",
+    description: "Stop Addy from starting automatically at sign-in.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "getAutoStartStatus",
+    description: "Check whether Addy is currently configured to start at sign-in.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+
+  // ======== KEYBOARD / MOUSE (previously routable but never declared) ========
+  {
+    name: "holdKey",
+    description: "Press a key down and keep holding it (pair with releaseKey). Use for chords like holding Ctrl.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        key: { type: Type.STRING, description: "Key name or character to hold down, e.g. 'ctrl', 'shift', 'a'." }
+      },
+      required: ["key"]
+    }
+  },
+  {
+    name: "releaseKey",
+    description: "Release a key that was held down with holdKey.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        key: { type: Type.STRING, description: "Key name or character to release." }
+      },
+      required: ["key"]
+    }
+  },
+  {
+    name: "mouseMoveRelative",
+    description: "Move the cursor by an offset from its current position.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        dx: { type: Type.INTEGER, description: "Horizontal pixels to move." },
+        dy: { type: Type.INTEGER, description: "Vertical pixels to move." }
+      },
+      required: ["dx", "dy"]
+    }
+  },
+  {
+    name: "mouseGetPosition",
+    description: "Read the current cursor coordinates.",
+    parameters: { type: Type.OBJECT, properties: {} }
+  },
+  {
+    name: "mouseDown",
+    description: "Press and hold a mouse button. Pair with mouseUp, or use mouseDrag.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        button: { type: Type.STRING, description: "'left', 'right' or 'middle' (default left)." }
+      }
+    }
+  },
+  {
+    name: "mouseUp",
+    description: "Release a held mouse button.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        button: { type: Type.STRING, description: "'left', 'right' or 'middle' (default left)." }
+      }
+    }
+  },
+
+  // ======== SEARCH SHORTCUTS (open in the OS default browser) ========
+  {
+    name: "searchWeb",
+    description: "Run a web search in the user's default browser.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        query: { type: Type.STRING, description: "What to search for." },
+        engine: { type: Type.STRING, description: "Optional engine: google, duckduckgo, bing." }
+      },
+      required: ["query"]
+    }
+  },
+  {
+    name: "searchGoogle",
+    description: "Search Google in the user's default browser.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: { query: { type: Type.STRING, description: "What to search for." } },
+      required: ["query"]
+    }
+  },
+  {
+    name: "searchYouTube",
+    description: "Search YouTube in the user's default browser.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: { query: { type: Type.STRING, description: "What to search for on YouTube." } },
+      required: ["query"]
+    }
+  },
+  {
+    name: "searchGitHub",
+    description: "Search GitHub in the user's default browser.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: { query: { type: Type.STRING, description: "Search terms, e.g. 'react three fiber'." } },
+      required: ["query"]
+    }
+  },
 ];
 
 const MOUSE_TOOLS: ReadonlySet<string> = new Set([
@@ -890,12 +1213,22 @@ let spawnedAgentProcess: ReturnType<typeof spawn> | null = null;
 let activeToolsCount = 0;
 let isModelResponding = false;
 
+// Both the 10s ping and the 30s watchdog probe /health and call spawnDesktopAgent().
+// Without a cooldown, a slow-booting agent can get a second spawn racing it for
+// port 8765 (the loser crashes / bind-fails). Skip if we spawned very recently.
+let lastAgentSpawnAt = 0;
+const AGENT_SPAWN_COOLDOWN_MS = 20_000;
+
 /**
  * Auto-spawn the Python desktop agent as a managed child process.
  * Bound directly to the Node server lifetime so it terminates cleanly when
  * the server stops.
  */
 function spawnDesktopAgent(): void {
+  const now = Date.now();
+  if (now - lastAgentSpawnAt < AGENT_SPAWN_COOLDOWN_MS) return;
+  lastAgentSpawnAt = now;
+
   const agentEnv = {
     ...process.env,
     ADDY_AGENT_HOST: "127.0.0.1",
@@ -903,8 +1236,9 @@ function spawnDesktopAgent(): void {
   };
 
   // Preferred path (packaged app): a PyInstaller-frozen agent exe that embeds
-  // its own Python runtime. Set by the Electron main process via ADDY_AGENT_EXE.
-  const frozenExe = process.env.ADDY_AGENT_EXE;
+  // its own Python runtime. Set by the Electron main process via ADJ_AGENT_EXE
+  // (ADDY_AGENT_EXE kept as a legacy alias for older launch scripts).
+  const frozenExe = process.env.ADJ_AGENT_EXE || process.env.ADDY_AGENT_EXE;
   if (frozenExe && fs.existsSync(frozenExe)) {
     try {
       const child = spawn(frozenExe, [], {
@@ -943,7 +1277,7 @@ function spawnDesktopAgent(): void {
   });
   if (!py) {
     console.warn("[Desktop Agent] No frozen agent and no Python interpreter found; desktop control unavailable.");
-    logError("AGENT_SPAWN_NO_RUNTIME: neither ADDY_AGENT_EXE nor Python available");
+    logError("AGENT_SPAWN_NO_RUNTIME: neither ADJ_AGENT_EXE nor Python available");
     return;
   }
   try {
@@ -1094,8 +1428,26 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
   const HTTPS_PORT = 3443;
-  
+  // P0: bind loopback by default. Set ADDY_BIND_HOST=0.0.0.0 to opt into LAN access.
+  const BIND_HOST = process.env.ADDY_BIND_HOST || "127.0.0.1";
+
   app.use(express.json());
+
+  // P0: localhost-CSRF guard. Any request carrying a non-loopback browser Origin
+  // (i.e. a web page the user happens to visit) is rejected, so a hostile site
+  // can't drive Addy's shell / desktop / proxy endpoints via the user's browser.
+  // Requests with no Origin header (curl, internal calls) pass — the loopback
+  // bind is what protects those.
+  const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1", "0.0.0.0"]);
+  app.use("/api", (req, res, next) => {
+    const src = req.headers.origin || req.headers.referer;
+    if (!src) return next();
+    let host = "";
+    try { host = new URL(src).hostname.toLowerCase(); }
+    catch { return res.status(403).json({ error: "Forbidden origin" }); }
+    if (!LOOPBACK_HOSTS.has(host)) return res.status(403).json({ error: "Forbidden origin" });
+    next();
+  });
 
   // Initialize SQLite database and startup subsystems
   try {
@@ -1124,10 +1476,9 @@ async function startServer() {
     // Start memory curation scheduler
     startCurationScheduler();
 
-    // Start cron scheduler
-    startAllJobs();
-
-    // Register built-in cron handlers
+    // Register built-in cron handlers FIRST — startJobTimer() bails out when a
+    // job's handler isn't in the registry yet, so starting jobs before this point
+    // silently left every persisted job without a timer.
     registerCronHandler("memory_consolidation", async () => {
       const apiKey = getGeminiApiKey();
       if (!apiKey) return;
@@ -1149,6 +1500,9 @@ async function startServer() {
       await writeSessionDigest(date, [], [], []);
     });
 
+    // Now that every handler is registered, arm the persisted cron jobs.
+    startAllJobs();
+
     console.log("[System] Providers registered, curation & cron schedulers started");
 
     // Start SOUL.md watcher (hot-reloadable system prompt identity)
@@ -1159,8 +1513,6 @@ async function startServer() {
   }
 
   // Track active agent loops
-  const agentLoops = new Map<string, AgentLoop>();
-
   // OpenCode execution engine (Phase 1)
   const permissions = new DefaultPermissionService([process.cwd()]);
   const executionService = new OpenCodeExecutionService(undefined, undefined, permissions);
@@ -1178,6 +1530,35 @@ async function startServer() {
       // broadcast failures are non-fatal
     }
   });
+
+  // Autonomous ReAct task manager (model-triggered via agent_run). Background
+  // execution — routes tools through the same callDesktopAgent bridge (and thus
+  // the same tool permission/safety model) as a normal chat turn.
+  const agentTaskManager = new AgentTaskManager(
+    async (tool, args) => {
+      const result = await callDesktopAgent(tool, args);
+      return result.ok ? { success: true, data: result } : { success: false, error: result.error || "Tool failed" };
+    },
+    (p: AgentProgress) => {
+      // Reuse the existing progress WebSocket plumbing.
+      try {
+        const payload = JSON.stringify({ type: "agent_progress", ...p });
+        for (const client of wss.clients) {
+          if (client.readyState === client.OPEN) client.send(payload);
+        }
+      } catch {
+        /* broadcast is non-fatal */
+      }
+      // Voice the spoken cue + final summary through the live Gemini session.
+      if (p.spokenCue && liveVoiceSpeaker) {
+        try {
+          liveVoiceSpeaker(p.spokenCue);
+        } catch {
+          /* voice injection is best-effort */
+        }
+      }
+    }
+  );
 
   // Provider management API endpoints
   app.get("/api/providers", (_req, res) => {
@@ -1287,6 +1668,13 @@ async function startServer() {
   app.post("/api/desktop/execute", async (req, res) => {
     const { tool, args } = req.body || {};
     if (!tool) return res.status(400).json({ ok: false, error: "Tool name required" });
+    // Allow-list: without this the browser could invoke ANY handler registered in
+    // the Python agent, including ones deliberately withheld from the model
+    // (e.g. the private _cancelPowerTimer, which runs `shutdown /a` and would
+    // bypass the two-step power-action confirmation).
+    if (!DESKTOP_TOOLS.has(tool)) {
+      return res.status(403).json({ ok: false, error: `Tool not permitted via this endpoint: ${tool}` });
+    }
     try {
       const result = await callDesktopAgent(tool, args || {});
       if (result.ok) {
@@ -1440,64 +1828,36 @@ async function startServer() {
   });
 
 
-  // Switch model for a specific provider
+  // Switch model for a specific provider (persisted across restarts)
   app.post("/api/providers/model", (req, res) => {
     const { provider, model } = req.body;
     if (!provider || !model) return res.status(400).json({ error: "provider and model required" });
-    const prov = providerManager.getProvider(provider as ProviderName);
-    if (!prov) return res.status(404).json({ error: "Provider not found" });
-    prov.setModel?.(model);
+    const ok = providerManager.setProviderModel(provider as ProviderName, model);
+    if (!ok) return res.status(404).json({ error: "Provider not found" });
     res.json({ ok: true, provider, model });
   });
 
-  // Agent loop management API
+  // Agent loop management API (ReAct tasks, same lifecycle as the agent_run tool)
   app.post("/api/agent/start", async (req, res) => {
     try {
       const { goal } = req.body;
       if (!goal) return res.status(400).json({ error: "Goal is required" });
-
-      const apiKey = getGeminiApiKey();
-      if (!apiKey) return res.status(400).json({ error: "No API key configured" });
-
-      const id = "agent_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
-
-      const loop = new AgentLoop(
-        goal,
-        apiKey,
-        (event) => {
-          console.log("[Agent " + id + "] " + event.type, event.data ? JSON.stringify(event.data).slice(0, 200) : '');
-        },
-        async (tool, args) => {
-          const result = await callDesktopAgent(tool, args);
-          return result.ok ? { success: true, data: result } : { success: false, error: result.error || 'Tool failed' };
-        }
-      );
-
-      agentLoops.set(id, loop);
-
-      // Run in background
-      loop.run().then((state) => {
-        console.log("[Agent " + id + "] completed with status:", state.status);
-      }).catch((e) => {
-        console.error("[Agent " + id + "] error:", e);
-      });
-
-      res.json({ id, status: "started", goal });
+      const rec = agentTaskManager.start(String(goal));
+      res.json({ id: rec.taskId, status: rec.status, goal: rec.goal });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
   });
 
   app.get("/api/agent/:id", (req, res) => {
-    const loop = agentLoops.get(req.params.id);
-    if (!loop) return res.status(404).json({ error: "Agent not found" });
-    res.json(loop.getState());
+    const rec = agentTaskManager.get(req.params.id);
+    if (!rec) return res.status(404).json({ error: "Agent not found" });
+    res.json(rec);
   });
 
   app.post("/api/agent/:id/abort", (req, res) => {
-    const loop = agentLoops.get(req.params.id);
-    if (!loop) return res.status(404).json({ error: "Agent not found" });
-    loop.abort();
+    const ok = agentTaskManager.abort(req.params.id);
+    if (!ok) return res.status(404).json({ error: "No running agent with that id" });
     res.json({ ok: true });
   });
 
@@ -2010,8 +2370,8 @@ async function startServer() {
       (knowledgeBase ? "\n=== KNOWLEDGE BASE CONTEXT ===\n" + knowledgeBase + "\n========================================\n" : "") +
       allSkills +
       "\n=== BEHAVIOR & TOOL GUIDELINES ===\n" +
-      "1. BROWSER AUTOMATION 2.0 (Google Chrome & Playwright):\n" +
-      "   - You have FULL, direct Google Chrome browser automation capabilities via the 'desktopBrowser*' suite with persistent profile logins (Twitter/X, GitHub, Reddit, LinkedIn, Discord).\n" +
+      "1. BROWSER AUTOMATION 2.0 (Microsoft Edge & Playwright):\n" +
+      "   - You have FULL, direct Microsoft Edge browser automation capabilities via the 'desktopBrowser*' suite with persistent profile logins (Twitter/X, GitHub, Reddit, LinkedIn, Discord).\n" +
       "   - CRITICAL: When interacting with ANY website, search engine, or web app, NEVER use OCR ('locateElement') or desktop mouse coordinates! ALWAYS use the Browser 2.0 semantic workflow:\n" +
       "     1. 'desktopBrowserOpen(url)' or 'desktopBrowserSearch(query, engine)' to navigate.\n" +
       "     2. 'desktopBrowserGetSemanticTree()' to immediately receive a numbered interactive map of all buttons, inputs, links, and search boxes (e.g. '[1] Searchbox', '[2] Button: Submit').\n" +
@@ -2026,7 +2386,7 @@ async function startServer() {
       "   - You can type into any focused application using 'typeText' (keystrokes) or 'injectText' (fast clipboard paste).\n" +
       "   - Use 'pressKey' for single keys (Enter, Esc, Tab, arrows), 'pressKeyCombination' for hotkeys (Ctrl+S, Alt+Tab), 'keyboardMacro' for sequences.\n" +
       "4. TOOL TRIGGERS:\n" +
-      "   - Use 'desktopBrowserOpen' or 'openWebsite' to open any exact URL in Google Chrome.\n" +
+      "   - Use 'desktopBrowserOpen' or 'openWebsite' to open any exact URL in Microsoft Edge.\n" +
       "   - Use 'desktopBrowserSearch' or 'searchWeb'/'searchGitHub'/'searchGoogle'/'searchYouTube'/'youtubeSearch' to search the web and YouTube.\n" +
       "   - Use 'desktopBrowserGetSemanticTree' whenever you are on a webpage and need to know what to click or type into.\n" +
       "   - Use 'changeBackground' to shift your theme and 'saveCustomMemory' to memorize facts.\n" +
@@ -2037,6 +2397,8 @@ async function startServer() {
       "   - You have full real-time control of your companion's Windows PC through your local desktop agent (:8765).\n" +
       "   - APPLICATION CONTROL: Use 'openApplication' (Notepad, VS Code, Calculator, File Explorer, Task Manager, Settings, CMD, PowerShell) and 'closeApplication'.\n" +
       "   - FILE MANAGEMENT: Use 'createFile', 'readFile', 'readPdf' (extract text from PDF files), 'renameFile', 'deleteFile' (safe Recycle Bin by default), 'moveFile', 'openFolder', 'listFiles', 'searchFiles'. NEVER guess an absolute path with a username - you do not know ${userName}'s Windows username. Use folder aliases instead: 'downloads', 'documents', 'desktop', 'home', 'pictures', 'music', 'videos', or '~'. Example: openFolder(path='downloads'). Run 'systemInfo' to see the real user and home directory.\n" +
+      "   - LOCAL FILE vs WEB URL (IMPORTANT): a filesystem path like 'C:\\\\Users\\\\...\\\\file.pdf' or 'file:///C:/...' is NOT a web address. Never pass one to 'desktopBrowserOpen', 'openWebsite', 'readWebpage' or any 'desktopBrowser*' tool - they only accept http(s) URLs and will fail. To VIEW a local file use 'openWebsite' with the path (it opens the file in its default app), and to READ one use 'readFile'.\n" +
+      "   - PDF FILES: you cannot see a PDF directly - your model does not accept PDF input, so never try to 'look at' or screenshot a PDF to read it. Use 'readPdf' to extract its text (works for text-based PDFs). If 'readPdf' returns no text, the PDF is scanned/image-based - say so instead of retrying. Only 'openWebsite' with the path will visually open it in a PDF viewer.\n" +
       "   - PC CONTROL: Use 'volumeUp', 'volumeDown', 'setVolume', 'muteToggle'. For dangerous power actions (shutdown/restart/sleep/lock), use 'requestPowerAction' -> ask ${userName} for verbal confirmation -> 'executePowerAction'.\n" +
       "   - WINDOW MANAGEMENT: Use 'minimizeWindow', 'maximizeWindow', 'closeWindow', 'switchApplication'.\n" +
       "   - NATIVE DESKTOP MOUSE & OCR (Native Apps Only): Use 'locateElement' and 'mouseClick' ONLY when interacting with native non-web Windows programs (like desktop Notepad or Calculator). For all browser web interactions, always use 'desktopBrowser*' instead.\n" +
@@ -2180,39 +2542,60 @@ async function startServer() {
   });
 
   app.get("/api/config", (_req, res) => {
-    res.json({ hasApiKey: hasGeminiApiKey() });
+    res.json({ hasApiKey: hasGeminiApiKey(), keys: getGeminiKeyStatus() });
   });
 
   app.post("/api/config/apikey", async (req, res) => {
     try {
-      const key: string = (req.body?.apiKey ?? "").toString().trim();
-      if (!key) {
+      // Accepts one key, or several pasted on separate lines / separated by
+      // commas — they become a rotation pool.
+      const raw: string = (req.body?.apiKey ?? "").toString();
+      const keys = raw.split(/[\r\n,]+/).map((k) => k.trim()).filter(Boolean);
+      if (keys.length === 0) {
         return res.status(400).json({ error: "API key is required." });
       }
-      // Validate the key by listing models — this checks authentication only,
-      // without depending on any single model's availability or per-model
-      // quota (a 429 on one model must NOT read as an invalid key). We only
-      // reject on genuine auth failures; transient/network errors still save,
-      // since the live connection will surface any real problem later.
-      try {
-        const test = new GoogleGenAI({ apiKey: key });
-        const pager = await test.models.list();
-        await pager[Symbol.asyncIterator]().next(); // force the first request
-      } catch (e: any) {
-        const msg = String(e?.message || e);
-        const isAuthError =
-          /API[_ ]?KEY|PERMISSION_DENIED|UNAUTHENTICATED|invalid|401|403/i.test(msg);
-        if (isAuthError) {
-          logError(`APIKEY_VALIDATION_REJECTED: ${msg}`);
-          return res.status(400).json({
-            error: "That key was rejected by Google. Check it and try again.",
-          });
+      // Validate by listing models — this checks authentication only, without
+      // depending on any single model's availability or per-model quota (a 429 on
+      // one model must NOT read as an invalid key). We only reject on genuine
+      // auth failures; transient/network errors still save, since the live
+      // connection will surface any real problem later.
+      const rejected: string[] = [];
+      for (const key of keys) {
+        try {
+          const test = new GoogleGenAI({ apiKey: key });
+          const pager = await test.models.list();
+          await pager[Symbol.asyncIterator]().next(); // force the first request
+        } catch (e: any) {
+          const msg = String(e?.message || e);
+          const isAuthError =
+            /API[_ ]?KEY|PERMISSION_DENIED|UNAUTHENTICATED|invalid|401|403/i.test(msg);
+          if (isAuthError) {
+            logError(`APIKEY_VALIDATION_REJECTED: ${msg}`);
+            rejected.push(key);
+          } else {
+            logError(`APIKEY_VALIDATION_SOFT_FAIL (saving anyway): ${msg}`);
+          }
         }
-        logError(`APIKEY_VALIDATION_SOFT_FAIL (saving anyway): ${msg}`);
       }
-      setGeminiApiKey(key);
-      logCommand("APIKEY_SAVED");
-      res.json({ ok: true, hasApiKey: true });
+      const good = keys.filter((k) => !rejected.includes(k));
+      if (good.length === 0) {
+        return res.status(400).json({
+          error:
+            keys.length === 1
+              ? "That key was rejected by Google. Check it and try again."
+              : "None of those keys were accepted by Google.",
+        });
+      }
+      // Append rather than replace, so adding a key never drops the working ones.
+      for (const key of good) addGeminiApiKey(key);
+      logCommand(`APIKEY_SAVED (pool=${good.length}${rejected.length ? `, rejected=${rejected.length}` : ""})`);
+      res.json({
+        ok: true,
+        hasApiKey: true,
+        saved: good.length,
+        rejected: rejected.length,
+        keys: getGeminiKeyStatus(),
+      });
     } catch (e: any) {
       logError(`APIKEY_SAVE_ERROR: ${e?.message || e}`);
       res.status(500).json({ error: e?.message || "Failed to save API key." });
@@ -2300,9 +2683,12 @@ async function startServer() {
     isModelResponding = true;
     try {
       for (const model of TEXT_CHAT_MODELS) {
+      // Re-resolve per attempt: if the previous attempt benched a failing key,
+      // the next one automatically starts on a healthy key.
+      const key = getGeminiApiKey() || apiKey;
       try {
         const ai = new GoogleGenAI({
-          apiKey,
+          apiKey: key,
           httpOptions: { 
             apiVersion: "v1alpha",
             headers: { 'User-Agent': 'aistudio-build' } 
@@ -2464,6 +2850,34 @@ async function startServer() {
               } catch (e: any) {
                 functionResponses.push({ name: fc.name, response: { result: `Execution error: ${e.message}` }, id: fc.id });
               }
+            } else if (fc.name === "agent_run" || fc.name === "agent_abort") {
+              // Autonomous ReAct tasks (background). Tools route through the same
+              // desktop bridge/permission model via the task manager.
+              try {
+                let result: any;
+                if (fc.name === "agent_run") {
+                  const goal = String((fc.args as any)?.goal || "").trim();
+                  const rec = agentTaskManager.start(goal);
+                  result = {
+                    taskId: rec.taskId,
+                    status: rec.status,
+                    message: `Autonomous task ${rec.taskId} started in the background. I'll narrate each step as I work. Use agent_abort with this taskId to stop it.`,
+                  };
+                } else {
+                  const taskId = String((fc.args as any)?.taskId || "").trim();
+                  const ok = agentTaskManager.abort(taskId);
+                  result = {
+                    taskId,
+                    aborted: ok,
+                    message: ok
+                      ? "Stop requested — the autonomous task will halt at the next safe point."
+                      : "No running autonomous task with that id (it may already be finished).",
+                  };
+                }
+                functionResponses.push({ name: fc.name, response: { result: JSON.stringify(result) }, id: fc.id });
+              } catch (e: any) {
+                functionResponses.push({ name: fc.name, response: { result: `Agent error: ${e.message}` }, id: fc.id });
+              }
             } else if (REACH_TOOLS.has(fc.name) || DESKTOP_TOOLS.has(fc.name)) {
               // Desktop & Browser 2.0 & Reach tools (desktopBrowser*, mouse*, keyboard*, openApplication, etc.)
               // routed to the Python desktop_agent sidecar (:8765)
@@ -2618,6 +3032,7 @@ async function startServer() {
         return;
       } catch (e: any) {
         lastError = e;
+        if (isKeyError(e)) reportGeminiKeyFailure(key);
         console.log(`[TextChat] Model ${model} failed: ${e.message?.slice(0, 100)}, trying next...`);
         // If headers already sent we can't retry — bail
         if (res.headersSent) {
@@ -2680,116 +3095,6 @@ async function startServer() {
   // warm and trigger the desktop agent watchdog if needed.
   app.get("/api/ping", (_req, res) => {
     res.json({ ok: true, t: Date.now() });
-  });
-
-  // V2: Logs API — returns recent log entries (last 100 lines) for display.
-  app.get("/api/logs/:file", async (req, res) => {
-    try {
-      const fileName = String(req.params.file);
-      // Whitelist to prevent directory traversal.
-      if (!["commands", "startup", "errors"].includes(fileName)) {
-        return res.status(400).json({ error: "Invalid log file. Use: commands, startup, or errors." });
-      }
-      const logPath = path.join(LOGS_DIR, `${fileName}.log`);
-      if (!fs.existsSync(logPath)) {
-        return res.json({ lines: [], file: fileName });
-      }
-      const content = fs.readFileSync(logPath, "utf-8");
-      const lines = content.split("\n").filter(Boolean).slice(-100);
-      res.json({ lines, file: fileName });
-    } catch (e: any) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  // Safe Server-Side Scraper & HTML Proxy endpoint
-  app.get("/api/proxy", async (req, res) => {
-    try {
-      const url = req.query.url as string;
-      if (!url) {
-        return res.status(400).json({ error: "Missing 'url' parameter." });
-      }
-
-      console.log(`[Proxy Scraper] Fetching external content for: ${url}`);
-      const response = await fetch(url, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Scraper failed to load page: status ${response.status}`);
-      }
-
-      const html = await response.text();
-
-      // Simple regex-based HTML parsers for standard items
-      const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-      const title = titleMatch ? titleMatch[1].trim() : "";
-
-      // Extract high-level headings (h1, h2, h3)
-      const headings: string[] = [];
-      const headingMatches = html.matchAll(/<h([1-3])\b[^>]*>(.*?)<\/h\1>/gi);
-      for (const match of headingMatches) {
-        const text = match[2].replace(/<[^>]*>/g, "").trim();
-        if (text && text.length > 3 && text.length < 120 && !headings.includes(text)) {
-          headings.push(text);
-        }
-      }
-
-      // Extract organic anchor links
-      const links: { text: string; href: string }[] = [];
-      const linkMatches = html.matchAll(/<a\b[^>]*\bhref=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi);
-      for (const match of linkMatches) {
-        let href = match[1].trim();
-        const text = match[2].replace(/<[^>]*>/g, "").trim();
-        
-        if (text && text.length > 2 && text.length < 100) {
-          if (href.startsWith("/")) {
-            try {
-              const u = new URL(url);
-              href = `${u.protocol}//${u.host}${href}`;
-            } catch {}
-          }
-          if (href.startsWith("http://") || href.startsWith("https://")) {
-            links.push({ text, href });
-          }
-        }
-      }
-
-      // Extract general copy paragraphs
-      const paragraphs: string[] = [];
-      const paragraphMatches = html.matchAll(/<p\b[^>]*>(.*?)<\/p>/gi);
-      for (const match of paragraphMatches) {
-        const text = match[1].replace(/<[^>]*>/g, "").trim();
-        if (text && text.length > 25 && text.length < 600 && !paragraphs.includes(text)) {
-          paragraphs.push(text);
-        }
-      }
-
-      // Extract button elements
-      const buttons: string[] = [];
-      const buttonMatches = html.matchAll(/<button\b[^>]*>(.*?)<\/button>/gi);
-      for (const match of buttonMatches) {
-        const text = match[1].replace(/<[^>]*>/g, "").trim();
-        if (text && text.length > 1 && text.length < 60 && !buttons.includes(text)) {
-          buttons.push(text);
-        }
-      }
-
-      res.json({
-        url,
-        title,
-        headings: headings.slice(0, 15),
-        links: links.filter(l => !l.href.includes("javascript:")).slice(0, 30),
-        buttons: buttons.slice(0, 15),
-        paragraphs: paragraphs.slice(0, 12)
-      });
-
-    } catch (err: any) {
-      console.error(`[Proxy Scraper] Error fetching ${req.query.url}:`, err.message);
-      res.status(500).json({ error: `Scraper error: ${err.message}` });
-    }
   });
 
   // High-fidelity fully functional HTML Proxy which circumvents CSP and X-Frame-Options
@@ -2930,120 +3235,6 @@ async function startServer() {
     }
   });
 
-  // Real-time live YouTube search proxy endpoint
-  app.get("/api/youtube-search", async (req, res) => {
-    try {
-      const query = req.query.q as string;
-      if (!query) {
-        return res.status(400).json({ error: "Missing query q" });
-      }
-
-      console.log(`[YouTube Proxy Search] Searching real YouTube for: "${query}"`);
-      const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&hl=en&sp=EgIQAQ%253D%253D`;
-      const response = await fetch(searchUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-        }
-      });
-      const html = await response.text();
-
-      const videoList: any[] = [];
-      const jsonMatch = html.match(/ytInitialData\s*=\s*({.+?});/);
-      
-      if (jsonMatch) {
-        try {
-          const data = JSON.parse(jsonMatch[1]);
-          const contents = data.contents?.twoColumnSearchResultRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents;
-          if (contents && Array.isArray(contents)) {
-            for (const item of contents) {
-              if (item.videoRenderer) {
-                const vr = item.videoRenderer;
-                const vId = vr.videoId;
-                if (vId) {
-                  videoList.push({
-                    videoId: vId,
-                    title: vr.title?.runs?.[0]?.text || vr.title?.simpleText || "YouTube Video",
-                    thumbnail: `https://i.ytimg.com/vi/${vId}/hqdefault.jpg`,
-                    author: vr.ownerText?.runs?.[0]?.text || vr.shortBylineText?.runs?.[0]?.text || "Unknown Channel",
-                    duration: vr.lengthText?.simpleText || "N/A",
-                    views: vr.viewCountText?.simpleText || "N/A",
-                    published: vr.publishedTimeText?.simpleText || ""
-                  });
-                }
-              }
-            }
-          }
-        } catch (e: any) {
-          console.error("[YouTube Parser Engine] JSON parse error, falling back:", e.message);
-        }
-      }
-
-      // Fallback 1: Desktop Agent yt-dlp native search engine
-      if (videoList.length === 0) {
-        try {
-          const agentRes = await fetch("http://127.0.0.1:8765/execute", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              tool: "youtubeSearch",
-              args: { query, limit: 15 }
-            }),
-            signal: AbortSignal.timeout(6000)
-          });
-          if (agentRes.ok) {
-            const data: any = await agentRes.json();
-            const items = data.result?.items || data.items || [];
-            for (const it of items) {
-              if (it.id) {
-                videoList.push({
-                  videoId: it.id,
-                  title: it.title || "YouTube Video",
-                  thumbnail: `https://i.ytimg.com/vi/${it.id}/hqdefault.jpg`,
-                  author: it.channel || "YouTube Channel",
-                  duration: it.duration || "N/A",
-                  views: it.views || "Available Now",
-                  published: ""
-                });
-              }
-            }
-          }
-        } catch (agentErr: any) {
-          console.warn("[YouTube Proxy Search] Desktop agent search fallback timed out or unavailable:", agentErr.message);
-        }
-      }
-
-      // Fallback 2: Regex extraction from raw HTML
-      if (videoList.length === 0) {
-        const videoRegex = /"videoId":"([^"]+)"/g;
-        let match;
-        const ids: string[] = [];
-        while ((match = videoRegex.exec(html)) !== null && ids.length < 15) {
-          const id = match[1];
-          if (id && !ids.includes(id)) {
-            ids.push(id);
-          }
-        }
-
-        for (const id of ids) {
-          videoList.push({
-            videoId: id,
-            title: `Live Stream: ${id}`,
-            thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-            author: "YouTube Creator",
-            duration: "N/A",
-            views: "Available Now"
-          });
-        }
-      }
-
-      res.setHeader("Cache-Control", "public, max-age=60");
-      res.status(200).json({ results: videoList.slice(0, 15) });
-    } catch (err: any) {
-      console.error("[YouTube Search Error]:", err.message);
-      res.status(500).json({ error: err.message, results: [] });
-    }
-  });
-  
   // Custom server running with http.createServer so we can upgrade for WebSocket on port 3000
   const server = http.createServer(app);
   
@@ -3184,7 +3375,11 @@ async function startServer() {
 
       let currentModelResponseText = "";
       let consolidationDebounceTimer: NodeJS.Timeout | null = null;
-      let isModelResponding = false;
+      let lastSessionDocRefreshAt = 0;
+      // NOTE: isModelResponding is intentionally the shared module-level flag.
+      // It used to be redeclared here, which shadowed the outer one so the
+      // proactive busy-check (onlySpeakWhenFree) never saw voice activity and
+      // could interrupt Addy mid-sentence.
       let isExecutingTool = false;
       let isDormant = false;
       let lastInteractionTime = Date.now();
@@ -3297,7 +3492,7 @@ async function startServer() {
                     properties: {
                       model: {
                         type: Type.STRING,
-                        description: "The Gemini model name the user wants (e.g. 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro-exp-03-25')"
+                        description: "The Gemini Live model to switch to. Must be one of the Live-capable audio models; other Gemini models cannot stream voice and will be rejected."
                       }
                     },
                     required: ["model"]
@@ -3356,9 +3551,15 @@ async function startServer() {
                     console.error("[Memory Sync] Error running background consolidation:", err);
                   }
                 }
-                try {
-                  await refreshSessionDocuments(apiKey, phaseXSession.id, clientWs);
-                } catch {}
+                // Session documents are expensive (one LLM call). This debounce
+                // fires after every turn, so refresh at most every 10 minutes —
+                // the disconnect handler still writes a final summary.
+                if (Date.now() - lastSessionDocRefreshAt > 10 * 60 * 1000) {
+                  lastSessionDocRefreshAt = Date.now();
+                  try {
+                    await refreshSessionDocuments(apiKey, phaseXSession.id, clientWs);
+                  } catch {}
+                }
               }, 15_000);
             }
             
@@ -3547,10 +3748,11 @@ async function startServer() {
                     }
                   } else if (fc.name === "switchModel") {
                     const newModel = (fc.args as any)?.model;
-                    if (newModel) {
-                      const geminiProv = providerManager.getProvider('gemini');
-                      if (geminiProv) {
-                        geminiProv.setModel?.(newModel);
+                    // Only Live-capable models may be persisted. Switching to any other
+                    // name poisons every future connect with a permanent 1008 close loop.
+                    if (newModel && baseLiveModels.includes(newModel)) {
+                      // setProviderModel persists the choice across restarts.
+                      if (providerManager.setProviderModel('gemini', newModel)) {
                         preferredLiveModel = newModel;
                         console.log(`[switchModel] Switched to ${newModel}`);
 
@@ -3565,6 +3767,43 @@ async function startServer() {
 
                         setTimeout(() => { try { session.close(); } catch {} }, 500);
                       }
+                    } else if (newModel) {
+                      functionResponses.push({
+                        name: fc.name,
+                        response: { output: { error: `'${newModel}' is not a Live-capable model. Allowed: ${baseLiveModels.join(', ')}` } },
+                        id: fc.id
+                      });
+                    }
+                  } else if (fc.name === "agent_run" || fc.name === "agent_abort") {
+                    // Autonomous ReAct task (background). Progress + spoken cues are
+                    // streamed to this live voice session via agentTaskManager.
+                    try {
+                      let out: any;
+                      if (fc.name === "agent_run") {
+                        const goal = String((fc.args as any)?.goal || "").trim();
+                        const rec = agentTaskManager.start(goal);
+                        out = {
+                          taskId: rec.taskId,
+                          status: rec.status,
+                          result: `Started autonomous task ${rec.taskId}. I'll keep you posted out loud as I work through it.`,
+                        };
+                      } else {
+                        const taskId = String((fc.args as any)?.taskId || "").trim();
+                        const ok = agentTaskManager.abort(taskId);
+                        out = {
+                          taskId,
+                          aborted: ok,
+                          result: ok ? "Okay, stopping that task now." : "I don't have a running task with that id.",
+                        };
+                      }
+                      functionResponses.push({ name: fc.name, response: { output: out }, id: fc.id });
+                      logToolCall(phaseXSession.id, fc.name, (fc.args || {}) as Record<string, unknown>, out, Date.now() - t0, true);
+                    } catch (e: any) {
+                      functionResponses.push({
+                        name: fc.name,
+                        response: { output: { result: `Agent error: ${e.message}` } },
+                        id: fc.id,
+                      });
                     }
                   } else {
                     console.warn(`[Live Session] Unrecognized tool call: ${fc.name}`);
@@ -3594,7 +3833,12 @@ async function startServer() {
           },
           onclose: (e: any) => {
             console.log(`Gemini Live session closed (code: ${e?.code || 'unknown'}, reason: ${e?.reason || 'none'})`);
-            const isFatalError = e?.code === 1007 || (e?.reason && e.reason.toLowerCase().includes("quota"));
+            const reason = (e?.reason || "").toLowerCase();
+            // 1007 = protocol error, 1008 with "not found"/"not supported"/"quota" = permanent.
+            // Retrying any of these just burns quota and spams reconnects.
+            const isFatalError = e?.code === 1007
+              || reason.includes("quota")
+              || (e?.code === 1008 && (reason.includes("not found") || reason.includes("not supported")));
             if (isFatalError) {
               clientWs.send(JSON.stringify({
                 type: "error",
@@ -3612,8 +3856,11 @@ async function startServer() {
       });
       break; // Connection succeeded — exit the retry loop
     } catch (e: any) {
-      connectError = e;
-      console.log(`[Live] Model ${liveModel} connection failed: ${e.message?.slice(0, 120)}`);
+          connectError = e;
+          // A live session holds one key for its lifetime, so we can't swap it
+          // mid-connection — bench it so the NEXT connect attempt uses another.
+          if (isKeyError(e)) reportGeminiKeyFailure(apiKey);
+          console.log(`[Live] Model ${liveModel} connection failed: ${e.message?.slice(0, 120)}`);
     }
   }
   if (!session) {
@@ -3732,6 +3979,29 @@ STRICT RULE: NEVER output emojis, never say 'sparkles' or emoji names, and never
       }
     };
 
+    // Register this live session as the speaker for autonomous agent spoken cues.
+    setLiveVoiceSpeaker((text: string) => {
+      try {
+        session.sendClientContent({
+          turns: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text:
+                    `[AUTONOMOUS TASK UPDATE - speak only this, do not call any tools]: ` +
+                    `Say this out loud in your warm spoken voice, naturally: "${text}"`,
+                },
+              ],
+            },
+          ],
+          turnComplete: true,
+        });
+      } catch {
+        /* voice injection is best-effort */
+      }
+    });
+
     startConsciousnessWatchdog();
 
     clientWs.on("message", (rawMsg) => {
@@ -3784,6 +4054,7 @@ STRICT RULE: NEVER output emojis, never say 'sparkles' or emoji names, and never
 
     clientWs.on("close", () => {
       console.log("Client disconnected, closing Gemini session");
+      setLiveVoiceSpeaker(null);
       isModelResponding = false;
       isExecutingTool = false;
       stopConsciousnessWatchdog();
@@ -3892,9 +4163,9 @@ STRICT RULE: NEVER output emojis, never say 'sparkles' or emoji names, and never
     });
   }
 
-  server.listen(PORT, "0.0.0.0", () => {
-    logStartup(`Addy V2 server started on http://localhost:${PORT}`);
-    console.log(`[Server] Running on http://localhost:${PORT}`);
+  server.listen(PORT, BIND_HOST, () => {
+    logStartup(`Addy V2 server started on http://${BIND_HOST}:${PORT}`);
+    console.log(`[Server] Running on http://${BIND_HOST}:${PORT}`);
 
     // Register busy check callback so Addy never announces proactively when busy
     registerBusyCheck(() => {
@@ -3935,8 +4206,8 @@ STRICT RULE: NEVER output emojis, never say 'sparkles' or emoji names, and never
       app
     );
     httpsServer.on("upgrade", handleUpgrade);
-    httpsServer.listen(HTTPS_PORT, "0.0.0.0", () => {
-      console.log(`[Server] HTTPS running on https://localhost:${HTTPS_PORT}`);
+    httpsServer.listen(HTTPS_PORT, BIND_HOST, () => {
+      console.log(`[Server] HTTPS running on https://${BIND_HOST}:${HTTPS_PORT}`);
     });
   } else {
     console.log("[Server] No certs/addy-key.pem found - HTTPS disabled (LAN voice/mic unavailable).");
@@ -3984,11 +4255,21 @@ function startWatchdog(): void {
 }
 
 function stopAllBackgroundServices(): void {
-  try {
-    stopProactiveDaemon();
-  } catch (e: any) {
-    console.warn("[Proactive] Teardown error:", e?.message || e);
-  }
+    try {
+      stopProactiveDaemon();
+    } catch (e: any) {
+      console.warn("[Proactive] Teardown error:", e?.message || e);
+    }
+    try {
+      stopCurationScheduler();
+    } catch (e: any) {
+      console.warn("[Curator] Teardown error:", e?.message || e);
+    }
+    try {
+      stopAllJobs();
+    } catch (e: any) {
+      console.warn("[Cron] Teardown error:", e?.message || e);
+    }
   if (spawnedAgentProcess && spawnedAgentProcess.pid) {
     const pid = spawnedAgentProcess.pid;
     console.log(`[Desktop Agent] Terminating sidecar process tree (PID ${pid})...`);

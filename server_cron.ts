@@ -152,6 +152,7 @@ function startJobTimer(job: CronJob): void {
   if (job.type === "interval") {
     const ms = Number(job.schedule) || 60000;
     const timer = setInterval(run, ms);
+    timer.unref?.(); // never hold the process open for a scheduled job
     jobTimers.set(job.id, timer);
     // Run once immediately
     run();
@@ -161,6 +162,7 @@ function startJobTimer(job: CronJob): void {
       run();
       if (job.enabled) startJobTimer(job); // reschedule
     }, delay);
+    timer.unref?.();
     jobTimers.set(job.id, timer);
   }
 }
@@ -168,11 +170,9 @@ function startJobTimer(job: CronJob): void {
 function stopJobTimer(id: string): void {
   const timer = jobTimers.get(id);
   if (timer) {
-    if (timer instanceof setInterval.constructor || "unref" in timer) {
-      clearInterval(timer as any);
-    } else {
-      clearTimeout(timer as any);
-    }
+    // In Node, clearInterval and clearTimeout are interchangeable for the
+    // Timeout objects both setInterval() and setTimeout() return.
+    clearTimeout(timer as any);
     jobTimers.delete(id);
   }
 }

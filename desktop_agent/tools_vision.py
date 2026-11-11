@@ -14,6 +14,7 @@ import ctypes
 import logging
 import os
 import re
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 from .registry import register
@@ -135,13 +136,50 @@ def _capture_screen() -> Optional[Any]:
 # Engine 1: Windows UIAutomation (UIA)
 # ---------------------------------------------------------------------------
 
-def _get_uia_elements(max_depth: int = 12) -> List[Dict[str, Any]]:
-    """Enumerate interactive controls and labels using Windows UI Automation."""
-    elements = []
+# Minimum adjusted score for a UI Automation hit to be trusted without
+# falling back to a full-screen OCR pass.
+UIA_CONFIDENT_SCORE = 85.0
+
+# Minimum raw score for any candidate to be considered a match at all. Kept high
+# on purpose: a wrong element is worse than "not found", because a false
+# positive makes Addy click something that isn't the target.
+ACCEPT_SCORE = 60.0
+
+# A candidate found only by OCR (no accessibility guarantee) must clear this
+# higher bar before we return coordinates for a click.
+OCR_ONLY_MIN_SCORE = 90.0
+
+def _get_uia_elements(
+    max_depth: int = 12,
+    deadline_ms: int = 650,
+    cap: int = 250,
+    foreground_only: bool = False,
+    stop_when=None,
+) -> List[Dict[str, Any]]:
+    """Enumerate interactive controls and labels using Windows UI Automation.
+
+    UI Automation is a COM round-trip per property, so an unbounded depth-12 walk
+    of the whole desktop costs ~1.8s. Callers normally want the foreground window,
+    so by default we scope to it and fall back to a desktop-wide scan (bounded by
+    `deadline_ms` and `cap`) only if that yields too little.
+
+    `stop_when(elem)` is called for each newly discovered element; returning True
+    ends the walk immediately. That is what keeps the common case fast — without
+    it the scan always runs to its full time budget even after the target is found.
+    """
+    elements: List[Dict[str, Any]] = []
+    started = time.perf_counter()
+    state = {"stopped": False}
+
+    def over_budget() -> bool:
+        if state["stopped"]:
+            return True
+        return ((time.perf_counter() - started) * 1000.0) > deadline_ms or len(elements) >= cap
+
     try:
         import uiautomation as auto
 
-        targets = []
+        targets: List[Any] = []
         try:
             fg = auto.GetForegroundControl()
             if fg and fg.Exists(0.1, 0.1):
@@ -149,31 +187,37 @@ def _get_uia_elements(max_depth: int = 12) -> List[Dict[str, Any]]:
         except Exception:
             pass
 
-        root = auto.GetRootControl()
-        if root:
-            targets.append(root)
-            try:
-                for win in root.GetChildren():
-                    if win.ControlTypeName == "WindowControl" and win.BoundingRectangle and win.BoundingRectangle.width() > 50:
-                        targets.append(win)
-            except Exception:
-                pass
+        # Only widen to the whole desktop when the caller needs it.
+        if not foreground_only:
+            root = auto.GetRootControl()
+            if root:
+                targets.append(root)
+                try:
+                    for win in root.GetChildren():
+                        if win.ControlTypeName == "WindowControl" and win.BoundingRectangle and win.BoundingRectangle.width() > 50:
+                            targets.append(win)
+                except Exception:
+                    pass
 
         seen_coords = set()
 
         def scan_control(ctrl, depth=0):
-            if depth > max_depth or not ctrl:
+            if depth > max_depth or not ctrl or over_budget():
                 return
             try:
+                kids: List[Any] = []
                 rect = ctrl.BoundingRectangle
+                name = (ctrl.Name or "").strip()
+                auto_id = (ctrl.AutomationId or "").strip()
+                ctrl_type = ctrl.ControlTypeName or ""
+
                 if rect and rect.width() > 4 and rect.height() > 4:
-                    name = (ctrl.Name or "").strip()
-                    auto_id = (ctrl.AutomationId or "").strip()
-                    ctrl_type = ctrl.ControlTypeName or ""
-                    
-                    # If control has no direct name, check child text elements
+                    # If the control has no direct name, borrow the first named
+                    # child. Enumerate children ONCE and reuse for recursion —
+                    # this used to walk every unnamed control's subtree twice.
                     if not name:
-                        for child in ctrl.GetChildren():
+                        kids = ctrl.GetChildren()
+                        for child in kids:
                             c_name = (child.Name or "").strip()
                             if c_name:
                                 name = c_name
@@ -187,7 +231,7 @@ def _get_uia_elements(max_depth: int = 12) -> List[Dict[str, Any]]:
                         coord_key = (cx, cy)
                         if coord_key not in seen_coords:
                             seen_coords.add(coord_key)
-                            elements.append({
+                            elem = {
                                 "text": name or auto_id,
                                 "name": name,
                                 "auto_id": auto_id,
@@ -200,16 +244,28 @@ def _get_uia_elements(max_depth: int = 12) -> List[Dict[str, Any]]:
                                 "cy": cy,
                                 "confidence": 100,
                                 "source": "uiautomation",
-                            })
+                            }
+                            elements.append(elem)
+                            if stop_when is not None:
+                                try:
+                                    if stop_when(elem):
+                                        state["stopped"] = True
+                                        return
+                                except Exception:
+                                    pass
 
-                for child in ctrl.GetChildren():
+                if not kids:
+                    kids = ctrl.GetChildren()
+                for child in kids:
+                    if over_budget():
+                        return
                     scan_control(child, depth + 1)
             except Exception:
                 pass
 
         for target in targets:
             scan_control(target, 0)
-            if len(elements) >= 200:
+            if len(elements) >= cap:
                 break
 
     except Exception as e:
@@ -338,6 +394,21 @@ def _get_ocr_elements(img) -> List[Dict[str, Any]]:
 # Scoring & Matching Engine
 # ---------------------------------------------------------------------------
 
+def _has_word_overlap(q: str, c: str) -> bool:
+    """True when any whole word of `q` appears as a whole word in `c`.
+
+    Without this, substring matching produces confident nonsense: rapidfuzz's
+    partial_ratio scores "file" against "profile" at 100 because "profile"
+    literally ends in "file", so locateElement would click the wrong control.
+    """
+    for tok in re.findall(r"\w+", q):
+        if not tok:
+            continue
+        if re.search(r"(?<!\w)" + re.escape(tok) + r"(?!\w)", c):
+            return True
+    return False
+
+
 def _score_candidate(query: str, candidate_text: str, candidate_type: str = "") -> float:
     """Calculate match score (0..100) using rapidfuzz and semantic heuristics."""
     q = query.lower().strip()
@@ -349,6 +420,11 @@ def _score_candidate(query: str, candidate_text: str, candidate_type: str = "") 
     # Exact string match
     if q == c:
         return 100.0
+
+    # No shared whole word => at best a weak character-level coincidence. Cap it
+    # below the acceptance gate so we never act on a bogus match.
+    if not _has_word_overlap(q, c):
+        return 40.0
 
     try:
         from rapidfuzz import fuzz
@@ -365,6 +441,15 @@ def _score_candidate(query: str, candidate_text: str, candidate_type: str = "") 
             ct = candidate_type.lower()
             if ct in q:
                 score += 8.0
+
+        # Penalise very long candidates. Real clickable labels are short; long
+        # strings are code, console output or paragraphs that OCR happily
+        # "finds" and which Addy would then click at a nonsense coordinate.
+        n = len(c)
+        if n > 70:
+            score -= 35.0
+        elif n > 45:
+            score -= 18.0
 
         return min(100.0, float(score))
     except Exception:
@@ -383,51 +468,22 @@ def _score_candidate(query: str, candidate_text: str, candidate_type: str = "") 
 # Handlers
 # ---------------------------------------------------------------------------
 
-@register("locateElement")
-def locate_element(args: Dict[str, Any]) -> Dict[str, Any]:
-    """Find a UI element by text label, name, or description with high precision."""
-    label = args.get("label") or args.get("text") or args.get("name") or ""
-    if not label:
-        return {"result": "Provide a 'label' to search for.", "found": False}
-
-    candidates: List[Dict[str, Any]] = []
-
-    # 1. Query Windows UIAutomation elements
-    uia_elements = _get_uia_elements()
-    candidates.extend(uia_elements)
-
-    # 2. Query RapidOCR / WinOCR elements
-    img = _capture_screen()
-    if img:
-        ocr_elements = _get_ocr_elements(img)
-        candidates.extend(ocr_elements)
-
-    if not candidates:
-        return {
-            "result": f"Could not scan screen elements for '{label}'.",
-            "found": False
-        }
-
-    # Score candidates
-    scored = []
+def _best_match(label: str, candidates: List[Dict[str, Any]]) -> Optional[Tuple[float, Dict[str, Any]]]:
+    """Highest-scoring candidate for `label`, or None. UIA gets a small bonus."""
+    scored: List[Tuple[float, Dict[str, Any]]] = []
     for elem in candidates:
-        match_score = _score_candidate(label, elem["text"], elem.get("type", ""))
-        if match_score >= 50.0:
-            # Prefer UIAutomation controls over OCR when scores are close
-            adjusted_score = match_score + (10.0 if elem.get("source") == "uiautomation" else 0.0)
-            scored.append((adjusted_score, elem))
-
+        score = _score_candidate(label, elem["text"], elem.get("type", ""))
+        if score >= ACCEPT_SCORE:
+            if elem.get("source") == "uiautomation":
+                score += 10.0
+            scored.append((score, elem))
     if not scored:
-        visible_samples = list({c["text"] for c in candidates if len(c["text"]) > 2})[:15]
-        return {
-            "result": f"Could not find element matching '{label}' on screen.",
-            "found": False,
-            "visible_samples": visible_samples,
-        }
-
+        return None
     scored.sort(key=lambda x: -x[0])
-    best_score, best = scored[0]
+    return scored[0]
 
+
+def _found_result(label: str, score: float, best: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "result": f"Located '{best['text']}' at screen coordinates ({best['cx']}, {best['cy']}) [{best.get('type', 'Element')}].",
         "found": True,
@@ -439,8 +495,74 @@ def locate_element(args: Dict[str, Any]) -> Dict[str, Any]:
         "bbox": {"x": best["x"], "y": best["y"], "w": best["w"], "h": best["h"]},
         "type": best.get("type", "Element"),
         "source": best.get("source", "vision"),
-        "confidence": int(best_score),
+        "confidence": max(0, min(100, int(score))),
     }
+
+
+@register("locateElement")
+def locate_element(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Find a UI element by text label, name, or description with high precision."""
+    label = args.get("label") or args.get("text") or args.get("name") or ""
+    if not label:
+        return {"result": "Provide a 'label' to search for.", "found": False}
+
+    def _confident(elem: Dict[str, Any]) -> bool:
+        s = _score_candidate(label, elem.get("text", ""), elem.get("type", ""))
+        return s + 10.0 >= UIA_CONFIDENT_SCORE
+
+    # Phase 1 — UI Automation, scoped to the foreground window. This handles the
+    # overwhelming majority of real clicks and costs a fraction of a full scan.
+    uia = _get_uia_elements(foreground_only=True, stop_when=_confident)
+    hit = _best_match(label, uia)
+    if hit and hit[0] >= UIA_CONFIDENT_SCORE:
+        return _found_result(label, hit[0], hit[1])
+
+    # Phase 2 — not confident within the focused window: widen to a desktop UIA
+    # scan, stopping the moment the target shows up rather than running the whole
+    # budget.
+    if len(uia) < 8 or not hit:
+        uia = _get_uia_elements(deadline_ms=1800, cap=450, stop_when=_confident)
+        hit = _best_match(label, uia)
+        if hit and hit[0] >= UIA_CONFIDENT_SCORE:
+            return _found_result(label, hit[0], hit[1])
+
+    # Phase 3 — still nothing solid: pay for a screen capture + OCR (canvas,
+    # images, rendered text that UIA can't see).
+    candidates: List[Dict[str, Any]] = list(uia)
+    img = _capture_screen()
+    if img:
+        candidates.extend(_get_ocr_elements(img))
+
+    if not candidates:
+        return {
+            "result": f"Could not scan screen elements for '{label}'.",
+            "found": False
+        }
+
+    hit = _best_match(label, candidates)
+    if not hit:
+        visible_samples = list({c["text"] for c in candidates if len(c["text"]) > 2})[:15]
+        return {
+            "result": f"Could not find element matching '{label}' on screen.",
+            "found": False,
+            "visible_samples": visible_samples,
+        }
+
+    best_score, best = hit
+    # An OCR-only hit has no accessibility guarantee, so demand more of it before
+    # we hand back coordinates for a click.
+    if best.get("source") != "uiautomation" and best_score < OCR_ONLY_MIN_SCORE:
+        visible_samples = list({c["text"] for c in candidates if len(c["text"]) > 2})[:15]
+        return {
+            "result": (
+                f"Found text resembling '{label}' but not confidently as a control "
+                f"(best was {best['text'][:60]!r} from {best.get('source')}). Not clicking."
+            ),
+            "found": False,
+            "visible_samples": visible_samples,
+        }
+
+    return _found_result(label, best_score, best)
 
 
 @register("getScreenElements")

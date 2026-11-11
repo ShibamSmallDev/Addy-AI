@@ -4,10 +4,11 @@
 # Then install the Playwright browser once:
 #   "C:\...\Python311\python.exe" -m playwright install chromium
 #
-# NOTE: pytesseract also requires the Tesseract OCR engine to be installed
-#       on Windows (https://github.com/UB-Mannheim/tesseract/wiki). OCR tools
-#       will gracefully report "unavailable" if it is missing; all other
-#       capabilities work without it.
+# NOTE: OCR uses a 3-engine cascade (RapidOCR → Windows WinOCR → pytesseract).
+#       RapidOCR and WinOCR need no external engine and are cross/native-Windows
+#       friendly; pytesseract is the last fallback and additionally requires the
+#       Tesseract binary (https://github.com/UB-Mannheim/tesseract/wiki). Every
+#       engine is imported lazily and degrades gracefully if absent.
 
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
@@ -19,8 +20,33 @@ pyperclip==1.9.0
 pytesseract==0.3.13
 Pillow==11.0.0
 pycaw==20230407
-pygetwindow==0.0.9
 Send2Trash==1.8.3
 python-multipart==0.0.20
 # Best-effort NVIDIA GPU stats; optional import (graceful fallback if absent)
 nvidia-ml-py3==7.352.0
+
+# --- Imported by the code but previously undeclared ------------------------
+# PDF text extraction (tools_files.readPdf)
+pypdf
+# Screen capture fallback (tools_vision)
+mss
+# UI Automation element engine (tools_vision)
+uiautomation
+# Fuzzy UI-element scoring (tools_vision)
+rapidfuzz
+# RapidOCR input array type (tools_screenshot / tools_vision)
+numpy
+# pycaw COM activation (tools_pc)
+comtypes
+# Discord webhook (tools_social)
+requests
+# YouTube search / playlist / transcript (tools_reach, tools_social)
+yt-dlp
+youtube-transcript-api
+# Display brightness (tools_pc)
+screen-brightness-control
+# Primary OCR engine (tools_screenshot, tools_vision). Heavier: pulls onnxruntime.
+rapidocr-onnxruntime
+# Windows 10/11 native OCR (tools_screenshot, tools_vision); Windows-only.
+winocr; sys_platform == "win32"
+

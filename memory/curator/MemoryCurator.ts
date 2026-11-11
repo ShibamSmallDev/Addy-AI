@@ -20,6 +20,8 @@ export function startCurationScheduler(): void {
   curationTimer = setInterval(() => {
     runCuration().catch(e => console.error('[Curator] Scheduled curation failed:', e))
   }, CURATION_INTERVAL_MS)
+  // Never hold the process open for a 6-hour background sweep.
+  curationTimer.unref?.()
   console.log('[Curator] Scheduler started (every ' + (CURATION_INTERVAL_MS / 60000) + ' min)')
 }
 

@@ -3,7 +3,7 @@ import path from "path";
 import { EventEmitter } from "events";
 import { GoogleGenAI, Type } from "@google/genai";
 import { Memory, MemoryTransaction } from "./src/lib/memoryTypes";
-import { MEMORY_ROOT } from "./server_paths";
+import { MEMORY_ROOT, isGeminiKeyUsable } from "./server_paths";
 import { storeMemory, getAllMemories, deleteMemory, searchMemories, type MemoryCategory } from "./memory/retriever";
 import { generateContentWithFallback } from "./providers/GeminiProvider";
 
@@ -263,10 +263,14 @@ export function formatSystemInstructionsWithMemories(baseInstruction: string, me
   return baseInstruction + memoryBlock;
 }
 
-// Background memory consolidation queue lock + gate (max once per 30s)
+// Background memory consolidation queue lock + gate.
+// 30s was far too eager: it fired roughly every turn, so a conversation burned
+// dozens of LLM calls on itself. 3 minutes plus a larger minimum batch keeps
+// memory current without competing with real conversation for quota.
 let isConsolidating = false;
 let lastConsolidationTime = 0;
-const CONSOLIDATION_COOLDOWN_MS = 30_000;
+const CONSOLIDATION_COOLDOWN_MS = 180_000;
+const MIN_BATCH_MESSAGES = 6;
 
 // Persistent rolling buffer: keeps turns that arrived during cooldown so no messages are dropped
 let unconsolidatedBuffer: { role: string; text: string }[] = [];
@@ -294,6 +298,13 @@ export async function processConversationSlice(
     queueDialogueForConsolidation(dialogueHistory);
   }
 
+  // Background housekeeping must never compete with real conversation for quota.
+  // If every key is cooling down, leave the messages queued and try later.
+  if (apiKey && !isGeminiKeyUsable(apiKey)) {
+    console.log("[Memory] All Gemini keys are cooling down - deferring background consolidation.");
+    return null;
+  }
+
   const now = Date.now();
   if (!terminal) {
     if (now - lastConsolidationTime < CONSOLIDATION_COOLDOWN_MS) {
@@ -304,7 +315,7 @@ export async function processConversationSlice(
       if (!pendingConsolidationTimer && lastConsolidationApiKey) {
         pendingConsolidationTimer = setTimeout(async () => {
           pendingConsolidationTimer = null;
-          if (unconsolidatedBuffer.length >= 2 && !isConsolidating) {
+          if (unconsolidatedBuffer.length >= MIN_BATCH_MESSAGES && !isConsolidating) {
             console.log(`[Memory] Auto-draining unconsolidated buffer (${unconsolidatedBuffer.length} messages)...`);
             await processConversationSlice(lastConsolidationApiKey, [], false);
           }
@@ -329,7 +340,7 @@ export async function processConversationSlice(
   }
 
   const batchToProcess = [...unconsolidatedBuffer];
-  if (batchToProcess.length < 2) {
+  if (batchToProcess.length < MIN_BATCH_MESSAGES) {
     return null;
   }
 
@@ -347,10 +358,28 @@ export async function processConversationSlice(
     });
 
     const currentMemories = await loadMemories();
-    
-    // Format memory map to help Gemini understand what to edit
-    const memoryContext = currentMemories.map(m => `ID: ${m.id} | Category: ${m.category} | Fact: ${m.text}`).join("\n");
-    const dialogueContext = dialogueHistory.map(line => `${line.role === "user" ? "User" : "Addy"}: ${line.text}`).join("\n");
+
+    // Only the *new* messages matter. Previously this used the caller's full
+    // dialogueHistory, so every 30s re-processed the entire conversation from
+    // scratch. batchToProcess is the delta we haven't consolidated yet.
+    const dialogueContext = batchToProcess
+      .map(line => `${line.role === "user" ? "User" : "Addy"}: ${line.text}`)
+      .join("\n");
+
+    // Cap the memory map. Sending all 710+ memories every run made the prompt
+    // balloon without bound (each run also appended a new session memory, which
+    // then came back next time). Pinned first, then most recently updated.
+    const MEMORY_CONTEXT_CAP = 120;
+    const ranked = [...currentMemories].sort((a, b) => {
+      const ap = a.category === "identity" || a.category === "preference" ? 1 : 0;
+      const bp = b.category === "identity" || b.category === "preference" ? 1 : 0;
+      if (ap !== bp) return bp - ap;
+      return String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""));
+    });
+    const memoryContext = ranked
+      .slice(0, MEMORY_CONTEXT_CAP)
+      .map(m => `ID: ${m.id} | Category: ${m.category} | Fact: ${m.text}`)
+      .join("\n");
 
     // Find existing session summary memory to give context
     const existingSession = currentMemories.find(m => m.category === "session");
@@ -498,7 +527,10 @@ ${dialogueContext}
       }
     }
 
-    // Save the session summary as a persistent chronological memory with date & time
+    // Roll the session summary into ONE memory instead of appending a new one per
+    // run. Previously every 30s created a fresh "[Session on ...]" memory, which
+    // is what filled the store with hundreds of near-identical summaries and
+    // fed them all back into the next prompt.
     if (hasSessionSummary) {
       const dateStr = new Date().toLocaleDateString("en-US", {
         weekday: "short",
@@ -512,10 +544,21 @@ ${dialogueContext}
       });
       const sessionMemoryText = `[Session on ${dateStr} at ${timeStr}]: ${sessionSummary!}`;
 
-      const isDuplicate = updatedMemories.some(
-        (m) => m.category === "session" && (m.text === sessionMemoryText || m.text.includes(sessionSummary!))
-      );
-      if (!isDuplicate) {
+      const priorSessions = updatedMemories
+        .map((m, i) => ({ m, i }))
+        .filter(({ m }) => m.category === "session")
+        .sort((a, b) => String(b.m.updatedAt || b.m.createdAt || "").localeCompare(String(a.m.updatedAt || a.m.createdAt || "")));
+
+      if (priorSessions.length > 0) {
+        // Update the newest, supersede the rest so the store doesn't accumulate them.
+        const keep = priorSessions[0]!;
+        updatedMemories[keep.i] = { ...keep.m, text: sessionMemoryText, updatedAt: timestamp };
+        for (const old of priorSessions.slice(1)) {
+          if (updatedMemories[old.i]?.category === "session") {
+            updatedMemories[old.i] = { ...old.m, updatedAt: timestamp, _supersededBy: keep.m.id } as any;
+          }
+        }
+      } else {
         const newSessionMem: Memory = {
           id: Math.random().toString(36).substring(2, 11),
           category: "session",

@@ -1,3 +1,5 @@
+import { getGeminiApiKey as resolveGeminiApiKey } from '../server_paths'
+
 export interface ImageGenResult {
   success: boolean
   data?: string
@@ -6,7 +8,8 @@ export interface ImageGenResult {
 }
 
 function getGeminiApiKey(): string {
-  return process.env.ADDY_GEMINI_API_KEY || process.env.ADJ_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
+  // Canonical resolver (secrets.json then env) so the Settings-UI key works here too.
+  return resolveGeminiApiKey() || ''
 }
 
 function getOpenAIKey(): string {

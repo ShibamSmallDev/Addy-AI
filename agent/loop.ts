@@ -82,6 +82,10 @@ export class AgentLoop {
     this.abortFlag = true
   }
 
+  isAborted(): boolean {
+    return this.abortFlag
+  }
+
   getState(): AgentState {
     return { ...this.state }
   }

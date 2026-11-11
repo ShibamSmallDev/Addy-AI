@@ -183,8 +183,11 @@ def main() -> None:
     """Allow `python -m desktop_agent.main` to launch uvicorn."""
     import uvicorn
 
-    host = os.environ.get("ADJ_AGENT_HOST", "127.0.0.1")
-    port = int(os.environ.get("ADJ_AGENT_PORT", "8765"))
+    # Accept both prefixes: the Node launcher exports ADDY_AGENT_HOST/PORT, while
+    # older tooling and docs used ADJ_AGENT_HOST/PORT. Reading only one silently
+    # ignored the launcher's values (masked because both default to 127.0.0.1:8765).
+    host = os.environ.get("ADDY_AGENT_HOST") or os.environ.get("ADJ_AGENT_HOST", "127.0.0.1")
+    port = int(os.environ.get("ADDY_AGENT_PORT") or os.environ.get("ADJ_AGENT_PORT", "8765"))
     log.info("Launching uvicorn on %s:%d", host, port)
     uvicorn.run(
         "desktop_agent.main:app",

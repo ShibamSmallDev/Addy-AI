@@ -2,9 +2,10 @@
 Desktop automation: precision mouse movement, clicks, scroll, drag.
 
 Features:
-- Direct Win32 SendInput hardware driver for sub-pixel accuracy & multi-monitor support
+- Win32 hardware input via mouse_event (button press/release, wheel notches)
+  and SetCursorPos for cursor placement
 - Humanized Cubic Bézier curve trajectories for realistic easing
-- Fallback to pyautogui with multi-monitor offset correction
+- pyautogui fallback for cursor positioning
 """
 
 from __future__ import annotations
@@ -132,6 +133,29 @@ def _to_int(val: Any, default: int = 0) -> int:
         return default
 
 
+# --- Hardware mouse event flags (Win32 mouse_event) -------------------------
+MOUSEEVENTF_LEFTDOWN = 0x0002
+MOUSEEVENTF_LEFTUP = 0x0004
+MOUSEEVENTF_RIGHTDOWN = 0x0008
+MOUSEEVENTF_RIGHTUP = 0x0010
+MOUSEEVENTF_MIDDLEDOWN = 0x0020
+MOUSEEVENTF_MIDDLEUP = 0x0040
+MOUSEEVENTF_WHEEL = 0x0800
+
+BUTTON_FLAGS = {
+    "left": (MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP),
+    "right": (MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP),
+    "middle": (MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP),
+}
+
+
+def _mouse_event(flags: int, data: int = 0) -> None:
+    """Inject a hardware mouse event (button press/release or wheel notch)."""
+    ctypes.windll.user32.mouse_event(
+        flags, 0, 0, ctypes.c_ulong(data & 0xFFFFFFFF).value, 0
+    )
+
+
 # --- Handlers ---------------------------------------------------------------
 
 @register("mouseMove")
@@ -224,8 +248,7 @@ def mouse_double_click(args: Dict[str, Any]) -> Dict[str, Any]:
 def mouse_down(args: Dict[str, Any]) -> Dict[str, Any]:
     """Press and hold a mouse button."""
     btn = _normalize_button(args.get("button", "left"))
-    flag = MOUSEEVENTF_LEFTDOWN if btn == "left" else (MOUSEEVENTF_RIGHTDOWN if btn == "right" else MOUSEEVENTF_MIDDLEDOWN)
-    _send_mouse_input(flag)
+    _mouse_event(BUTTON_FLAGS[btn][0])
     return {"result": f"{btn.capitalize()} button pressed (held)"}
 
 
@@ -233,8 +256,7 @@ def mouse_down(args: Dict[str, Any]) -> Dict[str, Any]:
 def mouse_up(args: Dict[str, Any]) -> Dict[str, Any]:
     """Release a held mouse button."""
     btn = _normalize_button(args.get("button", "left"))
-    flag = MOUSEEVENTF_LEFTUP if btn == "left" else (MOUSEEVENTF_RIGHTUP if btn == "right" else MOUSEEVENTF_MIDDLEUP)
-    _send_mouse_input(flag)
+    _mouse_event(BUTTON_FLAGS[btn][1])
     return {"result": f"{btn.capitalize()} button released"}
 
 
@@ -248,12 +270,11 @@ def mouse_scroll(args: Dict[str, Any]) -> Dict[str, Any]:
     y = args.get("y")
 
     if x is not None and y is not None:
-        norm_x, norm_y = _screen_to_normalized(_to_int(x), _to_int(y))
-        _send_mouse_input(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK | MOUSEEVENTF_MOVE, norm_x, norm_y)
+        _set_cursor_position(_to_int(x), _to_int(y))
         time.sleep(0.02)
 
-    wheel_data = clicks * WHEEL_DELTA
-    _send_mouse_input(MOUSEEVENTF_WHEEL, data=wheel_data)
+    # Windows wheel convention: positive = up, negative = down.
+    _mouse_event(MOUSEEVENTF_WHEEL, clicks * WHEEL_DELTA)
     direction = "up" if clicks > 0 else "down"
     return {"result": f"Scrolled {direction} ({abs(clicks)} notches)"}
 
@@ -268,15 +289,14 @@ def mouse_drag(args: Dict[str, Any]) -> Dict[str, Any]:
     duration = float(args.get("duration", 0.3))
 
     if start_x is not None and start_y is not None:
-        norm_x, norm_y = _screen_to_normalized(_to_int(start_x), _to_int(start_y))
-        _send_mouse_input(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK | MOUSEEVENTF_MOVE, norm_x, norm_y)
+        _set_cursor_position(_to_int(start_x), _to_int(start_y))
         time.sleep(0.05)
 
-    _send_mouse_input(MOUSEEVENTF_LEFTDOWN)
+    _mouse_event(MOUSEEVENTF_LEFTDOWN)
     time.sleep(0.05)
     _move_smooth(end_x, end_y, duration=duration)
     time.sleep(0.05)
-    _send_mouse_input(MOUSEEVENTF_LEFTUP)
+    _mouse_event(MOUSEEVENTF_LEFTUP)
 
     log.info("mouseDrag to (%d, %d)", end_x, end_y)
     return {"result": f"Dragged to ({end_x}, {end_y})"}

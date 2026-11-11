@@ -7,5 +7,3 @@ export * from './execution-service';
 export * from './mcp-service';
 export * from './code-intelligence-service';
 export * from './agent-registry';
-export * from './specialist-registry';
-export * from './workspace-context';

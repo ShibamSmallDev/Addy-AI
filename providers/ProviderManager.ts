@@ -1,6 +1,7 @@
 import { type AIProvider, type ChatOptions, type HealthCheckResult, type ProviderStats, type ProviderName } from './AIProvider'
 import { GeminiProvider } from './GeminiProvider'
 import { getSetting, setSetting } from '../database'
+import { isCapacityError } from '../server_paths'
 
 const SETTING_KEY = 'adj_active_provider'
 const MODEL_SETTING_PREFIX = 'adj_provider_model_'
@@ -30,6 +31,24 @@ export class ProviderManager {
         this.executionProvider = saved
       }
     } catch {}
+    // Restore each registered provider's saved model choice so a model picked in
+    // Settings survives a restart (previously only the provider NAME persisted).
+    for (const [name, provider] of this.providers) {
+      try {
+        const model = getSetting(MODEL_SETTING_PREFIX + name) as string | null
+        if (model) provider.setModel?.(model)
+      } catch {}
+    }
+  }
+
+  /** Set a provider's model and persist it across restarts. */
+  setProviderModel(name: ProviderName, model: string): boolean {
+    const provider = this.providers.get(name)
+    if (!provider || !model) return false
+    provider.setModel?.(model)
+    try { setSetting(MODEL_SETTING_PREFIX + name, model) } catch {}
+    console.log('[ProviderManager] Model for ' + name + ': ' + model)
+    return true
   }
 
   getActiveProvider(): AIProvider {
@@ -98,6 +117,12 @@ export class ProviderManager {
         } catch (e: any) {
           lastError.push(e)
           console.log('[ProviderManager] Model ' + modelName + ' failed: ' + e.message.slice(0, 100))
+          // Upstream capacity problems are not model-specific. Walking the whole
+          // chain just multiplies the user's wait by 5, so stop immediately.
+          if (isCapacityError(e)) {
+            console.warn('[ProviderManager] Capacity error - aborting model fallback chain.')
+            break
+          }
         }
       }
     } finally {

@@ -14,6 +14,7 @@ import {
   InspectRequest,
   OpenCodeConnectionState,
   OpenCodeHealth,
+  FileChange,
 } from './types';
 
 interface SessionMapping {
@@ -205,6 +206,7 @@ export class OpenCodeExecutionService extends EventEmitter implements ExecutionS
     }));
 
     try {
+      const gitBefore = await this.gitSnapshot(request.projectPath);
       const session = await this.adapter.createSession({ projectId: request.projectPath });
       const mapping: SessionMapping = {
         addyTaskId: taskId,
@@ -245,11 +247,12 @@ export class OpenCodeExecutionService extends EventEmitter implements ExecutionS
       mapping.status = 'completed';
       this.persistSessions();
 
+      const gitAfter = await this.gitSnapshot(request.projectPath);
       const result: ExecutionResult = {
         taskId,
         status: 'success',
         summary,
-        filesChanged: [],
+        filesChanged: this.diffFiles(gitBefore, gitAfter),
         commandsExecuted: [],
         tests: [],
         errors: [],
@@ -309,6 +312,36 @@ export class OpenCodeExecutionService extends EventEmitter implements ExecutionS
       '',
       'Execute the operation carefully. Report exactly what you did: files changed (with paths), commands run, tests executed and their results, and any errors encountered.',
     ].join('\n');
+  }
+
+  /** Snapshot of `git status` for a project, keyed by path. Empty on failure. */
+  private async gitSnapshot(cwd: string): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    try {
+      const st = await this.adapter.getGitStatus(cwd);
+      for (const f of st.files) map.set(f.path, f.status || 'M');
+    } catch {
+      /* not a git repo, or git unavailable — leave empty */
+    }
+    return map;
+  }
+
+  /** Derive real FileChange[] from a before/after git-status diff. */
+  private diffFiles(before: Map<string, string>, after: Map<string, string>): FileChange[] {
+    const typeFor = (s: string): FileChange['type'] =>
+      s === '??' || s === 'A' ? 'created'
+      : s === 'D' ? 'deleted'
+      : s.startsWith('R') ? 'renamed'
+      : 'modified';
+    const out: FileChange[] = [];
+    for (const [p, s] of after) {
+      if (!before.has(p)) out.push({ path: p, type: typeFor(s) });
+      else if (before.get(p) !== s) out.push({ path: p, type: typeFor(s) });
+    }
+    for (const p of before.keys()) {
+      if (!after.has(p)) out.push({ path: p, type: 'deleted' });
+    }
+    return out;
   }
 
   private categoryForOperation(operation: string) {

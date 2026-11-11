@@ -1,12 +1,14 @@
 # Addy AI
 
-> **Local-first multimodal AI companion & desktop co-pilot. Features real-time voice, 3D anime avatar (Three.js), 24/7 autonomous proactive awareness, multi-tier memory with Obsidian sync, ReAct self-healing planner, and 106+ native OS automation tools.**
+> **Local-first multimodal AI companion & desktop co-pilot. Features real-time voice, a reactive audio visualizer, 24/7 autonomous proactive awareness, multi-tier memory with Obsidian sync, a ReAct self-healing planner, and 120+ native OS automation tools.**
 
 ---
 
 ## 🌟 Overview
 
-**Addy AI** is a local-first, highly agentic multimodal companion and desktop co-pilot. Powered by a hybrid reasoning engine (Google Gemini Multimodal Live API over WebSockets with resilient multi-tier fallback chains), Addy integrates real-time audio interaction, an interactive cel-shaded 3D anime avatar, a 24/7 autonomous proactive awareness daemon, multi-layer persistent memory with Obsidian two-way sync, and 106+ native Windows automation tools.
+**Addy AI** is a local-first, highly agentic multimodal companion and desktop co-pilot. Powered by a hybrid reasoning engine (Google Gemini Multimodal Live API over WebSockets with resilient multi-tier fallback chains), Addy integrates real-time audio interaction, a reactive audio visualizer, a 24/7 autonomous proactive awareness daemon, multi-layer persistent memory with Obsidian two-way sync, and 120+ native Windows automation tools.
+
+> **Tool count:** 123 tools are registered in the Python desktop agent; 115 are routable from the server, and ~110 are exposed to the model as function declarations.
 
 ---
 
@@ -15,7 +17,7 @@
 ```
                                   ┌────────────────────────┐
                                   │   React 19 / Vite UI   │
-                                  │   (3D Avatar & Audio)  │
+                                  │  (Visualizer & Audio)  │
                                   └───────────┬────────────┘
                                               │ WebSocket / HTTP
                                               ▼
@@ -45,9 +47,9 @@
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                     Addy Python Desktop Agent (Sidecar)                         │
 │                                                                                 │
-│   • Headed Google Chrome Automation      • Win32 Mouse & Keyboard (Unicode)     │
+│   • Headed Microsoft Edge Automation     • Win32 Mouse & Keyboard (Unicode)     │
 │   • Native YouTube / Media Intelligence  • Screen OCR, Vision & Window Controls │
-│   • Background Email & WhatsApp Watchers • 106 Registered Automation Tools      │
+│   • Background Email & WhatsApp Watchers • 123 Registered Automation Tools      │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -55,10 +57,10 @@
 
 ## 🚀 Key Capabilities
 
-### 💃 Interactive 3D Anime Avatar & Visualizer
-* **Three.js 3D Viewport**: Real-time cel-shaded 3D anime companion (`public/models/addy.glb`, 160 cm proportional rigged character) with authentic 2-tone cel shaders.
-* **56 Facial Blendshapes & Lip-Sync**: Dynamic morph targets with real-time frequency-mapped audio lip-sync, procedural blinking, breathing, and cursor eye-tracking.
-* **Visualizer Toggle**: Switch seamlessly between the full 3D avatar and a lightweight reacting audio energy orb (`ReactingOrb`).
+### 🎨 Reactive Audio Visualizer
+* **Real-Time Core Visualizer**: A canvas-rendered audio-reactive core (`AddyCoreVisualizer`) that pulses and shifts colour with the live voice stream and Addy's emotional state.
+* **Energy Orb**: Lightweight `ReactingOrb` renderer driven by session audio amplitude.
+* **Emotion-Aware**: Visual state follows the active emotion (idle, thinking, speaking, listening).
 
 ### ⏰ Autonomous Proactive Heartbeat Daemon
 * **24/7 Background Awareness**: Periodically polls breaking AI news (HN & TechCrunch), unread IMAP emails, and WhatsApp messages via cloned Edge session.
@@ -74,8 +76,8 @@
 * **Customizable Personalities**: Select between Warm Girl (Addy / Adrija), Tsundere, Professional Assistant, Chaotic Hacker, Playful Gamer, and Cyberpunk Operative.
 * **First-Start Onboarding Gate**: Interactive identity onboarding to personalize assistant and user names with permanent memory persistence.
 
-### 🌐 Headed Browser & Desktop Automation (106 Tools)
-* **Live User Co-Pilot**: Automation operates in a visible Google Chrome window (`headless=False`) with automatic window restoration and focus.
+### 🌐 Headed Browser & Desktop Automation (123 Tools)
+* **Live User Co-Pilot**: Automation operates in a visible Microsoft Edge window (`headless=False`) with automatic window restoration and focus.
 * **Semantic Web Navigation**: Accessible DOM tree parsing (`desktopBrowserGetSemanticTree`) and interactive element selection.
 * **Native Desktop Control**: DPI-corrected mouse positioning, full Unicode keystroke injection, window snapping, volume/media keys, and gated power actions.
 
@@ -92,7 +94,7 @@
 ### Prerequisites
 * **Node.js** (v18+)
 * **Python** (3.10+)
-* **Google Chrome** installed on your system
+* **Microsoft Edge** (or Google Chrome) installed on your system
 
 ### 1. Installation
 Clone the repository and install dependencies:
