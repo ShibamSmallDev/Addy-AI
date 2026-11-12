@@ -231,7 +231,8 @@ export type PermissionCategory =
   | 'MCP_WRITE'
   | 'NETWORK'
   | 'PACKAGE_INSTALL'
-  | 'SYSTEM_CHANGE';
+  | 'SYSTEM_CHANGE'
+  | 'DESKTOP_CONTROL';
 
 export type PermissionDecision = 'ALLOW' | 'ASK' | 'DENY';
 
@@ -300,4 +301,8 @@ export interface PermissionService {
   getTrustedWorkspaces(): string[];
   addTrustedWorkspace(workspacePath: string): void;
   removeTrustedWorkspace(workspacePath: string): void;
+  /** Grant an approval for a specific (category, operation, resource). scope 'once' is consumed on first use. */
+  grantApproval(request: PermissionRequest, scope?: 'once' | 'session'): void;
+  revokeApproval(request: PermissionRequest): void;
+  hasApproval(request: PermissionRequest): boolean;
 }

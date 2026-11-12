@@ -22,11 +22,13 @@ const DEFAULT_POLICY: Record<PermissionCategory, PermissionDecision> = {
   NETWORK: 'ASK',
   PACKAGE_INSTALL: 'ASK',
   SYSTEM_CHANGE: 'DENY',
+  DESKTOP_CONTROL: 'ALLOW',
 };
 
 export class DefaultPermissionService implements PermissionService {
   private trustedWorkspaces: string[] = [];
   private policies: Record<PermissionCategory, PermissionDecision> = { ...DEFAULT_POLICY };
+  private approvals = new Map<string, { once: boolean }>();
 
   constructor(trustedWorkspaces: string[] = []) {
     this.trustedWorkspaces = trustedWorkspaces.map((w) => path.resolve(w));
@@ -52,6 +54,28 @@ export class DefaultPermissionService implements PermissionService {
     this.policies[category] = decision;
   }
 
+  private approvalKey(request: PermissionRequest): string {
+    return `${request.category}|${request.operation}|${request.resource}`;
+  }
+
+  hasApproval(request: PermissionRequest): boolean {
+    return this.approvals.has(this.approvalKey(request));
+  }
+
+  grantApproval(request: PermissionRequest, scope: 'once' | 'session' = 'session'): void {
+    this.approvals.set(this.approvalKey(request), { once: scope === 'once' });
+  }
+
+  revokeApproval(request: PermissionRequest): void {
+    this.approvals.delete(this.approvalKey(request));
+  }
+
+  private consumeApproval(request: PermissionRequest): void {
+    const key = this.approvalKey(request);
+    const entry = this.approvals.get(key);
+    if (entry?.once) this.approvals.delete(key);
+  }
+
   async checkPermission(request: PermissionRequest): Promise<PermissionResult> {
     const policy = this.policies[request.category];
 
@@ -75,12 +99,26 @@ export class DefaultPermissionService implements PermissionService {
         return { decision: 'DENY', reason: 'Command is on the blocked list' };
       }
       if (classified.safe && !classified.requiresApproval) {
+        // Safe command: allow, unless an approval grant is irrelevant (already allowed).
         return { decision: 'ALLOW', reason: 'Command classified as safe' };
+      }
+      // unsafe (non-blocked) terminal commands require approval
+      if (this.hasApproval(request)) {
+        this.consumeApproval(request);
+        return { decision: 'ALLOW', reason: 'Approved for this action and target' };
       }
       return { decision: 'ASK', reason: 'Command requires approval' };
     }
 
-    return { decision: policy };
+    let decision: PermissionDecision = policy;
+
+    // An explicit, action+target-bound approval upgrades ASK -> ALLOW.
+    if (decision === 'ASK' && this.hasApproval(request)) {
+      this.consumeApproval(request);
+      return { decision: 'ALLOW', reason: 'Approved for this action and target' };
+    }
+
+    return { decision, reason: decision === 'ASK' ? `Approval required for ${request.category}` : undefined };
   }
 
   private isFileCategory(category: PermissionCategory): boolean {

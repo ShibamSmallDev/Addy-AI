@@ -17,7 +17,7 @@ import os
 import sys
 import traceback
 from contextlib import asynccontextmanager
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,6 +25,7 @@ from pydantic import BaseModel
 
 from . import __version__
 from .registry import DESKTOP_TOOL_NAMES, TOOLS, ToolError, load_all
+from .operations import claim_operation, get_operation, instance_id, last_eviction_at, record_result
 
 # ───────────────────────────────────────────────────────────────────────────
 # DPI awareness — must be set BEFORE any tool module is loaded (load_all()),
@@ -93,6 +94,9 @@ app.add_middleware(
 class ExecuteRequest(BaseModel):
     tool: str
     args: Dict[str, Any] = {}
+    # P1-3: unique operation id from the Node bridge. Enables deduplication
+    # (same op_id → replay the recorded result, never execute twice).
+    op_id: Optional[str] = None
 
 
 class ExecuteResponse(BaseModel):
@@ -100,6 +104,12 @@ class ExecuteResponse(BaseModel):
     result: Any = None
     error: str | None = None
     tool: str
+    # P1-3 protocol additions (all defaulted — older callers keep working):
+    op_id: Optional[str] = None
+    status: str = "completed"  # completed | failed | in_progress
+    deduplicated: bool = False  # true → result comes from the op registry
+    evicted: bool = False  # true → outcome replayed from a tier-2 tombstone
+    instance_id: str = ""  # process instance id (restart detection)
 
 
 @app.get("/health")
@@ -110,6 +120,40 @@ def health() -> Dict[str, Any]:
         "version": __version__,
         "tools": sorted(TOOLS.keys()),
         "tool_count": len(TOOLS),
+        # P1-3: per-process instance id — the bridge uses it to tell a
+        # restarted sidecar (empty operation registry) from a live one.
+        "instance_id": instance_id(),
+    }
+
+
+@app.get("/operations/{op_id}")
+def operation_status(op_id: str) -> Dict[str, Any]:
+    """P1-3: reconcile an operation ID after an ambiguous client outcome.
+
+    ``last_eviction_at`` is the tier-2 watermark: on ``found: false`` the
+    bridge must only conclude "never executed" when it is null or predates
+    the operation's dispatch — otherwise the outcome is unknown (bounded
+    retention could have forgotten a real result).
+    """
+    rec = get_operation(op_id)
+    watermark = last_eviction_at()
+    if rec is None:
+        return {
+            "found": False,
+            "op_id": op_id,
+            "instance_id": instance_id(),
+            "last_eviction_at": watermark,
+        }
+    return {
+        "found": True,
+        "op_id": op_id,
+        "status": rec.get("status"),
+        "tool": rec.get("tool"),
+        "result": rec.get("result"),
+        "error": rec.get("error"),
+        "evicted": bool(rec.get("evicted", False)),
+        "instance_id": instance_id(),
+        "last_eviction_at": watermark,
     }
 
 
@@ -133,28 +177,78 @@ def get_mouse_position() -> Dict[str, Any]:
 def execute(req: ExecuteRequest) -> ExecuteResponse:
     tool = req.tool
     args = req.args or {}
-    log.info("EXEC tool=%s args=%s", tool, _short_args(args))
+    op_id = req.op_id
+    log.info("EXEC op=%s tool=%s args=%s", op_id or "-", tool, _short_args(args))
+
+    # P1-3 idempotency: claim the operation ID BEFORE any dispatch decision
+    # (including the unknown-tool rejection below). A duplicate op_id — a retry
+    # after a lost response — replays the recorded outcome and NEVER enters
+    # the handler twice.
+    if op_id:
+        existing = claim_operation(op_id, tool)
+        if existing is not None:
+            prev_status = existing.get("status", "in_progress")
+            log.info(
+                "DUP op=%s tool=%s status=%s -> replaying recorded result (NOT re-executing)",
+                op_id,
+                tool,
+                prev_status,
+            )
+            if prev_status == "in_progress":
+                return ExecuteResponse(
+                    ok=False,
+                    status="in_progress",
+                    error=f"Operation {op_id} is already in progress; not re-executing.",
+                    tool=tool,
+                    op_id=op_id,
+                    deduplicated=True,
+                    instance_id=instance_id(),
+                )
+            return ExecuteResponse(
+                ok=prev_status == "completed",
+                status=prev_status if prev_status in ("completed", "failed") else "failed",
+                result=existing.get("result"),
+                error=existing.get("error"),
+                tool=tool,
+                op_id=op_id,
+                deduplicated=True,
+                evicted=bool(existing.get("evicted", False)),
+                instance_id=instance_id(),
+            )
 
     if tool not in TOOLS:
         known = ", ".join(sorted(TOOLS.keys()))
+        err = f"Unknown tool '{tool}'. Known tools: {known}"
+        if op_id:
+            # Record so a duplicate op_id replays this same failure instead of
+            # being treated as a fresh attempt.
+            record_result(op_id, "failed", error=err)
         return ExecuteResponse(
             ok=False,
-            error=f"Unknown tool '{tool}'. Known tools: {known}",
+            status="failed",
+            error=err,
             tool=tool,
+            op_id=op_id,
+            instance_id=instance_id(),
         )
 
     handler = TOOLS[tool]
     try:
         out = handler(args)
     except ToolError as e:
-        log.warning("ToolError in %s: %s", tool, e.message)
-        return ExecuteResponse(ok=False, error=e.message, tool=tool)
-    except Exception as e:  # noqa: BLE001
-        log.error("Unhandled error in %s: %s\n%s", tool, e, traceback.format_exc())
+        log.warning("ToolError in %s (op=%s): %s", tool, op_id or "-", e.message)
+        if op_id:
+            record_result(op_id, "failed", error=e.message)
         return ExecuteResponse(
-            ok=False,
-            error=f"Internal error in {tool}: {e}",
-            tool=tool,
+            ok=False, status="failed", error=e.message, tool=tool, op_id=op_id, instance_id=instance_id()
+        )
+    except Exception as e:  # noqa: BLE001
+        log.error("Unhandled error in %s (op=%s): %s\n%s", tool, op_id or "-", e, traceback.format_exc())
+        err = f"Internal error in {tool}: {e}"
+        if op_id:
+            record_result(op_id, "failed", error=err)
+        return ExecuteResponse(
+            ok=False, status="failed", error=err, tool=tool, op_id=op_id, instance_id=instance_id()
         )
 
     # Handlers return dicts like {"result": "..."}; pass the whole payload.
@@ -163,9 +257,13 @@ def execute(req: ExecuteRequest) -> ExecuteResponse:
         result_text = str(out.get("result", out))
     else:
         result_text = str(out)
-    log.info("DONE tool=%s -> %s", tool, result_text[:160])
+    log.info("DONE op=%s tool=%s -> %s", op_id or "-", tool, result_text[:160])
 
-    return ExecuteResponse(ok=True, result=out, tool=tool)
+    if op_id:
+        record_result(op_id, "completed", result=out)
+    return ExecuteResponse(
+        ok=True, status="completed", result=out, tool=tool, op_id=op_id, instance_id=instance_id()
+    )
 
 
 def _short_args(args: Dict[str, Any]) -> str:

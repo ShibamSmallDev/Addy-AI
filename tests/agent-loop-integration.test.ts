@@ -39,12 +39,12 @@ test('real AgentLoop: self-heals a failing step via the manager and completes wi
         analysis: 'One step.',
         reflection: 'go',
         steps: [
-          { thought: 'try v1', description: 'Run tool', tool: 'demoTool', args: { v: 1 }, spokenCue: 'Running it.', expected: 'ok' },
+          { thought: 'try v1', description: 'Run tool', tool: 'readFile', args: { path: 'demo.txt', max_chars: 1 }, spokenCue: 'Running it.', expected: 'ok' },
         ],
       });
     }
     if (prompt.includes('Suggest a corrected tool call')) {
-      return JSON.stringify({ tool: 'demoTool', args: { v: 2 }, spokenCue: 'Retrying with the fix.' });
+      return JSON.stringify({ tool: 'readFile', args: { path: 'demo.txt', max_chars: 2 }, spokenCue: 'Retrying with the fix.' });
     }
     if (prompt.includes('Summarize the outcome')) {
       return 'Recovered and finished the job.';
@@ -58,8 +58,8 @@ test('real AgentLoop: self-heals a failing step via the manager and completes wi
     const mgr = new AgentTaskManager(
       async (_tool, args) => {
         execCalls.push(args);
-        // v1 fails, v2 (the self-healed args) succeeds
-        if (args.v === 1) return { success: false, error: 'transient failure' };
+        // max_chars 1 fails, the self-healed max_chars 2 succeeds
+        if (args.max_chars === 1) return { success: false, error: 'transient failure' };
         return { success: true, data: 'ok' };
       },
       (p) => events.push(p)
@@ -72,7 +72,7 @@ test('real AgentLoop: self-heals a failing step via the manager and completes wi
     // Self-repair happened: the failing v1 attempt was retried with corrected args and completed.
     assert.equal(final.status, 'completed', `expected completed, got ${final.status}: ${final.error}`);
     assert.equal(final.summary, 'Recovered and finished the job.');
-    assert.deepEqual(execCalls, [{ v: 1 }, { v: 2 }]); // fail then repaired
+    assert.deepEqual(execCalls, [{ path: 'demo.txt', max_chars: 1 }, { path: 'demo.txt', max_chars: 2 }]); // fail then repaired
     // A retry was surfaced to the progress stream.
     assert.ok(events.some((e) => e.event === 'step-retry'), 'expected a step-retry progress event');
     // The LLM was actually driven (plan + self-heal + summary).

@@ -10,7 +10,7 @@
  * executor verbatim. No new autonomous-agent subsystem.
  */
 
-import { AgentLoop, type AgentState } from './loop'
+import { AgentLoop, type AgentState, type ToolExecutionResult } from './loop'
 import { getGeminiApiKey } from '../server_paths'
 
 export type AgentTaskStatus = 'queued' | 'running' | 'completed' | 'failed' | 'aborted'
@@ -45,7 +45,7 @@ export interface AgentProgress {
 export type ToolExec = (
   tool: string,
   args: Record<string, unknown>
-) => Promise<{ success: boolean; data?: unknown; error?: string }>
+) => Promise<ToolExecutionResult>
 
 export type LoopEvent = { type: string; data?: any; spokenCue?: string }
 

@@ -1,8 +1,26 @@
 import { storeMemory } from '../memory/retriever'
 import type { MemoryCategory } from '../memory/retriever'
 import { providerManager } from '../providers/ProviderManager'
+import { ProviderFailureError, type ProviderPhase } from '../providers/errors'
+import { parsePlanJson, validatePlan, PlanValidationError, isPlainObject } from './plan-validator'
+import { DESKTOP_TOOLS } from '../tools/desktop-tools'
+import type { ExecutionOutcome } from '../tools/desktop-agent-client'
 
 const DEFAULT_MODEL = 'gemini-2.0-flash'
+
+/**
+ * Result of one tool execution. `outcome`/`opId` are set by bridges that can
+ * report an explicit execution status (P1-3): `execution_unknown` and
+ * `cancelled` results must NEVER be retried — re-dispatching an operation
+ * whose execution status is unknown could repeat non-idempotent side effects.
+ */
+export interface ToolExecutionResult {
+  success: boolean
+  data?: any
+  error?: string
+  outcome?: ExecutionOutcome
+  opId?: string
+}
 
 export interface AgentStep {
   id: string
@@ -23,7 +41,7 @@ export interface AgentPlan {
 
 export interface AgentStepResult {
   step: AgentStep
-  result: { success: boolean; data?: any; error?: string }
+  result: ToolExecutionResult
   attempts: number
   error?: string
   spokenSummary?: string
@@ -42,13 +60,15 @@ export interface AgentState {
 }
 
 export type AgentEventCallback = (event: {
-  type: 'plan' | 'thought' | 'step-start' | 'step-done' | 'step-retry' | 'step-failed' | 'verifying' | 'completed' | 'failed'
+  type: 'plan' | 'plan-rejected' | 'thought' | 'step-start' | 'step-done' | 'step-retry' | 'step-failed' | 'verifying' | 'completed' | 'failed'
   data?: any
   spokenCue?: string
 }) => void
 
 const MAX_RETRIES = 3
 const MAX_REACT_STEPS = 12
+/** Planning attempts: 1 initial + 1 bounded, explicit replan. Never endless. */
+const MAX_PLAN_ATTEMPTS = 2
 
 export class AgentLoop {
   private state: AgentState
@@ -56,13 +76,13 @@ export class AgentLoop {
   private modelName: string
   private onEvent: AgentEventCallback
   private abortFlag = false
-  private toolExecutor: (tool: string, args: Record<string, unknown>) => Promise<{ success: boolean; data?: any; error?: string }>
+  private toolExecutor: (tool: string, args: Record<string, unknown>) => Promise<ToolExecutionResult>
 
   constructor(
     goal: string,
     apiKey: string,
     onEvent: AgentEventCallback,
-    toolExecutor: (tool: string, args: Record<string, unknown>) => Promise<{ success: boolean; data?: any; error?: string }>,
+    toolExecutor: (tool: string, args: Record<string, unknown>) => Promise<ToolExecutionResult>,
     modelName?: string
   ) {
     this.state = {
@@ -90,13 +110,35 @@ export class AgentLoop {
     return { ...this.state }
   }
 
-  private async generateCompletion(prompt: string, systemInstruction?: string): Promise<string> {
+  private async generateCompletion(prompt: string, systemInstruction?: string, phase: ProviderPhase = 'planning'): Promise<string> {
+    // Provider failures are typed and propagated — never swallowed into an
+    // empty string that would later be mistaken for a valid model response.
+    let raw: string
     try {
-      return await providerManager.generateResilientCompletion(prompt, systemInstruction)
-    } catch {
-      // Fallback
-      return ""
+      raw = await providerManager.generateResilientCompletion(prompt, systemInstruction)
+    } catch (err) {
+      throw ProviderFailureError.from(err, phase)
     }
+    if (typeof raw !== 'string') {
+      throw new ProviderFailureError('unavailable', phase, 'provider returned a non-string completion')
+    }
+    return raw
+  }
+
+  /**
+   * Explicit, goal-aware replan request: tells the model exactly why its plan
+   * was rejected (typed kind + concrete details) and to keep the SAME goal.
+   * Bounded — only ever called by the MAX_PLAN_ATTEMPTS loop.
+   */
+  private buildReplanPrompt(basePrompt: string, error: PlanValidationError, previousRaw: string): string {
+    return `${basePrompt}
+
+Your previous plan was REJECTED before execution — it failed validation and NO tool has run:
+${error.details.map((d) => `  - ${d}`).join('\n')}
+
+Previous response (truncated): ${previousRaw.slice(0, 1200)}
+
+Fix exactly these problems while keeping the same goal. Tool names must come from the list above and every argument must match the tool's declared schema. Reply with ONE corrected JSON plan in the exact schema requested.`
   }
 
   async run(): Promise<AgentState> {
@@ -191,47 +233,71 @@ Respond ONLY with valid JSON:
   ]
 }`
 
-    const rawPlan = await this.generateCompletion(planPrompt, "You are an autonomous AI planning agent. Reply strictly in JSON.")
-    const jsonStart = rawPlan.indexOf('{')
-    const jsonEnd = rawPlan.lastIndexOf('}')
+    // Planning must fail loudly: a provider outage is reported as a failed
+    // task with a typed reason (P1-1), and a plan that fails validation is
+    // rejected BEFORE any tool runs — there is no generic fallback plan.
+    let lastPlanError: PlanValidationError | null = null
+    let lastRawPlan = ''
 
-    if (jsonStart !== -1 && jsonEnd !== -1) {
+    for (let attempt = 0; attempt < MAX_PLAN_ATTEMPTS; attempt++) {
+      const isReplan = attempt > 0
+      const prompt = isReplan ? this.buildReplanPrompt(planPrompt, lastPlanError!, lastRawPlan) : planPrompt
+      const system = isReplan
+        ? "You are an autonomous AI planning agent correcting a rejected plan. Reply strictly in JSON."
+        : "You are an autonomous AI planning agent. Reply strictly in JSON."
+
+      let raw: string
       try {
-        const parsed = JSON.parse(rawPlan.slice(jsonStart, jsonEnd + 1))
-        const steps: AgentStep[] = (parsed.steps || []).map((s: any, i: number) => ({
-          id: 'step_' + (i + 1),
-          thought: s.thought || '',
-          description: s.description || 'Action step',
-          tool: s.tool || '',
-          args: s.args || {},
-          spokenCue: s.spokenCue || `Now executing ${s.description || s.tool}.`,
-          expected: s.expected || '',
-        }))
+        raw = await this.generateCompletion(prompt, system, 'planning')
+      } catch (err) {
+        // P1-1 path: provider outage fails the task typed — including during a replan.
+        const failure = ProviderFailureError.from(err, 'planning')
+        this.state.status = 'failed'
+        this.onEvent({
+          type: 'failed',
+          data: { phase: 'planning', kind: failure.kind, error: failure.message },
+          spokenCue: `I could not build a plan: ${failure.message}`,
+        })
+        return this.state
+      }
+      lastRawPlan = raw
+
+      try {
+        const parsed = parsePlanJson(raw)
+        const validated = validatePlan(parsed) // validates ALL steps or throws
         this.state.plan = {
           goal: this.state.goal,
-          steps,
-          analysis: parsed.analysis || '',
-          reflection: parsed.reflection || '',
+          steps: validated.steps.map((s, i) => ({ id: 'step_' + (i + 1), ...s })),
+          analysis: validated.analysis,
+          reflection: validated.reflection,
         }
-      } catch {}
+        lastPlanError = null
+        break
+      } catch (err) {
+        if (!(err instanceof PlanValidationError)) throw err // unexpected — surface it
+        lastPlanError = err
+        this.onEvent({
+          type: 'plan-rejected',
+          data: { attempt: attempt + 1, kind: err.kind, details: err.details },
+          spokenCue:
+            attempt + 1 < MAX_PLAN_ATTEMPTS
+              ? `My draft plan was rejected (${err.kind}). Re-planning against the original goal.`
+              : undefined,
+        })
+      }
     }
 
-    if (!this.state.plan || this.state.plan.steps.length === 0) {
-      // Fallback single-step exploratory plan
-      this.state.plan = {
-        goal: this.state.goal,
-        analysis: 'Executing goal with dynamic exploration.',
-        steps: [
-          {
-            id: 'step_1',
-            description: 'Execute primary goal action',
-            tool: 'searchFiles',
-            args: { query: this.state.goal },
-            spokenCue: `Starting work on ${this.state.goal}.`,
-            expected: 'Locate relevant files or interfaces',
-          }
-        ]
-      }
+    if (!this.state.plan) {
+      // Every attempt was rejected: fail with a useful explanation. The old
+      // generic `searchFiles` fallback is gone — it never matched the goal.
+      const failure = lastPlanError!
+      this.state.status = 'failed'
+      this.onEvent({
+        type: 'failed',
+        data: { phase: 'planning', kind: failure.kind, error: failure.message, details: failure.details },
+        spokenCue: `I could not produce a valid plan: ${failure.details[0] || failure.message}`,
+      })
+      return this.state
     }
 
     this.onEvent({ 
@@ -262,7 +328,7 @@ Respond ONLY with valid JSON:
         spokenCue: step.spokenCue || `Executing step ${i + 1}: ${step.description}.`
       })
 
-      let lastResult: { success: boolean; data?: any; error?: string } = { success: false, error: 'Not executed' }
+      let lastResult: ToolExecutionResult = { success: false, error: 'Not executed' }
       let attempts = 0
       let stepPassed = false
 
@@ -286,6 +352,16 @@ Respond ONLY with valid JSON:
 
         if (lastResult.success) {
           stepPassed = true
+        } else if (lastResult.outcome === 'execution_unknown' || lastResult.outcome === 'cancelled') {
+          // P1-3: an operation whose execution status is unknown (or that was
+          // cancelled) must NEVER be blindly retried — re-dispatching could
+          // repeat a non-idempotent side effect. Halt the retry loop; the
+          // generic failure path below reports the uncertainty (with the
+          // operation ID) and fails the task.
+          console.warn(
+            `[AgentLoop] Step ${i + 1} (${step.tool}) outcome=${lastResult.outcome} op=${lastResult.opId || 'n/a'} — not retrying (unsafe to re-execute)`
+          )
+          break
         } else if (attempts < MAX_RETRIES) {
           // Hermes-style Dynamic Self-Healing Prompt
           const fixPrompt = `The tool "${step.tool}" failed with args ${JSON.stringify(step.args)}.
@@ -297,17 +373,46 @@ Suggest a corrected tool call to achieve the expected result.
 Reply with JSON ONLY:
 { "tool": "<tool_name>", "args": {}, "spokenCue": "<1 sentence update>" }`
 
+          let fixRaw: string | null = null
           try {
-            const fixRaw = await this.generateCompletion(fixPrompt, "You are a self-healing AI agent.")
+            fixRaw = await this.generateCompletion(fixPrompt, "You are a self-healing AI agent.", 'self_repair')
+          } catch (err) {
+            // Self-repair is best-effort: a provider failure here is observable
+            // (logged with its typed kind) and the retry loop continues with the
+            // original step — never silently swallowed, never faked as a fix.
+            const failure = ProviderFailureError.from(err, 'self_repair')
+            console.warn(`[AgentLoop] Self-repair suggestion unavailable (step ${i + 1}): ${failure.message}`)
+          }
+
+          if (fixRaw !== null) {
+            // Malformed or unsafe repair suggestions are rejected explicitly —
+            // never applied silently, never treated as a provider failure.
             const fStart = fixRaw.indexOf('{')
             const fEnd = fixRaw.lastIndexOf('}')
-            if (fStart !== -1 && fEnd !== -1) {
-              const fix = JSON.parse(fixRaw.slice(fStart, fEnd + 1))
-              if (fix.tool) step.tool = fix.tool
-              if (fix.args) step.args = fix.args
-              if (fix.spokenCue) step.spokenCue = fix.spokenCue
+            if (fStart === -1 || fEnd === -1 || fEnd <= fStart) {
+              console.warn(`[AgentLoop] Malformed self-repair response ignored (step ${i + 1}): no JSON object`)
+            } else {
+              try {
+                const fix = JSON.parse(fixRaw.slice(fStart, fEnd + 1))
+                const fixToolOk =
+                  isPlainObject(fix) &&
+                  typeof (fix as any).tool === 'string' &&
+                  DESKTOP_TOOLS.has((fix as any).tool) &&
+                  ((fix as any).args === undefined || (fix as any).args === null || isPlainObject((fix as any).args))
+                if (fixToolOk) {
+                  if ((fix as any).args) step.args = (fix as any).args
+                  step.tool = (fix as any).tool
+                  if (typeof (fix as any).spokenCue === 'string') step.spokenCue = (fix as any).spokenCue
+                } else {
+                  console.warn(
+                    `[AgentLoop] Rejected self-repair suggestion (step ${i + 1}): unknown tool '${String((fix as any)?.tool)}' or invalid args`
+                  )
+                }
+              } catch {
+                console.warn(`[AgentLoop] Malformed self-repair response ignored (step ${i + 1}): invalid JSON`)
+              }
             }
-          } catch {}
+          }
         }
       }
 
@@ -320,7 +425,10 @@ Reply with JSON ONLY:
           spokenCue: `Step ${i + 1} failed: ${lastResult.error || 'unknown error'}. Halting task execution.`
         })
         this.state.status = 'failed'
-        this.onEvent({ type: 'failed', data: { step, error: lastResult.error } })
+        this.onEvent({
+          type: 'failed',
+          data: { step, error: lastResult.error, outcome: lastResult.outcome, opId: lastResult.opId },
+        })
         return this.state
       }
 
@@ -349,10 +457,13 @@ ${this.state.plan.steps.map((s, idx) => {
 Synthesize the final result and provide a natural spoken summary for Addy.`
 
     try {
-      const summaryText = await this.generateCompletion(summaryPrompt, "You are a concise reporting assistant.")
-      this.state.summary = summaryText.trim() || 'Task completed successfully.'
-    } catch {
-      this.state.summary = `Successfully completed all ${this.state.plan.steps.length} steps for: ${this.state.goal}.`
+      const summaryText = (await this.generateCompletion(summaryPrompt, "You are a concise reporting assistant.", 'summary')).trim()
+      // Empty model output must not masquerade as a generated summary.
+      this.state.summary = summaryText || `All ${this.state.plan.steps.length} steps executed; the model returned no summary text.`
+    } catch (err) {
+      const failure = ProviderFailureError.from(err, 'summary')
+      console.warn(`[AgentLoop] Summary generation unavailable: ${failure.message}`)
+      this.state.summary = `All ${this.state.plan.steps.length} steps executed successfully for: ${this.state.goal}. Model summary unavailable (${failure.kind}).`
     }
 
     this.state.status = 'completed'
